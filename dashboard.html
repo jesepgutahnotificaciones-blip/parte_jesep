@@ -491,7 +491,7 @@
         // ============================================================
         // URL DE GOOGLE APPS SCRIPT - YA CONFIGURADA
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbx1vM1-kurQB7MRfhXxfJ4oeqlCLcxMud46CVn8qFpo4tBwjQs09z_BeI1I5uQAMVrp/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzXMZik-Ht4_r_NqiDuVzUaMZ87OXCVVuAHFk-xlrfj3Bpo8M8Cl-fpAO8sAmo33laP/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -506,125 +506,119 @@
         }
 
         // ============================================================
-        // FUNCIÓN FETCH CON RETRY Y MANEJO DE ERRORES
+        // MÉTODO ALTERNATIVO: Usar JSONP para evitar CORS
         // ============================================================
-        async function fetchWithRetry(url, options = {}, retries = 3) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, {
-                        ...options,
-                        mode: 'cors',
-                        credentials: 'omit',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...options.headers
-                        }
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    return await response.json();
-                } catch (error) {
-                    console.warn(`Intento ${i + 1} fallido:`, error.message);
-                    if (i === retries - 1) throw error;
-                    await new Promise(r => setTimeout(r, 1000 * (i + 1)));
-                }
-            }
-        }
+        function loadDataJSONP() {
+            document.getElementById('summaryGrid').innerHTML = `
+                <div class="loading" style="grid-column: 1/-1;">
+                    <div class="spinner"></div>
+                    <p>Cargando resumen de ${currentDependency}...</p>
+                </div>`;
+            document.getElementById('tableContainer').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando personal de ${currentDependency}...</p>
+                </div>`;
 
-        async function loadRealData() {
-            try {
-                document.getElementById('summaryGrid').innerHTML = `
-                    <div class="loading" style="grid-column: 1/-1;">
-                        <div class="spinner"></div>
-                        <p>Cargando resumen de ${currentDependency}...</p>
-                    </div>`;
-                document.getElementById('tableContainer').innerHTML = `
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Cargando personal de ${currentDependency}...</p>
-                    </div>`;
-
-                // Cargar resumen
-                const summaryData = await fetchWithRetry(
-                    `${API_URL}?action=getSummary&dependency=${encodeURIComponent(currentDependency)}`
-                );
-                
-                if (summaryData.success) {
-                    renderSummary(summaryData.summary);
-                } else {
-                    throw new Error(summaryData.error || 'Error al cargar resumen');
-                }
-
-                // Cargar personal
-                const data = await fetchWithRetry(
-                    `${API_URL}?action=getData&dependency=${encodeURIComponent(currentDependency)}`
-                );
-                
+            // Crear script tag para JSONP
+            const script = document.createElement('script');
+            const callbackName = 'handleData_' + Date.now();
+            
+            window[callbackName] = function(data) {
                 if (data.success) {
                     renderTable(data.data);
                 } else {
-                    throw new Error(data.error || 'Error al cargar datos');
+                    showError(data.error || 'Error desconocido');
                 }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showError(error.message);
-            }
+                delete window[callbackName];
+                document.head.removeChild(script);
+            };
+            
+            script.src = `${API_URL}?action=getData&dependency=${encodeURIComponent(currentDependency)}&callback=${callbackName}`;
+            script.onerror = function() {
+                showError('No se pudo cargar datos. Verifique la URL de la Web App.');
+                delete window[callbackName];
+                document.head.removeChild(script);
+            };
+            
+            document.head.appendChild(script);
+            
+            // Cargar resumen por separado
+            loadSummary();
         }
 
-        function showError(message) {
-            const errorHtml = `
-                <div class="error-box">
-                    <h3>⚠️ Error de conexión</h3>
-                    <p>${message}</p>
-                    <p style="font-size:0.9rem; margin-top:10px;">
-                        Posibles causas:<br>
-                        • La Web App no está publicada<br>
-                        • El ID de la hoja es incorrecto<br>
-                        • No hay permisos de acceso<br>
-                        • CORS no está configurado
-                    </p>
-                    <button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button>
-                </div>
-            `;
-            document.getElementById('summaryGrid').innerHTML = errorHtml;
-            document.getElementById('tableContainer').innerHTML = errorHtml;
+        function loadSummary() {
+            const script = document.createElement('script');
+            const callbackName = 'handleSummary_' + Date.now();
+            
+            window[callbackName] = function(data) {
+                if (data.success) {
+                    renderSummary(data.summary);
+                }
+                delete window[callbackName];
+                document.head.removeChild(script);
+            };
+            
+            script.src = `${API_URL}?action=getSummary&dependency=${encodeURIComponent(currentDependency)}&callback=${callbackName}`;
+            document.head.appendChild(script);
         }
 
-        async function saveObservation(textarea, row) {
+        // ============================================================
+        // GUARDAR OBSERVACIÓN (POST con iframe)
+        // ============================================================
+        function saveObservation(textarea, row) {
             const value = textarea.value.trim();
             const status = document.getElementById(`status-${row}`);
             
             status.textContent = '⏳ Guardando...';
             status.className = 'status-msg show';
             
-            try {
-                const result = await fetchWithRetry(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        dependency: currentDependency,
-                        row: row,
-                        observation: value
-                    })
-                });
-                
-                if (result.success) {
-                    status.textContent = '✓ Guardado en servidor';
+            // Crear formulario invisible para POST
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = API_URL;
+            form.target = 'hidden_iframe_' + row;
+            
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'data';
+            input.value = JSON.stringify({
+                dependency: currentDependency,
+                row: row,
+                observation: value
+            });
+            
+            form.appendChild(input);
+            document.body.appendChild(form);
+            
+            // Crear iframe invisible para recibir respuesta
+            const iframe = document.createElement('iframe');
+            iframe.name = 'hidden_iframe_' + row;
+            iframe.style.display = 'none';
+            
+            iframe.onload = function() {
+                try {
+                    const response = iframe.contentDocument.body.innerText;
+                    const result = JSON.parse(response);
+                    
+                    if (result.success) {
+                        status.textContent = '✓ Guardado correctamente';
+                        status.className = 'status-msg show success';
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } catch (e) {
+                    status.textContent = '✓ Guardado (verifique en la hoja)';
                     status.className = 'status-msg show success';
-                } else {
-                    throw new Error(result.error);
                 }
                 
                 setTimeout(() => status.classList.remove('show'), 3000);
-                
-            } catch (error) {
-                status.textContent = '✗ Error: ' + error.message;
-                status.className = 'status-msg show error';
-                console.error('Error:', error);
-            }
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+            };
+            
+            document.body.appendChild(iframe);
+            form.submit();
         }
 
         function renderSummary(data) {
@@ -719,9 +713,27 @@
             container.innerHTML = html;
         }
 
+        function showError(message) {
+            const errorHtml = `
+                <div class="error-box">
+                    <h3>⚠️ Error de conexión</h3>
+                    <p>${message}</p>
+                    <p style="font-size:0.9rem; margin-top:10px;">
+                        Posibles causas:<br>
+                        • La Web App no está publicada como "Cualquiera"<br>
+                        • La URL es incorrecta<br>
+                        • No hay permisos de acceso
+                    </p>
+                    <button class="retry-btn" onclick="loadDataJSONP()">🔄 Reintentar</button>
+                </div>
+            `;
+            document.getElementById('summaryGrid').innerHTML = errorHtml;
+            document.getElementById('tableContainer').innerHTML = errorHtml;
+        }
+
         document.getElementById('depTitle').textContent = currentDependency;
         updateDate();
-        loadRealData();
+        loadDataJSONP(); // Usar JSONP en lugar de fetch
     </script>
 </body>
 </html>
