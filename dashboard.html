@@ -31,7 +31,6 @@
             min-height: 100vh;
         }
 
-        /* Header Institucional */
         .header-institutional {
             background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
             color: var(--blanco);
@@ -104,14 +103,12 @@
             opacity: 0.9;
         }
 
-        /* Main Content */
         .main-content {
             max-width: 1400px;
             margin: 25px auto;
             padding: 0 25px;
         }
 
-        /* Resumen Institucional */
         .summary-section {
             background: var(--blanco);
             border-radius: 12px;
@@ -181,7 +178,6 @@
             color: var(--blanco);
         }
 
-        /* Tabla de Datos */
         .data-section {
             background: var(--blanco);
             border-radius: 12px;
@@ -380,6 +376,30 @@
             100% { transform: rotate(360deg); }
         }
 
+        .error-box {
+            background: #FADBD8;
+            border: 2px solid var(--rojo-alerta);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            color: var(--rojo-alerta);
+        }
+
+        .error-box h3 {
+            margin-bottom: 10px;
+        }
+
+        .retry-btn {
+            background: var(--rojo-alerta);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
         .footer-institutional {
             text-align: center;
             padding: 25px;
@@ -469,7 +489,7 @@
 
     <script>
         // ============================================================
-        // URL DE GOOGLE APPS SCRIPT - YA CONFIGURADA
+        // URL DE GOOGLE APPS SCRIPT
         // ============================================================
         const API_URL = 'https://script.google.com/macros/s/AKfycbx1b6bokd-O5nJFWhAC9hJrEPLZAofnsDM4iIPL89LsJ1FnHUIc1xX2u6LHe6pAZIqy/exec';
 
@@ -485,6 +505,35 @@
                 now.toLocaleDateString('es-CO', options);
         }
 
+        // ============================================================
+        // FUNCIÓN FETCH CON RETRY Y MANEJO DE ERRORES
+        // ============================================================
+        async function fetchWithRetry(url, options = {}, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        mode: 'cors',
+                        credentials: 'omit',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.warn(`Intento ${i + 1} fallido:`, error.message);
+                    if (i === retries - 1) throw error;
+                    await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+                }
+            }
+        }
+
         async function loadRealData() {
             try {
                 document.getElementById('summaryGrid').innerHTML = `
@@ -498,38 +547,51 @@
                         <p>Cargando personal de ${currentDependency}...</p>
                     </div>`;
 
-                const summaryRes = await fetch(`${API_URL}?action=getSummary&dependency=${currentDependency}`);
-                const summaryData = await summaryRes.json();
+                // Cargar resumen
+                const summaryData = await fetchWithRetry(
+                    `${API_URL}?action=getSummary&dependency=${encodeURIComponent(currentDependency)}`
+                );
                 
                 if (summaryData.success) {
                     renderSummary(summaryData.summary);
                 } else {
-                    console.error('Error resumen:', summaryData.error);
-                    renderSummary([{label: 'Error', value: summaryData.error, alert: true}]);
+                    throw new Error(summaryData.error || 'Error al cargar resumen');
                 }
 
-                const dataRes = await fetch(`${API_URL}?action=getData&dependency=${currentDependency}`);
-                const data = await dataRes.json();
+                // Cargar personal
+                const data = await fetchWithRetry(
+                    `${API_URL}?action=getData&dependency=${encodeURIComponent(currentDependency)}`
+                );
                 
                 if (data.success) {
                     renderTable(data.data);
                 } else {
-                    console.error('Error datos:', data.error);
-                    document.getElementById('tableContainer').innerHTML = 
-                        `<p style="color:#C0392B; padding:30px; text-align:center; font-weight:600;">
-                            ⚠️ Error: ${data.error}<br>
-                            <span style="font-size:0.9rem; color:#666;">Verifique que la hoja "${currentDependency}" exista en el documento</span>
-                        </p>`;
+                    throw new Error(data.error || 'Error al cargar datos');
                 }
                 
             } catch (error) {
-                console.error('Error de conexión:', error);
-                document.getElementById('tableContainer').innerHTML = 
-                    `<p style="color:#C0392B; padding:30px; text-align:center;">
-                        ⚠️ No se pudo conectar con el servidor<br>
-                        <span style="font-size:0.85rem;">${error.message}</span>
-                    </p>`;
+                console.error('Error:', error);
+                showError(error.message);
             }
+        }
+
+        function showError(message) {
+            const errorHtml = `
+                <div class="error-box">
+                    <h3>⚠️ Error de conexión</h3>
+                    <p>${message}</p>
+                    <p style="font-size:0.9rem; margin-top:10px;">
+                        Posibles causas:<br>
+                        • La Web App no está publicada<br>
+                        • El ID de la hoja es incorrecto<br>
+                        • No hay permisos de acceso<br>
+                        • CORS no está configurado
+                    </p>
+                    <button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button>
+                </div>
+            `;
+            document.getElementById('summaryGrid').innerHTML = errorHtml;
+            document.getElementById('tableContainer').innerHTML = errorHtml;
         }
 
         async function saveObservation(textarea, row) {
@@ -540,17 +602,14 @@
             status.className = 'status-msg show';
             
             try {
-                const response = await fetch(API_URL, {
+                const result = await fetchWithRetry(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         dependency: currentDependency,
                         row: row,
                         observation: value
                     })
                 });
-                
-                const result = await response.json();
                 
                 if (result.success) {
                     status.textContent = '✓ Guardado en servidor';
@@ -573,7 +632,7 @@
             grid.innerHTML = '';
             
             if (!data || data.length === 0) {
-                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:20px;">No hay datos de resumen</p>';
+                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:20px;">No hay datos de resumen. Complete la hoja V1:AA10</p>';
                 return;
             }
             
