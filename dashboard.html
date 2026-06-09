@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Policía Nacional de Colombia</title>
+    <style>
+        :root {
+            --verde-policia: #005A2E;
+            --verde-claro: #007A3D;
+            --verde-muy-claro: #E8F5E9;
+            --amarillo-policia: #F4B223;
+            --dorado-oscuro: #D49A1A;
+            --azul-oscuro: #1A3A5C;
+            --blanco: #FFFFFF;
+            --gris-claro: #F5F5F5;
+            --gris-medio: #E0E0E0;
+            --rojo-alerta: #C0392B;
+            --sombra: rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gris-claro);
+            min-height: 100vh;
+        }
+
+        /* Header Institucional */
+        .header-institutional {
+            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
+            color: var(--blanco);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px var(--sombra);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-left img {
+            width: 70px;
+            height: auto;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .header-text h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .header-text .dep-name {
+            color: var(--amarillo-policia);
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-back {
+            background: var(--amarillo-policia);
+            color: var(--azul-oscuro);
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-back:hover {
+            background: var(--dorado-oscuro);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .date-display {
+            color: var(--blanco);
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 25px auto;
+            padding: 0 25px;
+        }
+
+        /* Resumen Institucional */
+        .summary-section {
+            background: var(--blanco);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 15px var(--sombra);
+            border-top: 5px solid var(--amarillo-policia);
+        }
+
+        .summary-section h2 {
+            color: var(--verde-policia);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-section h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: var(--amarillo-policia);
+            border-radius: 2px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--verde-claro) 100%);
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+            color: var(--blanco);
+            box-shadow: 0 4px 10px rgba(0,90,46,0.2);
+            transition: transform 0.3s;
+        }
+
+        .summary-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .summary-item .label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .summary-item .value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--amarillo-policia);
+        }
+
+        .summary-item.alert {
+            background: linear-gradient(135deg, var(--rojo-alerta) 0%, #E74C3C 100%);
+        }
+
+        .summary-item.alert .value {
+            color: var(--blanco);
+        }
+
+        /* Tabla de Datos */
+        .data-section {
+            background: var(--blanco);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 15px var(--sombra);
+            border-top: 5px solid var(--verde-policia);
+        }
+
+        .data-section h2 {
+            color: var(--verde-policia);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .data-section h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: var(--verde-policia);
+            border-radius: 2px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--gris-medio);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
+            color: var(--blanco);
+        }
+
+        th {
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--gris-medio);
+            color: var(--azul-oscuro);
+        }
+
+        tr:nth-child(even) {
+            background: var(--verde-muy-claro);
+        }
+
+        tr:hover {
+            background: #D4EDDA;
+            transition: background 0.2s;
+        }
+
+        .col-cedula {
+            font-weight: 700;
+            color: var(--verde-policia);
+            font-family: 'Courier New', monospace;
+        }
+
+        .col-grado {
+            background: var(--amarillo-policia);
+            color: var(--azul-oscuro);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+
+        .col-novedad {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+
+        .novedad-normal {
+            background: var(--verde-muy-claro);
+            color: var(--verde-policia);
+        }
+
+        .novedad-alerta {
+            background: #FADBD8;
+            color: var(--rojo-alerta);
+        }
+
+        .novedad-comision {
+            background: #FCF3CF;
+            color: var(--dorado-oscuro);
+        }
+
+        .obs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .obs-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--gris-medio);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 50px;
+            transition: border-color 0.3s;
+        }
+
+        .obs-input:focus {
+            outline: none;
+            border-color: var(--verde-policia);
+            box-shadow: 0 0 0 3px rgba(0, 90, 46, 0.1);
+        }
+
+        .obs-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-save {
+            background: var(--verde-policia);
+            color: var(--blanco);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-save:hover {
+            background: var(--verde-claro);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,90,46,0.3);
+        }
+
+        .status-msg {
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .status-msg.show {
+            opacity: 1;
+        }
+
+        .status-msg.success {
+            color: var(--verde-policia);
+        }
+
+        .status-msg.error {
+            color: var(--rojo-alerta);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--verde-policia);
+        }
+
+        .spinner {
+            border: 4px solid var(--gris-medio);
+            border-top: 4px solid var(--amarillo-policia);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer-institutional {
+            text-align: center;
+            padding: 25px;
+            margin-top: 30px;
+            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
+        }
+
+        .footer-institutional p {
+            color: var(--blanco);
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .footer-institutional .motto {
+            color: var(--amarillo-policia);
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 8px;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .header-institutional {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            .header-left img {
+                width: 50px;
+            }
+            .header-text h1 {
+                font-size: 1.1rem;
+            }
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            th, td {
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-institutional">
+        <div class="header-left">
+            <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
+                 alt="Escudo Policía Nacional" 
+                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
+            <div class="header-text">
+                <h1>POLICÍA NACIONAL DE COLOMBIA</h1>
+                <p class="dep-name" id="depTitle">Dashboard</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="date-display" id="currentDate"></span>
+            <button class="btn-back" onclick="window.location.href='index.html'">← Volver</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="summary-section">
+            <h2>📊 Resumen General de la Dependencia</h2>
+            <div class="summary-grid" id="summaryGrid">
+                <div class="loading" style="grid-column: 1/-1;">
+                    <div class="spinner"></div>
+                    <p>Cargando información institucional...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2>👥 Registro de Personal</h2>
+            <div class="table-wrapper" id="tableContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando datos del personal...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-institutional">
+        <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
+        <p class="motto">★ DIOS Y PATRIA ★</p>
+    </div>
+
+    <script>
+        // ============================================================
+        // URL DE GOOGLE APPS SCRIPT - YA CONFIGURADA
+        // ============================================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx1b6bokd-O5nJFWhAC9hJrEPLZAofnsDM4iIPL89LsJ1FnHUIc1xX2u6LHe6pAZIqy/exec';
+
+        let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
+
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            };
+            document.getElementById('currentDate').textContent = 
+                now.toLocaleDateString('es-CO', options);
+        }
+
+        async function loadRealData() {
+            try {
+                document.getElementById('summaryGrid').innerHTML = `
+                    <div class="loading" style="grid-column: 1/-1;">
+                        <div class="spinner"></div>
+                        <p>Cargando resumen de ${currentDependency}...</p>
+                    </div>`;
+                document.getElementById('tableContainer').innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando personal de ${currentDependency}...</p>
+                    </div>`;
+
+                const summaryRes = await fetch(`${API_URL}?action=getSummary&dependency=${currentDependency}`);
+                const summaryData = await summaryRes.json();
+                
+                if (summaryData.success) {
+                    renderSummary(summaryData.summary);
+                } else {
+                    console.error('Error resumen:', summaryData.error);
+                    renderSummary([{label: 'Error', value: summaryData.error, alert: true}]);
+                }
+
+                const dataRes = await fetch(`${API_URL}?action=getData&dependency=${currentDependency}`);
+                const data = await dataRes.json();
+                
+                if (data.success) {
+                    renderTable(data.data);
+                } else {
+                    console.error('Error datos:', data.error);
+                    document.getElementById('tableContainer').innerHTML = 
+                        `<p style="color:#C0392B; padding:30px; text-align:center; font-weight:600;">
+                            ⚠️ Error: ${data.error}<br>
+                            <span style="font-size:0.9rem; color:#666;">Verifique que la hoja "${currentDependency}" exista en el documento</span>
+                        </p>`;
+                }
+                
+            } catch (error) {
+                console.error('Error de conexión:', error);
+                document.getElementById('tableContainer').innerHTML = 
+                    `<p style="color:#C0392B; padding:30px; text-align:center;">
+                        ⚠️ No se pudo conectar con el servidor<br>
+                        <span style="font-size:0.85rem;">${error.message}</span>
+                    </p>`;
+            }
+        }
+
+        async function saveObservation(textarea, row) {
+            const value = textarea.value.trim();
+            const status = document.getElementById(`status-${row}`);
+            
+            status.textContent = '⏳ Guardando...';
+            status.className = 'status-msg show';
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        dependency: currentDependency,
+                        row: row,
+                        observation: value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    status.textContent = '✓ Guardado en servidor';
+                    status.className = 'status-msg show success';
+                } else {
+                    throw new Error(result.error);
+                }
+                
+                setTimeout(() => status.classList.remove('show'), 3000);
+                
+            } catch (error) {
+                status.textContent = '✗ Error: ' + error.message;
+                status.className = 'status-msg show error';
+                console.error('Error:', error);
+            }
+        }
+
+        function renderSummary(data) {
+            const grid = document.getElementById('summaryGrid');
+            grid.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:20px;">No hay datos de resumen</p>';
+                return;
+            }
+            
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `summary-item ${item.alert ? 'alert' : ''}`;
+                div.innerHTML = `
+                    <div class="label">${item.label || 'Sin nombre'}</div>
+                    <div class="value">${item.value || '0'}</div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function getNovedadClass(novedad) {
+            const novedadUpper = (novedad || '').toUpperCase();
+            if (['PERMISO', 'INCAPACIDAD', 'NOVEDAD', 'ALERTA'].some(n => novedadUpper.includes(n))) {
+                return 'novedad-alerta';
+            }
+            if (['COMISIÓN', 'COMISION', 'COURSE'].some(n => novedadUpper.includes(n))) {
+                return 'novedad-comision';
+            }
+            return 'novedad-normal';
+        }
+
+        function renderTable(data) {
+            const container = document.getElementById('tableContainer');
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = `
+                    <div style="padding:40px; text-align:center; color:#666;">
+                        <p style="font-size:1.2rem; margin-bottom:10px;">📭 No hay registros</p>
+                        <p>La dependencia <strong>${currentDependency}</strong> no tiene datos en el rango B2:U</p>
+                    </div>`;
+                return;
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CÉDULA</th>
+                            <th>GRADO</th>
+                            <th>APELLIDOS Y NOMBRES</th>
+                            <th>TURNO</th>
+                            <th>NOVEDAD</th>
+                            <th>OBSERVACIÓN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            data.forEach(person => {
+                const novedadClass = getNovedadClass(person.novedad);
+                
+                html += `
+                    <tr>
+                        <td class="col-cedula">${person.cedula || '-'}</td>
+                        <td><span class="col-grado">${person.grado || '-'}</span></td>
+                        <td>${person.nombres || '-'}</td>
+                        <td>${person.turno || '-'}</td>
+                        <td><span class="col-novedad ${novedadClass}">${person.novedad || 'SIN NOVEDAD'}</span></td>
+                        <td>
+                            <div class="obs-container">
+                                <textarea 
+                                    class="obs-input" 
+                                    data-row="${person.row}"
+                                    placeholder="Ingrese observación..."
+                                    onblur="saveObservation(this, ${person.row})"
+                                >${person.observacion || ''}</textarea>
+                                <div class="obs-actions">
+                                    <button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ${person.row})">
+                                        💾 Guardar
+                                    </button>
+                                    <span class="status-msg" id="status-${person.row}">✓ Guardado correctamente</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        document.getElementById('depTitle').textContent = currentDependency;
+        updateDate();
+        loadRealData();
+    </script>
+</body>
+</html>
