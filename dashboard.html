@@ -77,10 +77,12 @@
             border-radius: 2px;
         }
 
-        .summary-grid {
+        /* GRID ESPECÍFICO PARA 6 CUADROS */
+        .summary-grid-6 {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(6, 1fr);
             gap: 15px;
+            margin-bottom: 20px;
         }
 
         .summary-item {
@@ -96,15 +98,16 @@
         .summary-item:hover { transform: translateY(-3px); }
 
         .summary-item .label {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             opacity: 0.9;
             margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .summary-item .value {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: var(--amarillo-policia);
         }
@@ -117,24 +120,6 @@
             color: var(--blanco);
         }
 
-        /* Estilo especial para FUERZA DISPONIBLE */
-        .summary-item.fuerza-disponible-destacado {
-            background: linear-gradient(135deg, var(--amarillo-policia) 0%, var(--dorado-oscuro) 100%);
-            border: 3px solid var(--verde-policia);
-            grid-column: 1 / -1;
-        }
-
-        .summary-item.fuerza-disponible-destacado .label {
-            color: var(--azul-oscuro);
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .summary-item.fuerza-disponible-destacado .value {
-            color: var(--azul-oscuro);
-            font-size: 2.5rem;
-        }
-
         /* Estilo para títulos de sección */
         .summary-item.header-style {
             background: linear-gradient(135deg, #1A3A5C 0%, #2C5282 100%);
@@ -142,7 +127,7 @@
         }
 
         .summary-item.header-style .label {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--amarillo-policia);
         }
@@ -151,18 +136,20 @@
             display: none;
         }
 
-        /* Estilo para grados pequeños */
-        .summary-item.grado-item {
-            padding: 12px 8px;
+        /* Estilo para FUERZA DISPONIBLE destacado */
+        .summary-item.fuerza-disponible-destacado {
+            background: linear-gradient(135deg, var(--amarillo-policia) 0%, var(--dorado-oscuro) 100%);
+            border: 3px solid var(--verde-policia);
         }
 
-        .summary-item.grado-item .label {
-            font-size: 0.75rem;
+        .summary-item.fuerza-disponible-destacado .label {
+            color: var(--azul-oscuro);
             font-weight: 700;
         }
 
-        .summary-item.grado-item .value {
-            font-size: 1.4rem;
+        .summary-item.fuerza-disponible-destacado .value {
+            color: var(--azul-oscuro);
+            font-size: 2.2rem;
         }
 
         .data-section {
@@ -232,7 +219,19 @@
         .footer-institutional { text-align: center; padding: 25px; margin-top: 30px; background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); }
         .footer-institutional p { color: var(--blanco); font-size: 0.85rem; opacity: 0.9; }
         .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1.1rem; margin-top: 8px; letter-spacing: 2px; }
-        @media (max-width: 768px) { .header-institutional { flex-direction: column; gap: 15px; padding: 15px; } .header-left img { width: 50px; } .header-text h1 { font-size: 1.1rem; } .summary-grid { grid-template-columns: repeat(3, 1fr); } th, td { padding: 8px; font-size: 0.85rem; } }
+        
+        /* Responsive para móvil */
+        @media (max-width: 768px) {
+            .header-institutional { flex-direction: column; gap: 15px; padding: 15px; }
+            .header-left img { width: 50px; }
+            .header-text h1 { font-size: 1.1rem; }
+            .summary-grid-6 { grid-template-columns: repeat(3, 1fr); }
+            th, td { padding: 8px; font-size: 0.85rem; }
+        }
+        
+        @media (max-width: 480px) {
+            .summary-grid-6 { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -256,8 +255,8 @@
         <!-- RESUMEN GENERAL -->
         <div class="summary-section">
             <h2>📊 Resumen General de la Dependencia</h2>
-            <div class="summary-grid" id="summaryGrid">
-                <div class="loading" style="grid-column: 1/-1;">
+            <div id="summaryContainer">
+                <div class="loading">
                     <div class="spinner"></div>
                     <p>Cargando información institucional...</p>
                 </div>
@@ -277,14 +276,14 @@
 
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
-        <p class="motto">★ DIOS Y PATRIA JESEP★</p>
+        <p class="motto">★★ DIOS Y PATRIA ★★</p>
     </div>
 
     <script>
         // ============================================================
         // URL DE GOOGLE APPS SCRIPT - ACTUALIZA CON TU URL
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzZk3aS9xMY7TWworUZugzo1tp5F6nVA2kEYsx1_XXMM-kuH-R_436AhUBjgRVpcCH2/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxgmS18vi7es--DfnPsHNYRWcIqHfwkdKJE1lkYbCYSdP-Jtyu2L7Z8VTJA_QFji2F4/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -308,8 +307,8 @@
 
         async function loadRealData() {
             try {
-                document.getElementById('summaryGrid').innerHTML = `
-                    <div class="loading" style="grid-column: 1/-1;">
+                document.getElementById('summaryContainer').innerHTML = `
+                    <div class="loading">
                         <div class="spinner"></div>
                         <p>Cargando resumen de ${currentDependency}...</p>
                     </div>`;
@@ -349,54 +348,67 @@
                     <button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button>
                 </div>
             `;
-            document.getElementById('summaryGrid').innerHTML = errorHtml;
+            document.getElementById('summaryContainer').innerHTML = errorHtml;
             document.getElementById('tableContainer').innerHTML = errorHtml;
         }
 
         // ============================================================
-        // RENDERIZAR RESUMEN CON CASILLAS POR GRADOS
+        // RENDERIZAR RESUMEN CON 3 SECCIONES DE 6 CUADROS
         // ============================================================
         function renderSummary(data) {
-            const grid = document.getElementById('summaryGrid');
-            grid.innerHTML = '';
+            const container = document.getElementById('summaryContainer');
+            container.innerHTML = '';
             
             if (!data || data.length === 0) {
-                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:20px;">No hay datos de resumen</p>';
+                container.innerHTML = '<p style="text-align:center; padding:20px;">No hay datos de resumen</p>';
                 return;
             }
             
             let currentSection = '';
+            let currentGrid = null;
             
             data.forEach(item => {
-                const div = document.createElement('div');
-                
                 if (item.section === 'header') {
-                    // Título de sección
+                    // Nuevo título de sección
                     currentSection = item.label;
-                    div.className = 'summary-item header-style';
-                    div.innerHTML = `
+                    
+                    // Crear grid para esta sección
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.className = 'summary-grid-6';
+                    sectionDiv.id = 'grid-' + currentSection.replace(/\s+/g, '-').toLowerCase();
+                    container.appendChild(sectionDiv);
+                    currentGrid = sectionDiv;
+                    
+                    // Título
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'summary-item header-style';
+                    titleDiv.innerHTML = `
                         <div class="label">${item.label}</div>
                         <div class="value">-</div>
                     `;
+                    currentGrid.appendChild(titleDiv);
+                    
                 } else if (item.section === 'separator') {
-                    // No mostrar separadores
-                    return;
-                } else {
-                    // Item normal - verificar si es grado (OF, NE, PT, PP, AXP, NO UNI)
-                    const isGrado = ['OF', 'NE', 'PT', 'PP', 'AXP', 'NO UNI'].includes(item.label);
+                    // Separador - crear nuevo contenedor
+                    currentGrid = null;
+                    
+                } else if (currentGrid) {
+                    // Item normal - agregar al grid actual
+                    const div = document.createElement('div');
+                    
                     const isFuerzaDisponible = item.label && 
                         item.label.toUpperCase().includes('FUERZA') && 
                         item.label.toUpperCase().includes('DISPONIBLE');
                     
-                    div.className = `summary-item ${isGrado ? 'grado-item' : ''} ${item.alert || isFuerzaDisponible ? 'alert' : ''} ${isFuerzaDisponible ? 'fuerza-disponible-destacado' : ''}`;
+                    div.className = `summary-item ${item.alert || isFuerzaDisponible ? 'alert' : ''} ${isFuerzaDisponible ? 'fuerza-disponible-destacado' : ''}`;
                     
                     div.innerHTML = `
                         <div class="label">${item.label || ''}</div>
                         <div class="value">${item.value || '0'}</div>
                     `;
+                    
+                    currentGrid.appendChild(div);
                 }
-                
-                grid.appendChild(div);
             });
         }
 
