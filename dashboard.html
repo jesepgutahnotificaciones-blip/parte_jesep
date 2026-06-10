@@ -147,14 +147,14 @@
 
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
-        <p class="motto">★ DIOS Y PATRIA 654321★</p>
+        <p class="motto">★ DIOS Y PATRIA PRUEBAS JESEP ★</p>
     </div>
 
     <script>
         // ============================================================
-        // URL DE GOOGLE APPS SCRIPT - ACTUALIZA CON TU NUEVA URL
+        // URL ACTUALIZADA - TU NUEVA WEB APP
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyKw82hOMgVKF8-lgd2sa8-iBFjlyDWn4R5HPWYRTp0U_XCEiQmJ3OW0QhGHwYgb_ex/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbweoAfpzdxJhz6IjjoEJpcTl8uvwuWSpmzVS6LWIj42QRWRa4Q77sZrcXNvyc20UTto/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -199,77 +199,38 @@
         }
 
         // ============================================================
-        // GUARDAR DATOS USANDO FORMULARIO (MÉTODO MÁS CONFIABLE)
+        // GUARDAR DATOS CON FETCH
         // ============================================================
-        function saveData(row, novedad, observation) {
-            return new Promise((resolve, reject) => {
-                const formId = 'form_' + Date.now() + '_' + row;
-                const iframeId = 'iframe_' + Date.now() + '_' + row;
-                
-                // Crear formulario invisible
-                const form = document.createElement('form');
-                form.id = formId;
-                form.method = 'POST';
-                form.action = API_URL;
-                form.target = iframeId;
-                form.style.display = 'none';
-                
-                // Campos del formulario
-                const fields = {
-                    dependency: currentDependency,
-                    row: row.toString(),
-                    novedad: novedad || '',
-                    observation: observation || ''
-                };
-                
-                for (const [key, value] of Object.entries(fields)) {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = key;
-                    input.value = value;
-                    form.appendChild(input);
-                }
-                
-                // Crear iframe para recibir respuesta
-                const iframe = document.createElement('iframe');
-                iframe.id = iframeId;
-                iframe.name = iframeId;
-                iframe.style.display = 'none';
-                
-                // Manejar respuesta
-                iframe.onload = function() {
-                    try {
-                        const responseText = iframe.contentDocument.body.innerText;
-                        const result = JSON.parse(responseText);
-                        
-                        // Limpiar
-                        document.body.removeChild(form);
-                        document.body.removeChild(iframe);
-                        
-                        if (result.success) {
-                            resolve(result);
-                        } else {
-                            reject(new Error(result.error));
-                        }
-                    } catch (e) {
-                        // Si no puede parsear, asumir éxito
-                        document.body.removeChild(form);
-                        document.body.removeChild(iframe);
-                        resolve({ success: true });
-                    }
-                };
-                
-                iframe.onerror = function() {
-                    document.body.removeChild(form);
-                    document.body.removeChild(iframe);
-                    reject(new Error('Error de red'));
-                };
-                
-                // Agregar al DOM y enviar
-                document.body.appendChild(form);
-                document.body.appendChild(iframe);
-                form.submit();
+        async function saveData(row, novedad, observation) {
+            const data = {
+                dependency: currentDependency,
+                row: parseInt(row),
+                novedad: novedad || '',
+                observation: observation || ''
+            };
+            
+            console.log('Enviando:', JSON.stringify(data));
+            
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            console.log('Respuesta:', result);
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Error desconocido del servidor');
+            }
+            
+            return result;
         }
 
         // ============================================================
@@ -283,24 +244,24 @@
             status.className = 'status-msg show';
             
             try {
-                await saveData(row, novedad, '');
+                const result = await saveData(row, novedad, '');
                 
-                status.textContent = '✓ Guardado';
+                status.textContent = '✓ Guardado: ' + (result.novedadGuardada || novedad);
                 status.className = 'status-msg show success';
                 
                 // Actualizar badge
                 const badge = document.getElementById(`badge-${row}`);
                 if (badge) {
                     badge.className = `col-novedad ${getNovedadClass(novedad)}`;
-                    badge.textContent = novedad || 'SIN NOVEDAD';
+                    badge.textContent = result.novedadGuardada || novedad || 'SIN NOVEDAD';
                 }
                 
-                setTimeout(() => status.classList.remove('show'), 2000);
+                setTimeout(() => status.classList.remove('show'), 3000);
                 
             } catch (error) {
                 status.textContent = '✗ Error: ' + error.message;
                 status.className = 'status-msg show error';
-                console.error('Error:', error);
+                console.error('Error completo:', error);
             }
         }
 
@@ -315,7 +276,7 @@
             status.className = 'status-msg show';
             
             try {
-                await saveData(row, '', observation);
+                const result = await saveData(row, '', observation);
                 
                 status.textContent = '✓ Guardado';
                 status.className = 'status-msg show success';
@@ -324,6 +285,7 @@
             } catch (error) {
                 status.textContent = '✗ Error: ' + error.message;
                 status.className = 'status-msg show error';
+                console.error('Error:', error);
             }
         }
 
