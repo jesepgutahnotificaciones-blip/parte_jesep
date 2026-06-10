@@ -147,7 +147,7 @@
 
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
-        <p class="motto">★ DIOS Y PATRIA PRUEBAS 12345★</p>
+        <p class="motto">★ DIOS Y PATRIA ★</p>
     </div>
 
     <script>
@@ -183,3 +183,232 @@
 
                 const summaryData = await fetchData('getSummary');
                 if (summaryData.success) renderSummary(summaryData.summary);
+
+                const data = await fetchData('getData');
+                if (data.success) renderTable(data.data);
+                
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function showError(message) {
+            const html = `<div class="error-box"><h3>⚠️ Error</h3><p>${message}</p><button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button></div>`;
+            document.getElementById('summaryGrid').innerHTML = html;
+            document.getElementById('tableContainer').innerHTML = html;
+        }
+
+        // ============================================================
+        // GUARDAR DATOS USANDO FORMULARIO (MÉTODO MÁS CONFIABLE)
+        // ============================================================
+        function saveData(row, novedad, observation) {
+            return new Promise((resolve, reject) => {
+                const formId = 'form_' + Date.now() + '_' + row;
+                const iframeId = 'iframe_' + Date.now() + '_' + row;
+                
+                // Crear formulario invisible
+                const form = document.createElement('form');
+                form.id = formId;
+                form.method = 'POST';
+                form.action = API_URL;
+                form.target = iframeId;
+                form.style.display = 'none';
+                
+                // Campos del formulario
+                const fields = {
+                    dependency: currentDependency,
+                    row: row.toString(),
+                    novedad: novedad || '',
+                    observation: observation || ''
+                };
+                
+                for (const [key, value] of Object.entries(fields)) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                }
+                
+                // Crear iframe para recibir respuesta
+                const iframe = document.createElement('iframe');
+                iframe.id = iframeId;
+                iframe.name = iframeId;
+                iframe.style.display = 'none';
+                
+                // Manejar respuesta
+                iframe.onload = function() {
+                    try {
+                        const responseText = iframe.contentDocument.body.innerText;
+                        const result = JSON.parse(responseText);
+                        
+                        // Limpiar
+                        document.body.removeChild(form);
+                        document.body.removeChild(iframe);
+                        
+                        if (result.success) {
+                            resolve(result);
+                        } else {
+                            reject(new Error(result.error));
+                        }
+                    } catch (e) {
+                        // Si no puede parsear, asumir éxito
+                        document.body.removeChild(form);
+                        document.body.removeChild(iframe);
+                        resolve({ success: true });
+                    }
+                };
+                
+                iframe.onerror = function() {
+                    document.body.removeChild(form);
+                    document.body.removeChild(iframe);
+                    reject(new Error('Error de red'));
+                };
+                
+                // Agregar al DOM y enviar
+                document.body.appendChild(form);
+                document.body.appendChild(iframe);
+                form.submit();
+            });
+        }
+
+        // ============================================================
+        // GUARDAR NOVEDAD
+        // ============================================================
+        async function saveNovedad(select, row) {
+            const novedad = select.value;
+            const status = document.getElementById(`status-novedad-${row}`);
+            
+            status.textContent = '⏳ Guardando...';
+            status.className = 'status-msg show';
+            
+            try {
+                await saveData(row, novedad, '');
+                
+                status.textContent = '✓ Guardado';
+                status.className = 'status-msg show success';
+                
+                // Actualizar badge
+                const badge = document.getElementById(`badge-${row}`);
+                if (badge) {
+                    badge.className = `col-novedad ${getNovedadClass(novedad)}`;
+                    badge.textContent = novedad || 'SIN NOVEDAD';
+                }
+                
+                setTimeout(() => status.classList.remove('show'), 2000);
+                
+            } catch (error) {
+                status.textContent = '✗ Error: ' + error.message;
+                status.className = 'status-msg show error';
+                console.error('Error:', error);
+            }
+        }
+
+        // ============================================================
+        // GUARDAR OBSERVACIÓN
+        // ============================================================
+        async function saveObservation(textarea, row) {
+            const observation = textarea.value.trim();
+            const status = document.getElementById(`status-${row}`);
+            
+            status.textContent = '⏳ Guardando...';
+            status.className = 'status-msg show';
+            
+            try {
+                await saveData(row, '', observation);
+                
+                status.textContent = '✓ Guardado';
+                status.className = 'status-msg show success';
+                setTimeout(() => status.classList.remove('show'), 3000);
+                
+            } catch (error) {
+                status.textContent = '✗ Error: ' + error.message;
+                status.className = 'status-msg show error';
+            }
+        }
+
+        function getNovedadClass(novedad) {
+            const n = (novedad || '').toUpperCase();
+            if (n.includes('OFICINA')) return 'novedad-oficina';
+            if (n.includes('VACACIONES')) return 'novedad-vacaciones';
+            if (n.includes('SERVICIO')) return 'novedad-servicio';
+            if (n.includes('GRAVIDEZ')) return 'novedad-gravidez';
+            if (n.includes('EXCUSA')) return 'novedad-excusa';
+            if (n.includes('PERMISO')) return 'novedad-permiso';
+            if (n.includes('CITA')) return 'novedad-cita';
+            if (n.includes('MATERNIDAD')) return 'novedad-maternidad';
+            if (n.includes('RETARDADO')) return 'novedad-retardado';
+            return 'novedad-normal';
+        }
+
+        function createNovedadSelect(currentValue, row) {
+            let options = '<option value="">SIN NOVEDAD</option>';
+            NOVEDADES.forEach(n => {
+                const selected = (currentValue === n) ? 'selected' : '';
+                options += `<option value="${n}" ${selected}>${n}</option>`;
+            });
+            
+            return `
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <select class="novedad-select" onchange="saveNovedad(this, ${row})">${options}</select>
+                    <span class="col-novedad ${getNovedadClass(currentValue)}" id="badge-${row}">${currentValue || 'SIN NOVEDAD'}</span>
+                    <span class="status-msg" id="status-novedad-${row}">✓ Guardado</span>
+                </div>
+            `;
+        }
+
+        function renderSummary(data) {
+            const grid = document.getElementById('summaryGrid');
+            grid.innerHTML = '';
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:20px;">No hay datos de resumen</p>';
+                return;
+            }
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `summary-item ${item.alert ? 'alert' : ''}`;
+                div.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
+                grid.appendChild(div);
+            });
+        }
+
+        function renderTable(data) {
+            const container = document.getElementById('tableContainer');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div style="padding:40px; text-align:center;"><p>📭 No hay registros en ${currentDependency}</p></div>`;
+                return;
+            }
+            
+            let html = `<table><thead><tr><th>CÉDULA</th><th>GRADO</th><th>APELLIDOS Y NOMBRES</th><th>TURNO</th><th>NOVEDAD</th><th>OBSERVACIÓN</th></tr></thead><tbody>`;
+            
+            data.forEach(person => {
+                html += `
+                    <tr>
+                        <td class="col-cedula">${person.cedula || '-'}</td>
+                        <td><span class="col-grado">${person.grado || '-'}</span></td>
+                        <td>${person.nombres || '-'}</td>
+                        <td>${person.turno || '-'}</td>
+                        <td>${createNovedadSelect(person.novedad, person.row)}</td>
+                        <td>
+                            <div class="obs-container">
+                                <textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ${person.row})">${person.observacion || ''}</textarea>
+                                <div class="obs-actions">
+                                    <button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ${person.row})">💾 Guardar</button>
+                                    <span class="status-msg" id="status-${person.row}">✓ Guardado</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        document.getElementById('depTitle').textContent = currentDependency;
+        updateDate();
+        loadRealData();
+    </script>
+</body>
+</html>
