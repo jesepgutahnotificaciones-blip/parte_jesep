@@ -30,7 +30,6 @@
             font-size: 13px;
         }
 
-        /* ===== HEADER EJECUTIVO ===== */
         .header-institutional {
             background: var(--verde-policia);
             color: var(--blanco);
@@ -56,7 +55,6 @@
 
         .main-content { max-width: 1400px; margin: 12px auto; padding: 0 16px; }
 
-        /* ===== SECCIONES COMPACTAS ===== */
         .summary-section {
             background: var(--blanco);
             border-radius: 6px;
@@ -85,7 +83,6 @@
             border-radius: 2px;
         }
 
-        /* ===== GRID PRINCIPAL (FUERZA EFECTIVA) ===== */
         .summary-grid-6 {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -93,7 +90,6 @@
             margin-bottom: 10px;
         }
 
-        /* ===== GRID NOVEDADES (30% MÁS PEQUEÑO) ===== */
         .novedad-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -101,7 +97,6 @@
             margin-bottom: 6px;
         }
 
-        /* ===== ITEMS BASE (COMPACTOS) ===== */
         .summary-item {
             background: var(--verde-policia);
             padding: 8px 4px;
@@ -136,7 +131,6 @@
         }
         .summary-item.alert .value { color: var(--blanco); }
 
-        /* ===== TÍTULO SECCIÓN PRINCIPAL ===== */
         .summary-item.header-style {
             background: var(--azul-oscuro);
             grid-column: 1 / -1;
@@ -151,7 +145,6 @@
         }
         .summary-item.header-style .value { display: none; }
 
-        /* ===== TÍTULO NOVEDAD ===== */
         .summary-item.novedad-title {
             background: var(--gris-oscuro);
             grid-column: 1 / -1;
@@ -166,7 +159,6 @@
         }
         .summary-item.novedad-title .value { display: none; }
 
-        /* ===== ITEMS NOVEDAD (30% MÁS PEQUEÑOS) ===== */
         .summary-item.novedad-item {
             padding: 5px 3px;
             min-height: 38px;
@@ -181,7 +173,6 @@
             font-size: 0.95rem;
         }
 
-        /* ===== COLORES SUAVES DIFERENTES PARA CADA NOVEDAD ===== */
         .summary-item.novedad-item.nov-oficina {
             background: #E8F0FE;
             color: #1967D2;
@@ -242,7 +233,6 @@
         }
         .summary-item.novedad-item.nov-default .value { color: #5F6368; }
 
-        /* ===== SECCIÓN TABLA (COMPACTA) ===== */
         .data-section {
             background: var(--blanco);
             border-radius: 6px;
@@ -353,7 +343,6 @@
     </div>
 
     <div class="main-content">
-        <!-- RESUMEN GENERAL -->
         <div class="summary-section">
             <h2>📊 Resumen General de la Dependencia</h2>
             <div id="summaryContainer">
@@ -381,10 +370,7 @@
     </div>
 
     <script>
-        // ============================================================
-        // URL DE GOOGLE APPS SCRIPT - ACTUALIZA CON TU URL
-        // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz6_gcaUgE6bh8I0baBxcICJGTvAtMdhz9jK6VvGk-8_SaH1AEEjf-1zE325_KKhTgZ/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycby6EMC1-u0u_igX7F_txLmvgxwo2OgZ9pX5TlAdXGaYPHvjO0_GYhkL2PZjLSCJIq0d/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -420,7 +406,6 @@
                     </div>`;
 
                 const summaryData = await fetchData('getSummary');
-                
                 if (summaryData.success) {
                     renderSummary(summaryData.summary);
                 } else {
@@ -428,13 +413,11 @@
                 }
 
                 const data = await fetchData('getData');
-                
                 if (data.success) {
                     renderTable(data.data);
                 } else {
                     throw new Error(data.error || 'Error al cargar datos');
                 }
-                
             } catch (error) {
                 console.error('Error:', error);
                 showError(error.message);
@@ -453,9 +436,6 @@
             document.getElementById('tableContainer').innerHTML = errorHtml;
         }
 
-        // ============================================================
-        // RENDERIZAR RESUMEN COMPLETO
-        // ============================================================
         function renderSummary(data) {
             const container = document.getElementById('summaryContainer');
             container.innerHTML = '';
@@ -466,48 +446,32 @@
             }
             
             let currentGrid = null;
-            let isDesgregado = false;
             
             data.forEach(item => {
-                // Título de sección principal
                 if (item.section === 'header') {
-                    // Crear nuevo grid para la sección
                     const sectionDiv = document.createElement('div');
                     sectionDiv.className = 'summary-grid-6';
                     container.appendChild(sectionDiv);
                     currentGrid = sectionDiv;
-                    isDesgregado = item.label.includes('DESGREGADO');
                     
-                    // Título
                     const titleDiv = document.createElement('div');
                     titleDiv.className = 'summary-item header-style';
-                    titleDiv.innerHTML = `
-                        <div class="label">${item.label}</div>
-                        <div class="value">-</div>
-                    `;
+                    titleDiv.innerHTML = `<div class="label">${item.label}</div><div class="value">-</div>`;
                     currentGrid.appendChild(titleDiv);
                     
                 } else if (item.section === 'novedad-header') {
-                    // Título de novedad (DESGREGADO)
-                    // Crear nuevo grid para esta novedad
                     const novedadDiv = document.createElement('div');
                     novedadDiv.className = 'novedad-grid';
                     container.appendChild(novedadDiv);
                     currentGrid = novedadDiv;
                     
-                    // Título de la novedad
                     const titleDiv = document.createElement('div');
                     titleDiv.className = 'summary-item novedad-title';
-                    titleDiv.innerHTML = `
-                        <div class="label">${item.label}</div>
-                        <div class="value">-</div>
-                    `;
+                    titleDiv.innerHTML = `<div class="label">${item.label}</div><div class="value">-</div>`;
                     currentGrid.appendChild(titleDiv);
                     
                 } else if (item.section === 'novedad-item') {
-                    // Item de novedad (OF, NE, PT, PP, AXP, NO UNI)
                     const div = document.createElement('div');
-                    // Asignar clase de color según el título de novedad actual
                     const novedadTitle = currentGrid.querySelector('.novedad-title .label');
                     const novedadName = novedadTitle ? novedadTitle.textContent.toUpperCase() : '';
                     let colorClass = 'nov-default';
@@ -522,28 +486,19 @@
                     else if (novedadName.includes('RETARDADO')) colorClass = 'nov-retardado';
                     
                     div.className = 'summary-item novedad-item ' + colorClass;
-                    div.innerHTML = `
-                        <div class="label">${item.label}</div>
-                        <div class="value">${item.value}</div>
-                    `;
+                    div.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
                     currentGrid.appendChild(div);
                     
                 } else {
-                    // Items normales (FUERZA EFECTIVA / DISPONIBLE)
                     const div = document.createElement('div');
                     div.className = 'summary-item';
-                    div.innerHTML = `
-                        <div class="label">${item.label}</div>
-                        <div class="value">${item.value}</div>
-                    `;
+                    div.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
                     currentGrid.appendChild(div);
                 }
             });
         }
 
-        // ============================================================
-        // GUARDAR DATOS - SOLO AFECTA LA FILA SELECCIONADA
-        // ============================================================
+        // ===== GUARDAR USANDO text/plain PARA EVITAR CORS PREFLIGHT =====
         async function saveData(row, novedad, observation) {
             const payload = {
                 dependency: currentDependency,
@@ -552,9 +507,11 @@
                 observation: observation || ''
             };
             
+            // USAR text/plain EN LUGAR DE application/json
+            // Esto evita el preflight OPTIONS que Google Apps Script no acepta
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             });
             
@@ -570,9 +527,6 @@
             return result;
         }
 
-        // ============================================================
-        // GUARDAR NOVEDAD - SOLO LA FILA SELECCIONADA
-        // ============================================================
         async function saveNovedad(select, row) {
             const novedad = select.value;
             const status = document.getElementById(`status-novedad-${row}`);
@@ -600,9 +554,6 @@
             }
         }
 
-        // ============================================================
-        // GUARDAR OBSERVACIÓN - SOLO LA FILA SELECCIONADA
-        // ============================================================
         async function saveObservation(textarea, row) {
             const observation = textarea.value.trim();
             const status = document.getElementById(`status-${row}`);
