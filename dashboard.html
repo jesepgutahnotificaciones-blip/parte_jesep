@@ -6,268 +6,332 @@
     <title>Dashboard - Policía Nacional de Colombia</title>
     <style>
         :root {
-            --verde-policia: #005A2E;
-            --verde-claro: #007A3D;
-            --verde-muy-claro: #E8F5E9;
-            --amarillo-policia: #F4B223;
-            --dorado-oscuro: #D49A1A;
-            --azul-oscuro: #1A3A5C;
+            --verde-policia: #2D5A3D;
+            --verde-claro: #4A7C59;
+            --amarillo-policia: #C9A227;
+            --azul-oscuro: #1E3A5F;
             --blanco: #FFFFFF;
-            --gris-claro: #F5F5F5;
-            --gris-medio: #E0E0E0;
-            --rojo-alerta: #C0392B;
-            --sombra: rgba(0, 0, 0, 0.15);
+            --gris-fondo: #F0F2F5;
+            --gris-suave: #E8EAED;
+            --gris-texto: #5F6368;
+            --gris-oscuro: #3C4043;
+            --rojo-suave: #D93025;
+            --borde: #DADCE0;
+            --sombra-suave: 0 1px 3px rgba(0,0,0,0.08);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--gris-claro);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--gris-fondo);
             min-height: 100vh;
+            color: var(--gris-oscuro);
+            font-size: 13px;
         }
 
+        /* ===== HEADER EJECUTIVO ===== */
         .header-institutional {
-            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
+            background: var(--verde-policia);
             color: var(--blanco);
-            padding: 15px 30px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 15px var(--sombra);
+            box-shadow: var(--sombra-suave);
             position: sticky;
             top: 0;
             z-index: 1000;
+            height: 56px;
         }
 
-        .header-left { display: flex; align-items: center; gap: 20px; }
-        .header-left img { width: 70px; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
-        .header-text h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
-        .header-text .dep-name { color: var(--amarillo-policia); font-size: 1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-        .header-right { display: flex; align-items: center; gap: 15px; }
-        .btn-back { background: var(--amarillo-policia); color: var(--azul-oscuro); border: none; padding: 10px 22px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.95rem; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-back:hover { background: var(--dorado-oscuro); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .date-display { color: var(--blanco); font-size: 0.9rem; opacity: 0.9; }
-        .main-content { max-width: 1400px; margin: 25px auto; padding: 0 25px; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-left img { width: 36px; height: auto; }
+        .header-text h1 { font-size: 0.95rem; font-weight: 600; letter-spacing: 0.5px; }
+        .header-text .dep-name { color: var(--amarillo-policia); font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .btn-back { background: var(--amarillo-policia); color: var(--azul-oscuro); border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.75rem; transition: opacity 0.2s; text-transform: uppercase; }
+        .btn-back:hover { opacity: 0.85; }
+        .date-display { color: var(--blanco); font-size: 0.75rem; opacity: 0.85; }
 
+        .main-content { max-width: 1400px; margin: 12px auto; padding: 0 16px; }
+
+        /* ===== SECCIONES COMPACTAS ===== */
         .summary-section {
             background: var(--blanco);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 15px var(--sombra);
-            border-top: 5px solid var(--amarillo-policia);
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--sombra-suave);
+            border: 1px solid var(--borde);
         }
 
         .summary-section h2 {
             color: var(--verde-policia);
-            margin-bottom: 20px;
-            font-size: 1.3rem;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
         }
 
         .summary-section h2::before {
             content: '';
             display: inline-block;
-            width: 4px;
-            height: 24px;
+            width: 3px;
+            height: 16px;
             background: var(--amarillo-policia);
             border-radius: 2px;
         }
 
-        /* GRID PARA 6 CUADROS (FUERZA EFECTIVA / DISPONIBLE) */
+        /* ===== GRID PRINCIPAL (FUERZA EFECTIVA) ===== */
         .summary-grid-6 {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        /* GRID PARA DESGREGADO - 6 CUADROS POR NOVEDAD */
-        .novedad-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 6px;
+            gap: 8px;
             margin-bottom: 10px;
         }
 
-        .summary-item {
-            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--verde-claro) 100%);
-            padding: 18px;
-            border-radius: 10px;
-            text-align: center;
-            color: var(--blanco);
-            box-shadow: 0 4px 10px rgba(0,90,46,0.2);
-            transition: transform 0.3s;
+        /* ===== GRID NOVEDADES (30% MÁS PEQUEÑO) ===== */
+        .novedad-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+            margin-bottom: 6px;
         }
 
-        .summary-item:hover { transform: translateY(-3px); }
+        /* ===== ITEMS BASE (COMPACTOS) ===== */
+        .summary-item {
+            background: var(--verde-policia);
+            padding: 8px 4px;
+            border-radius: 4px;
+            text-align: center;
+            color: var(--blanco);
+            box-shadow: var(--sombra-suave);
+            min-height: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
         .summary-item .label {
-            font-size: 0.9rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.9;
-            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            opacity: 0.85;
+            margin-bottom: 2px;
             font-weight: 600;
+            line-height: 1.1;
         }
 
         .summary-item .value {
-            font-size: 1.8rem;
+            font-size: 1.15rem;
             font-weight: 700;
             color: var(--amarillo-policia);
         }
 
         .summary-item.alert {
-            background: linear-gradient(135deg, var(--rojo-alerta) 0%, #E74C3C 100%);
+            background: var(--rojo-suave);
         }
+        .summary-item.alert .value { color: var(--blanco); }
 
-        .summary-item.alert .value {
-            color: var(--blanco);
-        }
-
-        /* Título de sección principal */
+        /* ===== TÍTULO SECCIÓN PRINCIPAL ===== */
         .summary-item.header-style {
-            background: linear-gradient(135deg, #1A3A5C 0%, #2C5282 100%);
+            background: var(--azul-oscuro);
             grid-column: 1 / -1;
+            min-height: 32px;
+            padding: 6px 10px;
         }
-
         .summary-item.header-style .label {
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 0.8rem;
+            font-weight: 600;
             color: var(--amarillo-policia);
+            margin-bottom: 0;
         }
+        .summary-item.header-style .value { display: none; }
 
-        .summary-item.header-style .value {
-            display: none;
-        }
-
-        /* Título de novedad */
+        /* ===== TÍTULO NOVEDAD ===== */
         .summary-item.novedad-title {
-            background: linear-gradient(135deg, #005A2E 0%, #007A3D 100%);
+            background: var(--gris-oscuro);
             grid-column: 1 / -1;
-            padding: 12px;
+            padding: 5px 10px;
+            min-height: 28px;
         }
-
         .summary-item.novedad-title .label {
-            font-size: 1rem;
-            font-weight: 700;
+            font-size: 0.75rem;
+            font-weight: 600;
             color: var(--blanco);
+            margin-bottom: 0;
         }
+        .summary-item.novedad-title .value { display: none; }
 
-        .summary-item.novedad-title .value {
-            display: none;
-        }
-
-        /* Items pequeños de novedad */
+        /* ===== ITEMS NOVEDAD (30% MÁS PEQUEÑOS) ===== */
         .summary-item.novedad-item {
-            padding: 8px 4px;
-            min-height: 70px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,.08);
+            padding: 5px 3px;
+            min-height: 38px;
         }
-
         .summary-item.novedad-item .label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            margin-bottom: 3px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            line-height: 1.1;
+            margin-bottom: 1px;
         }
-
         .summary-item.novedad-item .value {
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 0.95rem;
         }
 
-        .nov-of { background:#E3F2FD; color:#1565C0; }
-        .nov-ne { background:#E8F5E9; color:#2E7D32; }
-        .nov-pt { background:#FFF8E1; color:#F57F17; }
-        .nov-pp { background:#F3E5F5; color:#7B1FA2; }
-        .nov-axp { background:#FCE4EC; color:#C2185B; }
-        .nov-no-uni { background:#E0F7FA; color:#00838F; }
-        .nov-otros { background:#ECEFF1; color:#455A64; }
+        /* ===== COLORES SUAVES DIFERENTES PARA CADA NOVEDAD ===== */
+        .summary-item.novedad-item.nov-oficina {
+            background: #E8F0FE;
+            color: #1967D2;
+        }
+        .summary-item.novedad-item.nov-oficina .value { color: #1967D2; }
 
+        .summary-item.novedad-item.nov-vacaciones {
+            background: #E6F4EA;
+            color: #1E8E3E;
+        }
+        .summary-item.novedad-item.nov-vacaciones .value { color: #1E8E3E; }
+
+        .summary-item.novedad-item.nov-servicio {
+            background: #FEF3E8;
+            color: #B06000;
+        }
+        .summary-item.novedad-item.nov-servicio .value { color: #B06000; }
+
+        .summary-item.novedad-item.nov-gravidez {
+            background: #FCE8F0;
+            color: #9C1B6A;
+        }
+        .summary-item.novedad-item.nov-gravidez .value { color: #9C1B6A; }
+
+        .summary-item.novedad-item.nov-excusa {
+            background: #F3E8FD;
+            color: #7B1FA2;
+        }
+        .summary-item.novedad-item.nov-excusa .value { color: #7B1FA2; }
+
+        .summary-item.novedad-item.nov-permiso {
+            background: #E0F7FA;
+            color: #00796B;
+        }
+        .summary-item.novedad-item.nov-permiso .value { color: #00796B; }
+
+        .summary-item.novedad-item.nov-cita {
+            background: #E1F5FE;
+            color: #0277BD;
+        }
+        .summary-item.novedad-item.nov-cita .value { color: #0277BD; }
+
+        .summary-item.novedad-item.nov-maternidad {
+            background: #FBE9E7;
+            color: #C53929;
+        }
+        .summary-item.novedad-item.nov-maternidad .value { color: #C53929; }
+
+        .summary-item.novedad-item.nov-retardado {
+            background: #FFF8E1;
+            color: #F9A825;
+        }
+        .summary-item.novedad-item.nov-retardado .value { color: #F9A825; }
+
+        .summary-item.novedad-item.nov-default {
+            background: #F1F3F4;
+            color: #5F6368;
+        }
+        .summary-item.novedad-item.nov-default .value { color: #5F6368; }
+
+        /* ===== SECCIÓN TABLA (COMPACTA) ===== */
         .data-section {
             background: var(--blanco);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 15px var(--sombra);
-            border-top: 5px solid var(--verde-policia);
+            border-radius: 6px;
+            padding: 14px 16px;
+            box-shadow: var(--sombra-suave);
+            border: 1px solid var(--borde);
         }
 
         .data-section h2 {
             color: var(--verde-policia);
-            margin-bottom: 20px;
-            font-size: 1.3rem;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
         }
-
         .data-section h2::before {
             content: '';
             display: inline-block;
-            width: 4px;
-            height: 24px;
+            width: 3px;
+            height: 16px;
             background: var(--verde-policia);
             border-radius: 2px;
         }
 
-        .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid var(--gris-medio); }
-        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-        thead { background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); color: var(--blanco); }
-        th { padding: 14px 12px; text-align: left; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; white-space: nowrap; }
-        td { padding: 12px; border-bottom: 1px solid var(--gris-medio); color: var(--azul-oscuro); }
-        tr:nth-child(even) { background: var(--verde-muy-claro); }
-        tr:hover { background: #D4EDDA; transition: background 0.2s; }
-        .col-cedula { font-weight: 700; color: var(--verde-policia); font-family: 'Courier New', monospace; }
-        .col-grado { background: var(--amarillo-policia); color: var(--azul-oscuro); padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 0.85rem; display: inline-block; }
-        .novedad-select { width: 100%; padding: 8px 10px; border: 2px solid var(--gris-medio); border-radius: 6px; font-family: inherit; font-size: 0.9rem; background: var(--blanco); cursor: pointer; transition: all 0.3s; }
-        .novedad-select:focus { outline: none; border-color: var(--verde-policia); box-shadow: 0 0 0 3px rgba(0, 90, 46, 0.1); }
-        .col-novedad { padding: 4px 10px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; display: inline-block; }
-        .novedad-normal { background: var(--verde-muy-claro); color: var(--verde-policia); }
-        .novedad-oficina { background: #E8F4FD; color: var(--azul-oscuro); }
-        .novedad-vacaciones { background: #E8F5E9; color: var(--verde-policia); }
-        .novedad-servicio { background: #FFF3E0; color: #E65100; }
-        .novedad-gravidez { background: #FCE4EC; color: #C2185B; }
-        .novedad-excusa { background: #F3E5F5; color: #7B1FA2; }
-        .novedad-permiso { background: #E0F2F1; color: #00695C; }
-        .novedad-cita { background: #E1F5FE; color: #01579B; }
-        .novedad-maternidad { background: #FBE9E7; color: #BF360C; }
-        .novedad-retardado { background: #FFF8E1; color: #FF6F00; }
-        .obs-container { display: flex; flex-direction: column; gap: 8px; }
-        .obs-input { width: 100%; padding: 10px; border: 2px solid var(--gris-medio); border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: vertical; min-height: 50px; transition: border-color 0.3s; }
-        .obs-input:focus { outline: none; border-color: var(--verde-policia); box-shadow: 0 0 0 3px rgba(0, 90, 46, 0.1); }
-        .obs-actions { display: flex; align-items: center; gap: 10px; }
-        .btn-save { background: var(--verde-policia); color: var(--blanco); border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
-        .btn-save:hover { background: var(--verde-claro); transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,90,46,0.3); }
-        .status-msg { font-size: 0.85rem; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
+        .table-wrapper { overflow-x: auto; border-radius: 4px; border: 1px solid var(--borde); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        thead { background: var(--verde-policia); color: var(--blanco); }
+        th { padding: 8px 10px; text-align: left; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.3px; white-space: nowrap; }
+        td { padding: 6px 10px; border-bottom: 1px solid var(--gris-suave); color: var(--gris-oscuro); }
+        tr:nth-child(even) { background: #FAFBFC; }
+        tr:hover { background: #F0F7FF; transition: background 0.15s; }
+        .col-cedula { font-weight: 600; color: var(--verde-policia); font-family: 'SF Mono', monospace; font-size: 0.78rem; }
+        .col-grado { background: var(--amarillo-policia); color: var(--azul-oscuro); padding: 2px 6px; border-radius: 3px; font-weight: 600; font-size: 0.7rem; display: inline-block; }
+        .novedad-select { width: 100%; padding: 4px 6px; border: 1px solid var(--borde); border-radius: 4px; font-family: inherit; font-size: 0.78rem; background: var(--blanco); cursor: pointer; }
+        .novedad-select:focus { outline: none; border-color: var(--verde-policia); }
+        .col-novedad { padding: 2px 6px; border-radius: 3px; font-weight: 600; font-size: 0.7rem; display: inline-block; }
+        .novedad-normal { background: #E6F4EA; color: #1E8E3E; }
+        .novedad-oficina { background: #E8F0FE; color: #1967D2; }
+        .novedad-vacaciones { background: #E6F4EA; color: #1E8E3E; }
+        .novedad-servicio { background: #FEF3E8; color: #B06000; }
+        .novedad-gravidez { background: #FCE8F0; color: #9C1B6A; }
+        .novedad-excusa { background: #F3E8FD; color: #7B1FA2; }
+        .novedad-permiso { background: #E0F7FA; color: #00796B; }
+        .novedad-cita { background: #E1F5FE; color: #0277BD; }
+        .novedad-maternidad { background: #FBE9E7; color: #C53929; }
+        .novedad-retardado { background: #FFF8E1; color: #F9A825; }
+        .obs-container { display: flex; flex-direction: column; gap: 4px; }
+        .obs-input { width: 100%; padding: 5px; border: 1px solid var(--borde); border-radius: 4px; font-family: inherit; font-size: 0.78rem; resize: vertical; min-height: 32px; }
+        .obs-input:focus { outline: none; border-color: var(--verde-policia); }
+        .obs-actions { display: flex; align-items: center; gap: 6px; }
+        .btn-save { background: var(--verde-policia); color: var(--blanco); border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.7rem; transition: opacity 0.2s; }
+        .btn-save:hover { opacity: 0.85; }
+        .status-msg { font-size: 0.7rem; font-weight: 500; opacity: 0; transition: opacity 0.3s; }
         .status-msg.show { opacity: 1; }
-        .status-msg.success { color: var(--verde-policia); }
-        .status-msg.error { color: var(--rojo-alerta); }
-        .loading { text-align: center; padding: 50px; color: var(--verde-policia); }
-        .spinner { border: 4px solid var(--gris-medio); border-top: 4px solid var(--amarillo-policia); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        .status-msg.success { color: #1E8E3E; }
+        .status-msg.error { color: var(--rojo-suave); }
+        .loading { text-align: center; padding: 30px; color: var(--gris-texto); }
+        .spinner { border: 3px solid var(--gris-suave); border-top: 3px solid var(--amarillo-policia); border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite; margin: 0 auto 12px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .error-box { background: #FADBD8; border: 2px solid var(--rojo-alerta); border-radius: 8px; padding: 30px; text-align: center; color: var(--rojo-alerta); }
-        .error-box h3 { margin-bottom: 10px; }
-        .retry-btn { background: var(--rojo-alerta); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; font-weight: 600; }
-        .footer-institutional { text-align: center; padding: 25px; margin-top: 30px; background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); }
-        .footer-institutional p { color: var(--blanco); font-size: 0.85rem; opacity: 0.9; }
-        .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1.1rem; margin-top: 8px; letter-spacing: 2px; }
+        .error-box { background: #FDEDEC; border: 1px solid var(--rojo-suave); border-radius: 6px; padding: 20px; text-align: center; color: var(--rojo-suave); }
+        .error-box h3 { margin-bottom: 6px; font-size: 0.9rem; }
+        .retry-btn { background: var(--rojo-suave); color: white; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight: 600; font-size: 0.75rem; }
+        .footer-institutional { text-align: center; padding: 12px; margin-top: 16px; background: var(--verde-policia); }
+        .footer-institutional p { color: var(--blanco); font-size: 0.7rem; opacity: 0.8; }
+        .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 600; font-size: 0.85rem; margin-top: 4px; letter-spacing: 1px; }
         
         @media (max-width: 768px) {
-            .header-institutional { flex-direction: column; gap: 15px; padding: 15px; }
-            .header-left img { width: 50px; }
-            .header-text h1 { font-size: 1.1rem; }
-            .summary-grid-6 { grid-template-columns: repeat(3, 1fr); }
-            .novedad-grid { grid-template-columns: repeat(3, 1fr); }
-            th, td { padding: 8px; font-size: 0.85rem; }
+            .header-institutional { flex-direction: column; gap: 8px; padding: 8px 12px; height: auto; }
+            .header-left img { width: 28px; }
+            .header-text h1 { font-size: 0.85rem; }
+            .summary-grid-6 { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .novedad-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
+            .summary-item { padding: 6px 3px; min-height: 42px; }
+            .summary-item .label { font-size: 0.55rem; }
+            .summary-item .value { font-size: 1rem; }
+            .summary-item.novedad-item { padding: 4px 2px; min-height: 34px; }
+            .summary-item.novedad-item .label { font-size: 0.5rem; }
+            .summary-item.novedad-item .value { font-size: 0.85rem; }
+            th, td { padding: 5px 6px; font-size: 0.75rem; }
         }
         
         @media (max-width: 480px) {
             .summary-grid-6 { grid-template-columns: repeat(2, 1fr); }
-            .novedad-grid { grid-template-columns: repeat(2, 1fr); }
+            .novedad-grid { grid-template-columns: repeat(2, 1fr); gap: 3px; }
+            .summary-item.novedad-item { padding: 4px 2px; min-height: 32px; }
+            .summary-item.novedad-item .label { font-size: 0.48rem; }
+            .summary-item.novedad-item .value { font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -320,7 +384,7 @@
         // ============================================================
         // URL DE GOOGLE APPS SCRIPT - ACTUALIZA CON TU URL
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxVtaYSsQknF8_s5XTwOqrB-bZ0C26DPRHgdxIFx7uWNEFpZHllHoRQnEvA-Ok7vfTn/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz6_gcaUgE6bh8I0baBxcICJGTvAtMdhz9jK6VvGk-8_SaH1AEEjf-1zE325_KKhTgZ/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -443,7 +507,21 @@
                 } else if (item.section === 'novedad-item') {
                     // Item de novedad (OF, NE, PT, PP, AXP, NO UNI)
                     const div = document.createElement('div');
-                    div.className = 'summary-item novedad-item';
+                    // Asignar clase de color según el título de novedad actual
+                    const novedadTitle = currentGrid.querySelector('.novedad-title .label');
+                    const novedadName = novedadTitle ? novedadTitle.textContent.toUpperCase() : '';
+                    let colorClass = 'nov-default';
+                    if (novedadName.includes('OFICINA')) colorClass = 'nov-oficina';
+                    else if (novedadName.includes('VACACIONES')) colorClass = 'nov-vacaciones';
+                    else if (novedadName.includes('SERVICIO')) colorClass = 'nov-servicio';
+                    else if (novedadName.includes('GRAVIDEZ')) colorClass = 'nov-gravidez';
+                    else if (novedadName.includes('EXCUSA')) colorClass = 'nov-excusa';
+                    else if (novedadName.includes('PERMISO')) colorClass = 'nov-permiso';
+                    else if (novedadName.includes('CITA')) colorClass = 'nov-cita';
+                    else if (novedadName.includes('MATERNIDAD')) colorClass = 'nov-maternidad';
+                    else if (novedadName.includes('RETARDADO')) colorClass = 'nov-retardado';
+                    
+                    div.className = 'summary-item novedad-item ' + colorClass;
                     div.innerHTML = `
                         <div class="label">${item.label}</div>
                         <div class="value">${item.value}</div>
@@ -464,20 +542,20 @@
         }
 
         // ============================================================
-        // GUARDAR DATOS
+        // GUARDAR DATOS - SOLO AFECTA LA FILA SELECCIONADA
         // ============================================================
         async function saveData(row, novedad, observation) {
-            const params = new URLSearchParams();
-            params.append('dependency', currentDependency);
-            params.append('row', row.toString());
-            params.append('novedad', novedad || '');
-            params.append('observation', observation || '');
+            const payload = {
+                dependency: currentDependency,
+                row: row,
+                novedad: novedad || '',
+                observation: observation || ''
+            };
             
-            const url = API_URL + '?' + params.toString();
-            
-            const response = await fetch(url, {
+            const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
             
             if (!response.ok) {
@@ -493,7 +571,7 @@
         }
 
         // ============================================================
-        // GUARDAR NOVEDAD
+        // GUARDAR NOVEDAD - SOLO LA FILA SELECCIONADA
         // ============================================================
         async function saveNovedad(select, row) {
             const novedad = select.value;
@@ -523,7 +601,7 @@
         }
 
         // ============================================================
-        // GUARDAR OBSERVACIÓN
+        // GUARDAR OBSERVACIÓN - SOLO LA FILA SELECCIONADA
         // ============================================================
         async function saveObservation(textarea, row) {
             const observation = textarea.value.trim();
