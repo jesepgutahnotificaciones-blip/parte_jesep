@@ -99,7 +99,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .error-box { background: #FADBD8; border: 2px solid var(--rojo-alerta); border-radius: 8px; padding: 30px; text-align: center; color: var(--rojo-alerta); }
         .error-box h3 { margin-bottom: 10px; }
-        .error-box .error-detail { font-size: 0.85rem; margin-top: 10px; color: #666; background: #fff; padding: 10px; border-radius: 4px; text-align: left; }
         .retry-btn { background: var(--rojo-alerta); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; font-weight: 600; }
         .footer-institutional { text-align: center; padding: 25px; margin-top: 30px; background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); }
         .footer-institutional p { color: var(--blanco); font-size: 0.85rem; opacity: 0.9; }
@@ -148,14 +147,14 @@
 
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
-        <p class="motto">★ DIOS Y PATRIA ★</p>
+        <p class="motto">★ DIOS Y PATRIA JESEP ★</p>
     </div>
 
     <script>
         // ============================================================
-        // URL DE GOOGLE APPS SCRIPT - ACTUALIZA CON TU NUEVA URL
+        // URL DE GOOGLE APPS SCRIPT - TU URL ACTUAL
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwWxSZYmwoZF9DA0jSQaNmuEO3d3xDvJpbkwRLblkclW-yjGRKZm2pLkFNMkcltVZ_l/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw20TsVCafkjYXNV8ijl35nux2G5oxqaKK85vIVYNQBKCQlOVFv2dhxXrk0RmXbUWJG/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -172,117 +171,67 @@
 
         async function fetchData(action) {
             const url = `${API_URL}?action=${action}&dependency=${encodeURIComponent(currentDependency)}`;
-            
-            try {
-                const response = await fetch(url, { 
-                    method: 'GET', 
-                    mode: 'cors', 
-                    cache: 'no-cache',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('Error en fetchData:', error);
-                throw new Error(`No se pudo conectar con el servidor. ${error.message}`);
-            }
+            const response = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-cache' });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return await response.json();
         }
 
         async function loadRealData() {
             try {
-                document.getElementById('summaryGrid').innerHTML = `<div class="loading" style="grid-column: 1/-1;"><div class="spinner"></div><p>Cargando resumen de ${currentDependency}...</p></div>`;
-                document.getElementById('tableContainer').innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando personal de ${currentDependency}...</p></div>`;
+                document.getElementById('summaryGrid').innerHTML = `<div class="loading" style="grid-column: 1/-1;"><div class="spinner"></div><p>Cargando...</p></div>`;
+                document.getElementById('tableContainer').innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>`;
 
                 const summaryData = await fetchData('getSummary');
-                
-                if (summaryData.success) {
-                    renderSummary(summaryData.summary);
-                } else {
-                    throw new Error(summaryData.error || 'Error al cargar resumen');
-                }
+                if (summaryData.success) renderSummary(summaryData.summary);
 
                 const data = await fetchData('getData');
-                
-                if (data.success) {
-                    renderTable(data.data);
-                } else {
-                    throw new Error(data.error || 'Error al cargar datos');
-                }
+                if (data.success) renderTable(data.data);
                 
             } catch (error) {
-                console.error('Error:', error);
                 showError(error.message);
             }
         }
 
         function showError(message) {
-            const html = `
-                <div class="error-box">
-                    <h3>⚠️ Error de conexión</h3>
-                    <p>${message}</p>
-                    <div class="error-detail">
-                        <strong>URL actual:</strong><br>
-                        ${API_URL}<br><br>
-                        <strong>Posibles causas:</strong>
-                        <ul style="margin-left: 20px; margin-top: 5px;">
-                            <li>La Web App no está publicada como "Cualquiera"</li>
-                            <li>La URL es incorrecta o está desactivada</li>
-                            <li>Hay un error en el código de Apps Script</li>
-                            <li>Problema de CORS</li>
-                        </ul>
-                    </div>
-                    <button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button>
-                </div>
-            `;
+            const html = `<div class="error-box"><h3>⚠️ Error</h3><p>${message}</p><button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button></div>`;
             document.getElementById('summaryGrid').innerHTML = html;
             document.getElementById('tableContainer').innerHTML = html;
         }
 
         // ============================================================
-        // GUARDAR DATOS CON FETCH
+        // GUARDAR DATOS CON POST (URL ENCODED)
         // ============================================================
         async function saveData(row, novedad, observation) {
-            const data = {
-                dependency: currentDependency,
-                row: parseInt(row),
-                novedad: novedad || '',
-                observation: observation || ''
-            };
+            // Crear URL con parámetros (más confiable que JSON body)
+            const params = new URLSearchParams();
+            params.append('dependency', currentDependency);
+            params.append('row', row.toString());
+            params.append('novedad', novedad || '');
+            params.append('observation', observation || '');
             
-            console.log('Enviando:', JSON.stringify(data));
+            const url = API_URL + '?' + params.toString();
             
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            console.log('URL de guardado:', url);
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 }
-                
-                const result = await response.json();
-                console.log('Respuesta:', result);
-                
-                if (!result.success) {
-                    throw new Error(result.error || 'Error desconocido del servidor');
-                }
-                
-                return result;
-            } catch (error) {
-                console.error('Error en saveData:', error);
-                throw error;
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
+            
+            const result = await response.json();
+            console.log('Respuesta:', result);
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Error del servidor');
+            }
+            
+            return result;
         }
 
         // ============================================================
@@ -298,14 +247,14 @@
             try {
                 const result = await saveData(row, novedad, '');
                 
-                status.textContent = '✓ Guardado: ' + (result.novedadGuardada || novedad);
+                status.textContent = '✓ Guardado';
                 status.className = 'status-msg show success';
                 
                 // Actualizar badge
                 const badge = document.getElementById(`badge-${row}`);
                 if (badge) {
                     badge.className = `col-novedad ${getNovedadClass(novedad)}`;
-                    badge.textContent = result.novedadGuardada || novedad || 'SIN NOVEDAD';
+                    badge.textContent = novedad || 'SIN NOVEDAD';
                 }
                 
                 setTimeout(() => status.classList.remove('show'), 3000);
@@ -313,7 +262,7 @@
             } catch (error) {
                 status.textContent = '✗ Error: ' + error.message;
                 status.className = 'status-msg show error';
-                console.error('Error completo:', error);
+                console.error('Error:', error);
             }
         }
 
