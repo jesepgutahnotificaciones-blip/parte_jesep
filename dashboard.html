@@ -99,6 +99,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .error-box { background: #FADBD8; border: 2px solid var(--rojo-alerta); border-radius: 8px; padding: 30px; text-align: center; color: var(--rojo-alerta); }
         .error-box h3 { margin-bottom: 10px; }
+        .error-box .error-detail { font-size: 0.85rem; margin-top: 10px; color: #666; background: #fff; padding: 10px; border-radius: 4px; text-align: left; }
         .retry-btn { background: var(--rojo-alerta); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; font-weight: 600; }
         .footer-institutional { text-align: center; padding: 25px; margin-top: 30px; background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); }
         .footer-institutional p { color: var(--blanco); font-size: 0.85rem; opacity: 0.9; }
@@ -147,14 +148,14 @@
 
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
-        <p class="motto">★ DIOS Y PATRIA PRUEBAS JESEP ★</p>
+        <p class="motto">★ DIOS Y PATRIA ★</p>
     </div>
 
     <script>
         // ============================================================
-        // URL ACTUALIZADA - TU NUEVA WEB APP
+        // URL DE GOOGLE APPS SCRIPT - ACTUALIZA CON TU NUEVA URL
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbweoAfpzdxJhz6IjjoEJpcTl8uvwuWSpmzVS6LWIj42QRWRa4Q77sZrcXNvyc20UTto/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwWxSZYmwoZF9DA0jSQaNmuEO3d3xDvJpbkwRLblkclW-yjGRKZm2pLkFNMkcltVZ_l/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -171,29 +172,74 @@
 
         async function fetchData(action) {
             const url = `${API_URL}?action=${action}&dependency=${encodeURIComponent(currentDependency)}`;
-            const response = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-cache' });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return await response.json();
+            
+            try {
+                const response = await fetch(url, { 
+                    method: 'GET', 
+                    mode: 'cors', 
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error en fetchData:', error);
+                throw new Error(`No se pudo conectar con el servidor. ${error.message}`);
+            }
         }
 
         async function loadRealData() {
             try {
-                document.getElementById('summaryGrid').innerHTML = `<div class="loading" style="grid-column: 1/-1;"><div class="spinner"></div><p>Cargando...</p></div>`;
-                document.getElementById('tableContainer').innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>`;
+                document.getElementById('summaryGrid').innerHTML = `<div class="loading" style="grid-column: 1/-1;"><div class="spinner"></div><p>Cargando resumen de ${currentDependency}...</p></div>`;
+                document.getElementById('tableContainer').innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando personal de ${currentDependency}...</p></div>`;
 
                 const summaryData = await fetchData('getSummary');
-                if (summaryData.success) renderSummary(summaryData.summary);
+                
+                if (summaryData.success) {
+                    renderSummary(summaryData.summary);
+                } else {
+                    throw new Error(summaryData.error || 'Error al cargar resumen');
+                }
 
                 const data = await fetchData('getData');
-                if (data.success) renderTable(data.data);
+                
+                if (data.success) {
+                    renderTable(data.data);
+                } else {
+                    throw new Error(data.error || 'Error al cargar datos');
+                }
                 
             } catch (error) {
+                console.error('Error:', error);
                 showError(error.message);
             }
         }
 
         function showError(message) {
-            const html = `<div class="error-box"><h3>⚠️ Error</h3><p>${message}</p><button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button></div>`;
+            const html = `
+                <div class="error-box">
+                    <h3>⚠️ Error de conexión</h3>
+                    <p>${message}</p>
+                    <div class="error-detail">
+                        <strong>URL actual:</strong><br>
+                        ${API_URL}<br><br>
+                        <strong>Posibles causas:</strong>
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li>La Web App no está publicada como "Cualquiera"</li>
+                            <li>La URL es incorrecta o está desactivada</li>
+                            <li>Hay un error en el código de Apps Script</li>
+                            <li>Problema de CORS</li>
+                        </ul>
+                    </div>
+                    <button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button>
+                </div>
+            `;
             document.getElementById('summaryGrid').innerHTML = html;
             document.getElementById('tableContainer').innerHTML = html;
         }
@@ -211,26 +257,32 @@
             
             console.log('Enviando:', JSON.stringify(data));
             
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Respuesta:', result);
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Error desconocido del servidor');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('Error en saveData:', error);
+                throw error;
             }
-            
-            const result = await response.json();
-            console.log('Respuesta:', result);
-            
-            if (!result.success) {
-                throw new Error(result.error || 'Error desconocido del servidor');
-            }
-            
-            return result;
         }
 
         // ============================================================
