@@ -79,7 +79,7 @@
 
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 15px;
         }
 
@@ -151,6 +151,20 @@
             display: none;
         }
 
+        /* Estilo para grados pequeños */
+        .summary-item.grado-item {
+            padding: 12px 8px;
+        }
+
+        .summary-item.grado-item .label {
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .summary-item.grado-item .value {
+            font-size: 1.4rem;
+        }
+
         .data-section {
             background: var(--blanco);
             border-radius: 12px;
@@ -218,7 +232,7 @@
         .footer-institutional { text-align: center; padding: 25px; margin-top: 30px; background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); }
         .footer-institutional p { color: var(--blanco); font-size: 0.85rem; opacity: 0.9; }
         .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1.1rem; margin-top: 8px; letter-spacing: 2px; }
-        @media (max-width: 768px) { .header-institutional { flex-direction: column; gap: 15px; padding: 15px; } .header-left img { width: 50px; } .header-text h1 { font-size: 1.1rem; } .summary-grid { grid-template-columns: repeat(2, 1fr); } th, td { padding: 8px; font-size: 0.85rem; } }
+        @media (max-width: 768px) { .header-institutional { flex-direction: column; gap: 15px; padding: 15px; } .header-left img { width: 50px; } .header-text h1 { font-size: 1.1rem; } .summary-grid { grid-template-columns: repeat(3, 1fr); } th, td { padding: 8px; font-size: 0.85rem; } }
     </style>
 </head>
 <body>
@@ -263,14 +277,14 @@
 
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
-        <p class="motto">★ DIOS Y PATRIA ★</p>
+        <p class="motto">★ DIOS Y PATRIA JESEP★</p>
     </div>
 
     <script>
         // ============================================================
         // URL DE GOOGLE APPS SCRIPT - ACTUALIZA CON TU URL
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz3-3Qca7jUG_igKv5OCMj_r391Uv6DEgWU7t9_rbqjOEP_5qnv-uLuDXCsOiDmv_Yo/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzZk3aS9xMY7TWworUZugzo1tp5F6nVA2kEYsx1_XXMM-kuH-R_436AhUBjgRVpcCH2/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -340,7 +354,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR RESUMEN CON 3 SECCIONES
+        // RENDERIZAR RESUMEN CON CASILLAS POR GRADOS
         // ============================================================
         function renderSummary(data) {
             const grid = document.getElementById('summaryGrid');
@@ -351,11 +365,14 @@
                 return;
             }
             
+            let currentSection = '';
+            
             data.forEach(item => {
                 const div = document.createElement('div');
                 
                 if (item.section === 'header') {
                     // Título de sección
+                    currentSection = item.label;
                     div.className = 'summary-item header-style';
                     div.innerHTML = `
                         <div class="label">${item.label}</div>
@@ -365,12 +382,13 @@
                     // No mostrar separadores
                     return;
                 } else {
-                    // Item normal
+                    // Item normal - verificar si es grado (OF, NE, PT, PP, AXP, NO UNI)
+                    const isGrado = ['OF', 'NE', 'PT', 'PP', 'AXP', 'NO UNI'].includes(item.label);
                     const isFuerzaDisponible = item.label && 
                         item.label.toUpperCase().includes('FUERZA') && 
                         item.label.toUpperCase().includes('DISPONIBLE');
                     
-                    div.className = `summary-item ${item.alert || isFuerzaDisponible ? 'alert' : ''} ${isFuerzaDisponible ? 'fuerza-disponible-destacado' : ''}`;
+                    div.className = `summary-item ${isGrado ? 'grado-item' : ''} ${item.alert || isFuerzaDisponible ? 'alert' : ''} ${isFuerzaDisponible ? 'fuerza-disponible-destacado' : ''}`;
                     
                     div.innerHTML = `
                         <div class="label">${item.label || ''}</div>
