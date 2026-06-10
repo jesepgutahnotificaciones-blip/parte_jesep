@@ -77,12 +77,20 @@
             border-radius: 2px;
         }
 
-        /* GRID ESPECÍFICO PARA 6 CUADROS */
+        /* GRID PARA 6 CUADROS (FUERZA EFECTIVA / DISPONIBLE) */
         .summary-grid-6 {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 15px;
             margin-bottom: 20px;
+        }
+
+        /* GRID PARA DESGREGADO - 6 CUADROS POR NOVEDAD */
+        .novedad-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .summary-item {
@@ -120,7 +128,7 @@
             color: var(--blanco);
         }
 
-        /* Estilo para títulos de sección */
+        /* Título de sección principal */
         .summary-item.header-style {
             background: linear-gradient(135deg, #1A3A5C 0%, #2C5282 100%);
             grid-column: 1 / -1;
@@ -136,20 +144,35 @@
             display: none;
         }
 
-        /* Estilo para FUERZA DISPONIBLE destacado */
-        .summary-item.fuerza-disponible-destacado {
-            background: linear-gradient(135deg, var(--amarillo-policia) 0%, var(--dorado-oscuro) 100%);
-            border: 3px solid var(--verde-policia);
+        /* Título de novedad */
+        .summary-item.novedad-title {
+            background: linear-gradient(135deg, #005A2E 0%, #007A3D 100%);
+            grid-column: 1 / -1;
+            padding: 12px;
         }
 
-        .summary-item.fuerza-disponible-destacado .label {
-            color: var(--azul-oscuro);
+        .summary-item.novedad-title .label {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--blanco);
+        }
+
+        .summary-item.novedad-title .value {
+            display: none;
+        }
+
+        /* Items pequeños de novedad */
+        .summary-item.novedad-item {
+            padding: 12px 8px;
+        }
+
+        .summary-item.novedad-item .label {
+            font-size: 0.75rem;
             font-weight: 700;
         }
 
-        .summary-item.fuerza-disponible-destacado .value {
-            color: var(--azul-oscuro);
-            font-size: 2.2rem;
+        .summary-item.novedad-item .value {
+            font-size: 1.4rem;
         }
 
         .data-section {
@@ -220,17 +243,18 @@
         .footer-institutional p { color: var(--blanco); font-size: 0.85rem; opacity: 0.9; }
         .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1.1rem; margin-top: 8px; letter-spacing: 2px; }
         
-        /* Responsive para móvil */
         @media (max-width: 768px) {
             .header-institutional { flex-direction: column; gap: 15px; padding: 15px; }
             .header-left img { width: 50px; }
             .header-text h1 { font-size: 1.1rem; }
             .summary-grid-6 { grid-template-columns: repeat(3, 1fr); }
+            .novedad-grid { grid-template-columns: repeat(3, 1fr); }
             th, td { padding: 8px; font-size: 0.85rem; }
         }
         
         @media (max-width: 480px) {
             .summary-grid-6 { grid-template-columns: repeat(2, 1fr); }
+            .novedad-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -276,14 +300,14 @@
 
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
-        <p class="motto">★★ DIOS Y PATRIA ★★</p>
+        <p class="motto">★ DIOS Y PATRIA JESEP 2026★</p>
     </div>
 
     <script>
         // ============================================================
         // URL DE GOOGLE APPS SCRIPT - ACTUALIZA CON TU URL
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxgmS18vi7es--DfnPsHNYRWcIqHfwkdKJE1lkYbCYSdP-Jtyu2L7Z8VTJA_QFji2F4/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxVtaYSsQknF8_s5XTwOqrB-bZ0C26DPRHgdxIFx7uWNEFpZHllHoRQnEvA-Ok7vfTn/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -353,7 +377,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR RESUMEN CON 3 SECCIONES DE 6 CUADROS
+        // RENDERIZAR RESUMEN COMPLETO
         // ============================================================
         function renderSummary(data) {
             const container = document.getElementById('summaryContainer');
@@ -364,20 +388,18 @@
                 return;
             }
             
-            let currentSection = '';
             let currentGrid = null;
+            let isDesgregado = false;
             
             data.forEach(item => {
+                // Título de sección principal
                 if (item.section === 'header') {
-                    // Nuevo título de sección
-                    currentSection = item.label;
-                    
-                    // Crear grid para esta sección
+                    // Crear nuevo grid para la sección
                     const sectionDiv = document.createElement('div');
                     sectionDiv.className = 'summary-grid-6';
-                    sectionDiv.id = 'grid-' + currentSection.replace(/\s+/g, '-').toLowerCase();
                     container.appendChild(sectionDiv);
                     currentGrid = sectionDiv;
+                    isDesgregado = item.label.includes('DESGREGADO');
                     
                     // Título
                     const titleDiv = document.createElement('div');
@@ -388,25 +410,41 @@
                     `;
                     currentGrid.appendChild(titleDiv);
                     
-                } else if (item.section === 'separator') {
-                    // Separador - crear nuevo contenedor
-                    currentGrid = null;
+                } else if (item.section === 'novedad-header') {
+                    // Título de novedad (DESGREGADO)
+                    // Crear nuevo grid para esta novedad
+                    const novedadDiv = document.createElement('div');
+                    novedadDiv.className = 'novedad-grid';
+                    container.appendChild(novedadDiv);
+                    currentGrid = novedadDiv;
                     
-                } else if (currentGrid) {
-                    // Item normal - agregar al grid actual
-                    const div = document.createElement('div');
-                    
-                    const isFuerzaDisponible = item.label && 
-                        item.label.toUpperCase().includes('FUERZA') && 
-                        item.label.toUpperCase().includes('DISPONIBLE');
-                    
-                    div.className = `summary-item ${item.alert || isFuerzaDisponible ? 'alert' : ''} ${isFuerzaDisponible ? 'fuerza-disponible-destacado' : ''}`;
-                    
-                    div.innerHTML = `
-                        <div class="label">${item.label || ''}</div>
-                        <div class="value">${item.value || '0'}</div>
+                    // Título de la novedad
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'summary-item novedad-title';
+                    titleDiv.innerHTML = `
+                        <div class="label">${item.label}</div>
+                        <div class="value">-</div>
                     `;
+                    currentGrid.appendChild(titleDiv);
                     
+                } else if (item.section === 'novedad-item') {
+                    // Item de novedad (OF, NE, PT, PP, AXP, NO UNI)
+                    const div = document.createElement('div');
+                    div.className = 'summary-item novedad-item';
+                    div.innerHTML = `
+                        <div class="label">${item.label}</div>
+                        <div class="value">${item.value}</div>
+                    `;
+                    currentGrid.appendChild(div);
+                    
+                } else {
+                    // Items normales (FUERZA EFECTIVA / DISPONIBLE)
+                    const div = document.createElement('div');
+                    div.className = 'summary-item';
+                    div.innerHTML = `
+                        <div class="label">${item.label}</div>
+                        <div class="value">${item.value}</div>
+                    `;
                     currentGrid.appendChild(div);
                 }
             });
