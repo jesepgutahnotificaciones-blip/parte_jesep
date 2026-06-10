@@ -370,7 +370,12 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycby6EMC1-u0u_igX7F_txLmvgxwo2OgZ9pX5TlAdXGaYPHvjO0_GYhkL2PZjLSCJIq0d/exec';
+        // ============================================================
+        // REEMPLAZA CON TU URL DE GOOGLE APPS SCRIPT
+        // IMPORTANTE: La URL debe ser de una implementación VIVA (no del editor)
+        // Ejemplo: https://script.google.com/macros/s/AKfycb.../exec
+        // ============================================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwnd3Vq8swC_DuYiCuRYTlNiqKTX013fGXPS1cO1WmDxqMIuFscTayvji9BZB0VwGcL/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -385,11 +390,66 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
+        // ============================================================
+        // FETCH CON MANEJO DE ERRORES DETALLADO
+        // ============================================================
         async function fetchData(action) {
             const url = `${API_URL}?action=${action}&dependency=${encodeURIComponent(currentDependency)}`;
-            const response = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-cache' });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return await response.json();
+            
+            try {
+                const response = await fetch(url, { 
+                    method: 'GET', 
+                    mode: 'cors', 
+                    cache: 'no-cache',
+                    redirect: 'follow'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error en fetchData:', error);
+                throw new Error(`No se pudo conectar con el servidor. Verifica que la URL de la API esté correcta y que la implementación de Google Apps Script esté activa. Error: ${error.message}`);
+            }
+        }
+
+        // ============================================================
+        // GUARDAR USANDO GET CON PARÁMETROS EN URL
+        // ============================================================
+        async function saveData(row, novedad, observation) {
+            const params = new URLSearchParams();
+            params.append('action', 'saveData');
+            params.append('dependency', currentDependency);
+            params.append('row', row.toString());
+            params.append('novedad', novedad || '');
+            params.append('observation', observation || '');
+            
+            const url = `${API_URL}?${params.toString()}`;
+            
+            try {
+                const response = await fetch(url, { 
+                    method: 'GET', 
+                    mode: 'cors', 
+                    cache: 'no-cache',
+                    redirect: 'follow'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.error || 'Error del servidor');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('Error en saveData:', error);
+                throw new Error(`Error al guardar: ${error.message}`);
+            }
         }
 
         async function loadRealData() {
@@ -498,35 +558,6 @@
             });
         }
 
-        // ===== GUARDAR USANDO text/plain PARA EVITAR CORS PREFLIGHT =====
-        async function saveData(row, novedad, observation) {
-            const payload = {
-                dependency: currentDependency,
-                row: row,
-                novedad: novedad || '',
-                observation: observation || ''
-            };
-            
-            // USAR text/plain EN LUGAR DE application/json
-            // Esto evita el preflight OPTIONS que Google Apps Script no acepta
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const result = await response.json();
-            if (!result.success) {
-                throw new Error(result.error || 'Error del servidor');
-            }
-            
-            return result;
-        }
-
         async function saveNovedad(select, row) {
             const novedad = select.value;
             const status = document.getElementById(`status-novedad-${row}`);
@@ -611,7 +642,7 @@
                 container.innerHTML = `
                     <div style="padding:40px; text-align:center; color:#666;">
                         <p style="font-size:1.2rem; margin-bottom:10px;">📭 No hay registros</p>
-                        <p>La dependencia <strong>${currentDependency}</strong> no tiene datos en el rango B2:U</p>
+                        <p>La dependencia <strong>${currentDependency}</strong> no tiene datos</p>
                     </div>`;
                 return;
             }
