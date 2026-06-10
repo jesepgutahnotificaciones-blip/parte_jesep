@@ -49,19 +49,134 @@
         .btn-back:hover { background: var(--dorado-oscuro); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .date-display { color: var(--blanco); font-size: 0.9rem; opacity: 0.9; }
         .main-content { max-width: 1400px; margin: 25px auto; padding: 0 25px; }
-        .summary-section { background: var(--blanco); border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 15px var(--sombra); border-top: 5px solid var(--amarillo-policia); }
-        .summary-section h2 { color: var(--verde-policia); margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
-        .summary-section h2::before { content: ''; display: inline-block; width: 4px; height: 24px; background: var(--amarillo-policia); border-radius: 2px; }
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .summary-item { background: linear-gradient(135deg, var(--verde-policia) 0%, var(--verde-claro) 100%); padding: 18px; border-radius: 10px; text-align: center; color: var(--blanco); box-shadow: 0 4px 10px rgba(0,90,46,0.2); transition: transform 0.3s; }
+
+        .summary-section {
+            background: var(--blanco);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 15px var(--sombra);
+            border-top: 5px solid var(--amarillo-policia);
+        }
+
+        .summary-section h2 {
+            color: var(--verde-policia);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-section h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: var(--amarillo-policia);
+            border-radius: 2px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--verde-claro) 100%);
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+            color: var(--blanco);
+            box-shadow: 0 4px 10px rgba(0,90,46,0.2);
+            transition: transform 0.3s;
+        }
+
         .summary-item:hover { transform: translateY(-3px); }
-        .summary-item .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 8px; }
-        .summary-item .value { font-size: 1.6rem; font-weight: 700; color: var(--amarillo-policia); }
-        .summary-item.alert { background: linear-gradient(135deg, var(--rojo-alerta) 0%, #E74C3C 100%); }
-        .summary-item.alert .value { color: var(--blanco); }
-        .data-section { background: var(--blanco); border-radius: 12px; padding: 25px; box-shadow: 0 2px 15px var(--sombra); border-top: 5px solid var(--verde-policia); }
-        .data-section h2 { color: var(--verde-policia); margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
-        .data-section h2::before { content: ''; display: inline-block; width: 4px; height: 24px; background: var(--verde-policia); border-radius: 2px; }
+
+        .summary-item .label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .summary-item .value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--amarillo-policia);
+        }
+
+        .summary-item.alert {
+            background: linear-gradient(135deg, var(--rojo-alerta) 0%, #E74C3C 100%);
+        }
+
+        .summary-item.alert .value {
+            color: var(--blanco);
+        }
+
+        /* Estilo especial para FUERZA DISPONIBLE */
+        .summary-item.fuerza-disponible-destacado {
+            background: linear-gradient(135deg, var(--amarillo-policia) 0%, var(--dorado-oscuro) 100%);
+            border: 3px solid var(--verde-policia);
+            grid-column: 1 / -1;
+        }
+
+        .summary-item.fuerza-disponible-destacado .label {
+            color: var(--azul-oscuro);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .summary-item.fuerza-disponible-destacado .value {
+            color: var(--azul-oscuro);
+            font-size: 2.5rem;
+        }
+
+        /* Estilo para títulos de sección */
+        .summary-item.header-style {
+            background: linear-gradient(135deg, #1A3A5C 0%, #2C5282 100%);
+            grid-column: 1 / -1;
+        }
+
+        .summary-item.header-style .label {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--amarillo-policia);
+        }
+
+        .summary-item.header-style .value {
+            display: none;
+        }
+
+        .data-section {
+            background: var(--blanco);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 15px var(--sombra);
+            border-top: 5px solid var(--verde-policia);
+        }
+
+        .data-section h2 {
+            color: var(--verde-policia);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .data-section h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: var(--verde-policia);
+            border-radius: 2px;
+        }
+
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid var(--gris-medio); }
         table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
         thead { background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); color: var(--blanco); }
@@ -124,6 +239,7 @@
     </div>
 
     <div class="main-content">
+        <!-- RESUMEN GENERAL -->
         <div class="summary-section">
             <h2>📊 Resumen General de la Dependencia</h2>
             <div class="summary-grid" id="summaryGrid">
@@ -147,14 +263,14 @@
 
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
-        <p class="motto">★ DIOS Y PATRIA JESEP ★</p>
+        <p class="motto">★ DIOS Y PATRIA ★</p>
     </div>
 
     <script>
         // ============================================================
-        // URL DE GOOGLE APPS SCRIPT - TU URL ACTUAL
+        // URL DE GOOGLE APPS SCRIPT - ACTUALIZA CON TU URL
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbw20TsVCafkjYXNV8ijl35nux2G5oxqaKK85vIVYNQBKCQlOVFv2dhxXrk0RmXbUWJG/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz3-3Qca7jUG_igKv5OCMj_r391Uv6DEgWU7t9_rbqjOEP_5qnv-uLuDXCsOiDmv_Yo/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
 
@@ -178,31 +294,98 @@
 
         async function loadRealData() {
             try {
-                document.getElementById('summaryGrid').innerHTML = `<div class="loading" style="grid-column: 1/-1;"><div class="spinner"></div><p>Cargando...</p></div>`;
-                document.getElementById('tableContainer').innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>`;
+                document.getElementById('summaryGrid').innerHTML = `
+                    <div class="loading" style="grid-column: 1/-1;">
+                        <div class="spinner"></div>
+                        <p>Cargando resumen de ${currentDependency}...</p>
+                    </div>`;
+                document.getElementById('tableContainer').innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando personal de ${currentDependency}...</p>
+                    </div>`;
 
                 const summaryData = await fetchData('getSummary');
-                if (summaryData.success) renderSummary(summaryData.summary);
+                
+                if (summaryData.success) {
+                    renderSummary(summaryData.summary);
+                } else {
+                    throw new Error(summaryData.error || 'Error al cargar resumen');
+                }
 
                 const data = await fetchData('getData');
-                if (data.success) renderTable(data.data);
+                
+                if (data.success) {
+                    renderTable(data.data);
+                } else {
+                    throw new Error(data.error || 'Error al cargar datos');
+                }
                 
             } catch (error) {
+                console.error('Error:', error);
                 showError(error.message);
             }
         }
 
         function showError(message) {
-            const html = `<div class="error-box"><h3>⚠️ Error</h3><p>${message}</p><button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button></div>`;
-            document.getElementById('summaryGrid').innerHTML = html;
-            document.getElementById('tableContainer').innerHTML = html;
+            const errorHtml = `
+                <div class="error-box">
+                    <h3>⚠️ Error de conexión</h3>
+                    <p>${message}</p>
+                    <button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button>
+                </div>
+            `;
+            document.getElementById('summaryGrid').innerHTML = errorHtml;
+            document.getElementById('tableContainer').innerHTML = errorHtml;
         }
 
         // ============================================================
-        // GUARDAR DATOS CON POST (URL ENCODED)
+        // RENDERIZAR RESUMEN CON 3 SECCIONES
+        // ============================================================
+        function renderSummary(data) {
+            const grid = document.getElementById('summaryGrid');
+            grid.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:20px;">No hay datos de resumen</p>';
+                return;
+            }
+            
+            data.forEach(item => {
+                const div = document.createElement('div');
+                
+                if (item.section === 'header') {
+                    // Título de sección
+                    div.className = 'summary-item header-style';
+                    div.innerHTML = `
+                        <div class="label">${item.label}</div>
+                        <div class="value">-</div>
+                    `;
+                } else if (item.section === 'separator') {
+                    // No mostrar separadores
+                    return;
+                } else {
+                    // Item normal
+                    const isFuerzaDisponible = item.label && 
+                        item.label.toUpperCase().includes('FUERZA') && 
+                        item.label.toUpperCase().includes('DISPONIBLE');
+                    
+                    div.className = `summary-item ${item.alert || isFuerzaDisponible ? 'alert' : ''} ${isFuerzaDisponible ? 'fuerza-disponible-destacado' : ''}`;
+                    
+                    div.innerHTML = `
+                        <div class="label">${item.label || ''}</div>
+                        <div class="value">${item.value || '0'}</div>
+                    `;
+                }
+                
+                grid.appendChild(div);
+            });
+        }
+
+        // ============================================================
+        // GUARDAR DATOS
         // ============================================================
         async function saveData(row, novedad, observation) {
-            // Crear URL con parámetros (más confiable que JSON body)
             const params = new URLSearchParams();
             params.append('dependency', currentDependency);
             params.append('row', row.toString());
@@ -211,13 +394,9 @@
             
             const url = API_URL + '?' + params.toString();
             
-            console.log('URL de guardado:', url);
-            
             const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
             });
             
             if (!response.ok) {
@@ -225,8 +404,6 @@
             }
             
             const result = await response.json();
-            console.log('Respuesta:', result);
-            
             if (!result.success) {
                 throw new Error(result.error || 'Error del servidor');
             }
@@ -245,12 +422,11 @@
             status.className = 'status-msg show';
             
             try {
-                const result = await saveData(row, novedad, '');
+                await saveData(row, novedad, '');
                 
                 status.textContent = '✓ Guardado';
                 status.className = 'status-msg show success';
                 
-                // Actualizar badge
                 const badge = document.getElementById(`badge-${row}`);
                 if (badge) {
                     badge.className = `col-novedad ${getNovedadClass(novedad)}`;
@@ -262,7 +438,6 @@
             } catch (error) {
                 status.textContent = '✗ Error: ' + error.message;
                 status.className = 'status-msg show error';
-                console.error('Error:', error);
             }
         }
 
@@ -277,7 +452,7 @@
             status.className = 'status-msg show';
             
             try {
-                const result = await saveData(row, '', observation);
+                await saveData(row, '', observation);
                 
                 status.textContent = '✓ Guardado';
                 status.className = 'status-msg show success';
@@ -286,7 +461,6 @@
             } catch (error) {
                 status.textContent = '✗ Error: ' + error.message;
                 status.className = 'status-msg show error';
-                console.error('Error:', error);
             }
         }
 
@@ -320,29 +494,32 @@
             `;
         }
 
-        function renderSummary(data) {
-            const grid = document.getElementById('summaryGrid');
-            grid.innerHTML = '';
-            if (!data || data.length === 0) {
-                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:20px;">No hay datos de resumen</p>';
-                return;
-            }
-            data.forEach(item => {
-                const div = document.createElement('div');
-                div.className = `summary-item ${item.alert ? 'alert' : ''}`;
-                div.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
-                grid.appendChild(div);
-            });
-        }
-
         function renderTable(data) {
             const container = document.getElementById('tableContainer');
+            
             if (!data || data.length === 0) {
-                container.innerHTML = `<div style="padding:40px; text-align:center;"><p>📭 No hay registros en ${currentDependency}</p></div>`;
+                container.innerHTML = `
+                    <div style="padding:40px; text-align:center; color:#666;">
+                        <p style="font-size:1.2rem; margin-bottom:10px;">📭 No hay registros</p>
+                        <p>La dependencia <strong>${currentDependency}</strong> no tiene datos en el rango B2:U</p>
+                    </div>`;
                 return;
             }
             
-            let html = `<table><thead><tr><th>CÉDULA</th><th>GRADO</th><th>APELLIDOS Y NOMBRES</th><th>TURNO</th><th>NOVEDAD</th><th>OBSERVACIÓN</th></tr></thead><tbody>`;
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CÉDULA</th>
+                            <th>GRADO</th>
+                            <th>APELLIDOS Y NOMBRES</th>
+                            <th>TURNO</th>
+                            <th>NOVEDAD</th>
+                            <th>OBSERVACIÓN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             
             data.forEach(person => {
                 html += `
@@ -354,9 +531,15 @@
                         <td>${createNovedadSelect(person.novedad, person.row)}</td>
                         <td>
                             <div class="obs-container">
-                                <textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ${person.row})">${person.observacion || ''}</textarea>
+                                <textarea 
+                                    class="obs-input" 
+                                    placeholder="Ingrese observación..."
+                                    onblur="saveObservation(this, ${person.row})"
+                                >${person.observacion || ''}</textarea>
                                 <div class="obs-actions">
-                                    <button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ${person.row})">💾 Guardar</button>
+                                    <button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ${person.row})">
+                                        💾 Guardar
+                                    </button>
                                     <span class="status-msg" id="status-${person.row}">✓ Guardado</span>
                                 </div>
                             </div>
