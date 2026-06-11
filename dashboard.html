@@ -481,7 +481,10 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzqRUBmwNB6S__cae0fpz7728th4TRfgIZ3DZCnVe816eSKYrRR3nkm8aFP_ZEXfKM/exec';
+        // ============================================================
+        // CONFIGURACIÓN - REEMPLAZA CON TU URL DEL WEB APP
+        // ============================================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxNxZkmcQ7wHgpLW-14uR5E5PN0_B2yaXraJ-0CPaOOAWWM1Enw9OufMFu15eEP5Nt9/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
         let allTableData = [];
@@ -498,31 +501,55 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
+        // ============================================================
+        // FUNCIÓN FETCH CON GET (evita CORS con Google Apps Script)
+        // ============================================================
         async function fetchData(action, turno) {
             const turnoParam = turno ? '&turno=' + encodeURIComponent(turno) : '';
             const url = API_URL + '?action=' + encodeURIComponent(action) + '&dependency=' + encodeURIComponent(currentDependency) + turnoParam;
-            const response = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-cache', redirect: 'follow' });
+            
+            console.log('Fetching:', url);
+            
+            const response = await fetch(url, { 
+                method: 'GET', 
+                mode: 'cors', 
+                cache: 'no-cache'
+            });
+            
             if (!response.ok) throw new Error('HTTP ' + response.status);
             return await response.json();
         }
 
+        // ============================================================
+        // GUARDAR DATOS - USA GET (POST no funciona desde navegador)
+        // ============================================================
         async function saveData(row, novedad, observation) {
-            const params = new URLSearchParams();
-            params.append('action', 'saveData');
-            params.append('dependency', currentDependency);
-            params.append('row', row.toString());
-            params.append('novedad', novedad || '');
-            params.append('observation', observation || '');
+            const params = [];
+            params.push('action=' + encodeURIComponent('saveData'));
+            params.push('dependency=' + encodeURIComponent(currentDependency));
+            params.push('row=' + encodeURIComponent(row.toString()));
+            params.push('novedad=' + encodeURIComponent(novedad || ''));
+            params.push('observation=' + encodeURIComponent(observation || ''));
             
-            const url = API_URL + '?' + params.toString();
+            const url = API_URL + '?' + params.join('&');
             
-            const response = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-cache', redirect: 'follow' });
+            console.log('Saving:', url);
+            
+            const response = await fetch(url, { 
+                method: 'GET', 
+                mode: 'cors', 
+                cache: 'no-cache'
+            });
+            
             if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
             const result = await response.json();
             if (!result.success) throw new Error(result.error || 'Error del servidor');
             return result;
         }
 
+        // ============================================================
+        // CARGAR DATOS INICIALES
+        // ============================================================
         async function loadRealData(turno) {
             try {
                 document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen de ' + currentDependency + '...</p></div>';
@@ -552,6 +579,9 @@
             document.getElementById('tableContainer').innerHTML = errorHtml;
         }
 
+        // ============================================================
+        // ACORDEÓN NOVEDADES
+        // ============================================================
         function toggleNovedadAccordion(contentId, iconId) {
             const content = document.getElementById(contentId);
             const icon = document.getElementById(iconId);
@@ -596,6 +626,9 @@
             });
         }
 
+        // ============================================================
+        // RENDERIZAR RESUMEN
+        // ============================================================
         function renderSummary(data) {
             const container = document.getElementById('summaryContainer');
             container.innerHTML = '';
@@ -679,6 +712,9 @@
             }
         }
 
+        // ============================================================
+        // FILTRAR POR TURNO
+        // ============================================================
         async function filterByTurno(turno) {
             currentFilter = turno;
             
@@ -724,6 +760,9 @@
             renderTable(filteredData);
         }
 
+        // ============================================================
+        // GUARDAR NOVEDAD
+        // ============================================================
         async function saveNovedad(select, row) {
             const novedad = select.value;
             const status = document.getElementById('status-novedad-' + row);
@@ -750,6 +789,9 @@
             }
         }
 
+        // ============================================================
+        // GUARDAR OBSERVACIÓN
+        // ============================================================
         async function saveObservation(textarea, row) {
             const observation = textarea.value.trim();
             const status = document.getElementById('status-' + row);
