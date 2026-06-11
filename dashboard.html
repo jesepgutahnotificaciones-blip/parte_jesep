@@ -307,6 +307,43 @@
         .footer-institutional p { color: var(--blanco); font-size: 0.7rem; opacity: 0.8; }
         .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 600; font-size: 0.85rem; margin-top: 4px; letter-spacing: 1px; }
         
+
+        /* ===== ACORDEÓN PARA RESUMEN ===== */
+        .accordion-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: all 0.2s ease;
+            padding: 10px 0;
+            margin-bottom: 0 !important;
+        }
+        .accordion-header:hover {
+            opacity: 0.8;
+        }
+        .accordion-icon {
+            font-size: 0.85rem;
+            color: var(--amarillo-policia);
+            transition: transform 0.3s ease;
+            font-weight: 700;
+        }
+        .accordion-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+        .accordion-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+            opacity: 1;
+        }
+        .accordion-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
         @media (max-width: 768px) {
             .header-institutional { flex-direction: column; gap: 8px; padding: 8px 12px; height: auto; }
             .header-left img { width: 28px; }
@@ -396,16 +433,7 @@
     </div>
 
     <div class="main-content">
-        <div class="summary-section">
-            <h2>📊 Resumen General de la Dependencia</h2>
-            <div id="summaryContainer">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Cargando información institucional...</p>
-                </div>
-            </div>
-        </div>
-
+        <!-- SECCIÓN 1: REGISTRO DE PERSONAL (ahora primero) -->
         <div class="data-section">
             <h2>👥 Registro de Personal</h2>
             <div class="filter-bar" id="filterBar">
@@ -422,6 +450,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- SECCIÓN 2: RESUMEN GENERAL (ahora segundo, con acordeón) -->
+        <div class="summary-section">
+            <h2 class="accordion-header" onclick="toggleAccordion()">
+                <span>📊 Resumen General de la Dependencia</span>
+                <span class="accordion-icon" id="accordionIcon">▼</span>
+            </h2>
+            <div class="accordion-content" id="accordionContent">
+                <div id="summaryContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando información institucional...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="footer-institutional">
@@ -430,7 +474,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz_0SVcijVfrY2zctYSPkYYAslc9JrqW2eW67CQHx6sjVpDinNIYM4CdbjvAMU-IHO8/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxVtaYSsQknF8_s5XTwOqrB-bZ0C26DPRHgdxIFx7uWNEFpZHllHoRQnEvA-Ok7vfTn/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
         let allTableData = []; // Almacena todos los datos originales para filtrar
@@ -447,8 +491,9 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
-        async function fetchData(action) {
-            const url = `${API_URL}?action=${action}&dependency=${encodeURIComponent(currentDependency)}`;
+        async function fetchData(action, turno = '') {
+            const turnoParam = turno ? `&turno=${encodeURIComponent(turno)}` : '';
+            const url = `${API_URL}?action=${action}&dependency=${encodeURIComponent(currentDependency)}${turnoParam}`;
             const response = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-cache', redirect: 'follow' });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             return await response.json();
@@ -471,7 +516,7 @@
             return result;
         }
 
-        async function loadRealData() {
+        async function loadRealData(turno = '') {
             try {
                 document.getElementById('summaryContainer').innerHTML = `
                     <div class="loading">
@@ -484,14 +529,18 @@
                         <p>Cargando personal de ${currentDependency}...</p>
                     </div>`;
 
-                const summaryData = await fetchData('getSummary');
+                // Cargar resumen filtrado por turno (si aplica)
+                const summaryData = await fetchData('getSummary', turno);
                 if (summaryData.success) renderSummary(summaryData.summary);
                 else throw new Error(summaryData.error || 'Error al cargar resumen');
 
+                // Cargar datos de tabla
                 const data = await fetchData('getData');
                 if (data.success) {
                     allTableData = data.data || []; // Guardar datos originales
-                    filterByTurno('ALL'); // Mostrar todos inicialmente
+                    if (!turno) {
+                        filterByTurno('ALL'); // Mostrar todos inicialmente
+                    }
                 }
                 else throw new Error(data.error || 'Error al cargar datos');
             } catch (error) {
@@ -646,7 +695,26 @@
                 </div>`;
         }
 
-        function filterByTurno(turno) {
+        function toggleAccordion() {
+            const content = document.getElementById('accordionContent');
+            const icon = document.getElementById('accordionIcon');
+            content.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+        }
+
+        // Iniciar acordeón colapsado por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const content = document.getElementById('accordionContent');
+                const icon = document.getElementById('accordionIcon');
+                if (content && !content.classList.contains('collapsed')) {
+                    content.classList.add('collapsed');
+                    icon.classList.add('collapsed');
+                }
+            }, 1500); // Esperar a que cargue el contenido antes de colapsar
+        });
+
+        async function filterByTurno(turno) {
             currentFilter = turno;
 
             // Actualizar estados de botones
@@ -656,7 +724,35 @@
             else if (turno === 'C') document.getElementById('btn-turno-c').classList.add('active');
             else document.getElementById('btn-turno-all').classList.add('active');
 
-            // Filtrar datos
+            // Si se selecciona un turno específico, recargar el resumen para ese turno
+            if (turno !== 'ALL') {
+                try {
+                    document.getElementById('summaryContainer').innerHTML = `
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Cargando resumen Turno ${turno}...</p>
+                        </div>`;
+                    const summaryData = await fetchData('getSummary', turno);
+                    if (summaryData.success) renderSummary(summaryData.summary);
+                } catch (e) {
+                    console.error('Error cargando resumen por turno:', e);
+                }
+            } else {
+                // Si es TODOS, recargar resumen general
+                try {
+                    document.getElementById('summaryContainer').innerHTML = `
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Cargando resumen general...</p>
+                        </div>`;
+                    const summaryData = await fetchData('getSummary', '');
+                    if (summaryData.success) renderSummary(summaryData.summary);
+                } catch (e) {
+                    console.error('Error cargando resumen general:', e);
+                }
+            }
+
+            // Filtrar datos de tabla
             let filteredData = allTableData;
             if (turno !== 'ALL') {
                 filteredData = allTableData.filter(person => {
