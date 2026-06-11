@@ -52,6 +52,27 @@
         .btn-back:hover { opacity: 0.85; }
         .date-display { color: var(--blanco); font-size: 0.75rem; opacity: 0.85; }
 
+        .header-stats {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 4px;
+            margin-left: 12px;
+        }
+        .header-stats .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+        .header-stats .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--amarillo-policia);
+        }
+
         .main-content { max-width: 1400px; margin: 12px auto; padding: 0 16px; }
 
         .summary-section {
@@ -232,7 +253,6 @@
         }
         .summary-item.novedad-item.nov-default .value { color: #5F6368; }
 
-        /* ===== ACORDEÓN PARA DESGREGADO POR NOVEDADES ===== */
         .novedad-accordion-header {
             background: linear-gradient(135deg, #3C4043 0%, #5F6368 100%);
             color: var(--blanco);
@@ -307,7 +327,6 @@
             border-radius: 2px;
         }
 
-        /* ===== BOTONES DE FILTRO POR TURNO ===== */
         .filter-bar {
             display: flex;
             gap: 8px;
@@ -404,6 +423,7 @@
             .header-institutional { flex-direction: column; gap: 8px; padding: 8px 12px; height: auto; }
             .header-left img { width: 28px; }
             .header-text h1 { font-size: 0.85rem; }
+            .header-stats { margin-left: 0; margin-top: 4px; }
             .summary-grid-6 { grid-template-columns: repeat(3, 1fr); gap: 6px; }
             .novedad-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
             .summary-item { padding: 6px 3px; min-height: 42px; }
@@ -438,6 +458,10 @@
                 <h1>POLICÍA NACIONAL DE COLOMBIA</h1>
                 <p class="dep-name" id="depTitle">Dashboard</p>
             </div>
+            <div class="header-stats" id="headerStats" style="display:none;">
+                <span class="stat-label">Total Funcionarios:</span>
+                <span class="stat-value" id="totalFuncionarios">-</span>
+            </div>
         </div>
         <div class="header-right">
             <span class="date-display" id="currentDate"></span>
@@ -446,7 +470,6 @@
     </div>
 
     <div class="main-content">
-        <!-- SECCIÓN 1: REGISTRO DE PERSONAL (PRIMERO) -->
         <div class="data-section">
             <h2>👥 Registro de Personal</h2>
             <div class="filter-bar" id="filterBar">
@@ -464,7 +487,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 2: RESUMEN GENERAL (SEGUNDO) -->
         <div class="summary-section">
             <h2>📊 Resumen General de la Dependencia</h2>
             <div id="summaryContainer">
@@ -482,10 +504,7 @@
     </div>
 
     <script>
-        // ============================================================
-        // CONFIGURACIÓN - REEMPLAZA CON TU URL DEL WEB APP
-        // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxcDtj0IQ7xfZNw_rv1rhxY-FVWqP79cDCDlDL2yOYZrNq58v61X9o8FpOw-sEHS7yA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwfwsLhBCk5TPekU_zK2F9WiwFcPEsLNil9B4m4J_Hzu8xQ-B7P1yh_G1HLjWqQTt_p/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
         let allTableData = [];
@@ -503,25 +522,33 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
-        // ============================================================
-        // FETCH CON GET SIMPLE (sin headers que disparen preflight CORS)
-        // ============================================================
+        async function loadTotalFuncionarios() {
+            try {
+                const url = API_URL + '?action=getTotalFuncionarios&dependency=' + encodeURIComponent(currentDependency);
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const result = await response.json();
+                if (result.success && result.total !== undefined) {
+                    document.getElementById('totalFuncionarios').textContent = result.total;
+                    document.getElementById('headerStats').style.display = 'flex';
+                }
+            } catch (e) {
+                console.error('Error cargando total funcionarios:', e);
+            }
+        }
+
         async function fetchData(action, turno) {
             const turnoParam = turno ? '&turno=' + encodeURIComponent(turno) : '';
             const url = API_URL + '?action=' + encodeURIComponent(action) + '&dependency=' + encodeURIComponent(currentDependency) + turnoParam;
             
             console.log('Fetching:', url);
             
-            // GET simple sin headers = no preflight CORS
             const response = await fetch(url);
             
             if (!response.ok) throw new Error('HTTP ' + response.status);
             return await response.json();
         }
 
-        // ============================================================
-        // GUARDAR DATOS - USA GET (sin headers para evitar preflight)
-        // ============================================================
         async function saveData(row, novedad, observation) {
             const params = [];
             params.push('action=' + encodeURIComponent('saveData'));
@@ -534,7 +561,6 @@
             
             console.log('Saving:', url);
             
-            // GET simple sin headers = no preflight CORS
             const response = await fetch(url);
             
             if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
@@ -543,9 +569,6 @@
             return result;
         }
 
-        // ============================================================
-        // CARGAR DATOS INICIALES
-        // ============================================================
         async function loadRealData(turno) {
             try {
                 document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen de ' + currentDependency + '...</p></div>';
@@ -575,9 +598,6 @@
             document.getElementById('tableContainer').innerHTML = errorHtml;
         }
 
-        // ============================================================
-        // ACORDEÓN NOVEDADES
-        // ============================================================
         function toggleNovedadAccordion(contentId, iconId) {
             const content = document.getElementById(contentId);
             const icon = document.getElementById(iconId);
@@ -622,9 +642,6 @@
             });
         }
 
-        // ============================================================
-        // RENDERIZAR RESUMEN
-        // ============================================================
         function renderSummary(data) {
             const container = document.getElementById('summaryContainer');
             container.innerHTML = '';
@@ -708,9 +725,6 @@
             }
         }
 
-        // ============================================================
-        // FILTRAR POR TURNO
-        // ============================================================
         async function filterByTurno(turno) {
             currentFilter = turno;
             
@@ -756,9 +770,6 @@
             renderTable(filteredData);
         }
 
-        // ============================================================
-        // GUARDAR NOVEDAD
-        // ============================================================
         async function saveNovedad(select, row) {
             const novedad = select.value;
             const status = document.getElementById('status-novedad-' + row);
@@ -785,9 +796,6 @@
             }
         }
 
-        // ============================================================
-        // GUARDAR OBSERVACIÓN
-        // ============================================================
         async function saveObservation(textarea, row) {
             const observation = textarea.value.trim();
             const status = document.getElementById('status-' + row);
@@ -851,6 +859,7 @@
 
         document.getElementById('depTitle').textContent = currentDependency;
         updateDate();
+        loadTotalFuncionarios();
         loadRealData();
     </script>
 </body>
