@@ -322,6 +322,52 @@
             th, td { padding: 5px 6px; font-size: 0.75rem; }
         }
         
+
+        /* ===== BOTONES DE FILTRO POR TURNO ===== */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-btn {
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
+            color: var(--blanco);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.78rem;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: var(--sombra-suave);
+        }
+        .filter-btn:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+        .filter-btn:active {
+            transform: translateY(0);
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #C9A227 0%, #B8941F 100%);
+            color: var(--azul-oscuro);
+        }
+        .filter-btn.clear {
+            background: var(--gris-suave);
+            color: var(--gris-oscuro);
+            border: 1px solid var(--borde);
+        }
+        .filter-info {
+            font-size: 0.75rem;
+            color: var(--gris-texto);
+            margin-left: auto;
+            font-weight: 500;
+        }
+
         @media (max-width: 480px) {
             .summary-grid-6 { grid-template-columns: repeat(2, 1fr); }
             .novedad-grid { grid-template-columns: repeat(2, 1fr); gap: 3px; }
@@ -330,6 +376,7 @@
             .summary-item.novedad-item .value { font-size: 0.8rem; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <div class="header-institutional">
@@ -361,6 +408,13 @@
 
         <div class="data-section">
             <h2>👥 Registro de Personal</h2>
+            <div class="filter-bar" id="filterBar">
+                <button class="filter-btn" onclick="filterByTurno('A')" id="btn-turno-a">🅰️ TURNO A</button>
+                <button class="filter-btn" onclick="filterByTurno('B')" id="btn-turno-b">🅱️ TURNO B</button>
+                <button class="filter-btn" onclick="filterByTurno('C')" id="btn-turno-c">🅲️ TURNO C</button>
+                <button class="filter-btn clear" onclick="filterByTurno('ALL')" id="btn-turno-all">🔄 TODOS</button>
+                <span class="filter-info" id="filterInfo">Mostrando todos los registros</span>
+            </div>
             <div class="table-wrapper" id="tableContainer">
                 <div class="loading">
                     <div class="spinner"></div>
@@ -379,6 +433,8 @@
         const API_URL = 'https://script.google.com/macros/s/AKfycbz_0SVcijVfrY2zctYSPkYYAslc9JrqW2eW67CQHx6sjVpDinNIYM4CdbjvAMU-IHO8/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
+        let allTableData = []; // Almacena todos los datos originales para filtrar
+        let currentFilter = 'ALL'; // Filtro activo: 'A', 'B', 'C', 'ALL'
 
         const NOVEDADES = [
             'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
@@ -433,7 +489,10 @@
                 else throw new Error(summaryData.error || 'Error al cargar resumen');
 
                 const data = await fetchData('getData');
-                if (data.success) renderTable(data.data);
+                if (data.success) {
+                    allTableData = data.data || []; // Guardar datos originales
+                    filterByTurno('ALL'); // Mostrar todos inicialmente
+                }
                 else throw new Error(data.error || 'Error al cargar datos');
             } catch (error) {
                 console.error('Error:', error);
@@ -585,6 +644,36 @@
                     <span class="col-novedad ${getNovedadClass(currentValue)}" id="badge-${row}">${currentValue || 'SIN NOVEDAD'}</span>
                     <span class="status-msg" id="status-novedad-${row}">✓ Guardado</span>
                 </div>`;
+        }
+
+        function filterByTurno(turno) {
+            currentFilter = turno;
+
+            // Actualizar estados de botones
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (turno === 'A') document.getElementById('btn-turno-a').classList.add('active');
+            else if (turno === 'B') document.getElementById('btn-turno-b').classList.add('active');
+            else if (turno === 'C') document.getElementById('btn-turno-c').classList.add('active');
+            else document.getElementById('btn-turno-all').classList.add('active');
+
+            // Filtrar datos
+            let filteredData = allTableData;
+            if (turno !== 'ALL') {
+                filteredData = allTableData.filter(person => {
+                    const turnoPersona = (person.turno || '').toString().trim().toUpperCase();
+                    return turnoPersona === turno;
+                });
+            }
+
+            // Actualizar info
+            const info = document.getElementById('filterInfo');
+            if (turno === 'ALL') {
+                info.textContent = `Mostrando todos los registros (${filteredData.length})`;
+            } else {
+                info.textContent = `Filtrado: Turno ${turno} (${filteredData.length} registros)`;
+            }
+
+            renderTable(filteredData);
         }
 
         function renderTable(data) {
