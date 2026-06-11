@@ -393,6 +393,8 @@
         .novedad-maternidad { background: #FBE9E7; color: #C53929; }
         .novedad-retardado { background: #FFF8E1; color: #F9A825; }
         .novedad-otra { background: #F3E5F5; color: #6A1B9A; }
+        .novedad-retardada { background: #FFF3E0; color: #E65100; }
+        .novedad-excusa-parcial { background: #E8EAF6; color: #303F9F; }
         .obs-container { display: flex; flex-direction: column; gap: 4px; }
         .obs-input { width: 100%; padding: 5px; border: 1px solid var(--borde); border-radius: 4px; font-family: inherit; font-size: 0.78rem; resize: vertical; min-height: 32px; }
         .obs-input:focus { outline: none; border-color: var(--verde-policia); }
@@ -448,6 +450,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header-institutional">
         <div class="header-left">
@@ -504,7 +507,8 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwfwsLhBCk5TPekU_zK2F9WiwFcPEsLNil9B4m4J_Hzu8xQ-B7P1yh_G1HLjWqQTt_p/exec';
+
+                const API_URL = 'https://script.google.com/macros/s/AKfycbwfwsLhBCk5TPekU_zK2F9WiwFcPEsLNil9B4m4J_Hzu8xQ-B7P1yh_G1HLjWqQTt_p/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
         let allTableData = [];
@@ -513,7 +517,7 @@
         const NOVEDADES = [
             'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
             'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD', 
-            'RETARDADO', 'OTRA NOVEDAD'
+            'RETARDADO', 'OTRA NOVEDAD', 'RETARDAD@', 'EXCUSA PARCIAL'
         ];
 
         function updateDate() {
@@ -820,10 +824,12 @@
             if (n.indexOf('VACACIONES') !== -1) return 'novedad-vacaciones';
             if (n.indexOf('SERVICIO') !== -1) return 'novedad-servicio';
             if (n.indexOf('GRAVIDEZ') !== -1) return 'novedad-gravidez';
+            if (n === 'EXCUSA PARCIAL') return 'novedad-excusa-parcial';
             if (n.indexOf('EXCUSA') !== -1) return 'novedad-excusa';
             if (n.indexOf('PERMISO') !== -1) return 'novedad-permiso';
             if (n.indexOf('CITA') !== -1) return 'novedad-cita';
             if (n.indexOf('MATERNIDAD') !== -1) return 'novedad-maternidad';
+            if (n === 'RETARDAD@') return 'novedad-retardada';
             if (n.indexOf('RETARDADO') !== -1) return 'novedad-retardado';
             if (n.indexOf('OTRA') !== -1) return 'novedad-otra';
             return 'novedad-normal';
