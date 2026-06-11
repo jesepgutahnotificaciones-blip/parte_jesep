@@ -1,5 +1,5 @@
-<html lang="es">
 <!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -485,7 +485,7 @@
         // ============================================================
         // CONFIGURACIÓN - REEMPLAZA CON TU URL DEL WEB APP
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxroGez_su7NcrGfJ8wdWsRqtJTmZxASPR5WqsfFKUqgIAYd5OQifcG9nAHeH2FDiq7/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzfLKP-rTpvpPfb-9mvvgfTI7zAo9jhH8F4MYTlDGEpfQ-asE0tRknylnmY9L3VMIrs/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
         let allTableData = [];
@@ -504,7 +504,7 @@
         }
 
         // ============================================================
-        // FETCH CON GET + text/plain (evita CORS preflight)
+        // FETCH CON GET SIMPLE (sin headers que disparen preflight CORS)
         // ============================================================
         async function fetchData(action, turno) {
             const turnoParam = turno ? '&turno=' + encodeURIComponent(turno) : '';
@@ -512,19 +512,15 @@
             
             console.log('Fetching:', url);
             
-            const response = await fetch(url, { 
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8'
-                }
-            });
+            // GET simple sin headers = no preflight CORS
+            const response = await fetch(url);
             
             if (!response.ok) throw new Error('HTTP ' + response.status);
             return await response.json();
         }
 
         // ============================================================
-        // GUARDAR DATOS - USA GET (POST no funciona desde navegador)
+        // GUARDAR DATOS - USA GET (sin headers para evitar preflight)
         // ============================================================
         async function saveData(row, novedad, observation) {
             const params = [];
@@ -538,12 +534,8 @@
             
             console.log('Saving:', url);
             
-            const response = await fetch(url, { 
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8'
-                }
-            });
+            // GET simple sin headers = no preflight CORS
+            const response = await fetch(url);
             
             if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
             const result = await response.json();
@@ -835,24 +827,24 @@
                 const selected = (currentValue === n) ? 'selected' : '';
                 options += '<option value="' + n + '" ' + selected + '>' + n + '</option>';
             });
-            
+
             return '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><select class="novedad-select" onchange="saveNovedad(this, ' + row + ')">' + options + '</select><span class="col-novedad ' + getNovedadClass(currentValue) + '" id="badge-' + row + '">' + (currentValue || 'SIN NOVEDAD') + '</span><span class="status-msg" id="status-novedad-' + row + '">✓ Guardado</span></div>';
         }
 
         function renderTable(data) {
             const container = document.getElementById('tableContainer');
-            
+
             if (!data || data.length === 0) {
                 container.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p style="font-size:1.2rem; margin-bottom:10px;">📭 No hay registros</p><p>La dependencia <strong>' + currentDependency + '</strong> no tiene datos</p></div>';
                 return;
             }
-            
+
             let html = '<table><thead><tr><th>GRADO</th><th>APELLIDOS Y NOMBRES</th><th>TURNO</th><th>NOVEDAD</th><th>OBSERVACIONES</th></tr></thead><tbody>';
-            
+
             data.forEach(function(person) {
                 html += '<tr><td><span class="col-grado">' + (person.grado || '-') + '</span></td><td>' + (person.nombres || '-') + '</td><td>' + (person.turno || '-') + '</td><td>' + createNovedadSelect(person.novedad, person.row) + '</td><td><div class="obs-container"><textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ' + person.row + ')">' + (person.observacion || '') + '</textarea><div class="obs-actions"><button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ' + person.row + ')">💾 Guardar</button><span class="status-msg" id="status-' + person.row + '">✓ Guardado</span></div></div></td></tr>';
             });
-            
+
             html += '</tbody></table>';
             container.innerHTML = html;
         }
