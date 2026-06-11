@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 <html lang="es">
+<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -373,6 +373,7 @@
         .novedad-cita { background: #E1F5FE; color: #0277BD; }
         .novedad-maternidad { background: #FBE9E7; color: #C53929; }
         .novedad-retardado { background: #FFF8E1; color: #F9A825; }
+        .novedad-otra { background: #F3E5F5; color: #6A1B9A; }
         .obs-container { display: flex; flex-direction: column; gap: 4px; }
         .obs-input { width: 100%; padding: 5px; border: 1px solid var(--borde); border-radius: 4px; font-family: inherit; font-size: 0.78rem; resize: vertical; min-height: 32px; }
         .obs-input:focus { outline: none; border-color: var(--verde-policia); }
@@ -389,7 +390,7 @@
         .error-box { background: #FDEDEC; border: 1px solid var(--rojo-suave); border-radius: 6px; padding: 20px; text-align: center; color: var(--rojo-suave); }
         .error-box h3 { margin-bottom: 6px; font-size: 0.9rem; }
         .retry-btn { background: var(--rojo-suave); color: white; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight: 600; font-size: 0.75rem; }
-
+        
         .footer-institutional {
             text-align: center;
             padding: 12px;
@@ -398,7 +399,7 @@
         }
         .footer-institutional p { color: var(--blanco); font-size: 0.7rem; opacity: 0.8; }
         .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 600; font-size: 0.85rem; margin-top: 4px; letter-spacing: 1px; }
-
+        
         @media (max-width: 768px) {
             .header-institutional { flex-direction: column; gap: 8px; padding: 8px 12px; height: auto; }
             .header-left img { width: 28px; }
@@ -415,7 +416,7 @@
             .filter-bar { gap: 6px; }
             .filter-btn { padding: 5px 10px; font-size: 0.7rem; }
         }
-
+        
         @media (max-width: 480px) {
             .summary-grid-6 { grid-template-columns: repeat(2, 1fr); }
             .novedad-grid { grid-template-columns: repeat(2, 1fr); gap: 3px; }
@@ -426,7 +427,6 @@
             .filter-info { width: 100%; text-align: center; margin-left: 0; margin-top: 4px; }
         }
     </style>
-<base target="_blank">
 </head>
 <body>
     <div class="header-institutional">
@@ -485,7 +485,7 @@
         // ============================================================
         // CONFIGURACIÓN - REEMPLAZA CON TU URL DEL WEB APP
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwktuKYcsCL0RLIUw5M-OWu8smv0p86lAT26KZfi0pe_KSAOP_xyVhf3z2omj9w-dc/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxroGez_su7NcrGfJ8wdWsRqtJTmZxASPR5WqsfFKUqgIAYd5OQifcG9nAHeH2FDiq7/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
         let allTableData = [];
@@ -493,7 +493,8 @@
 
         const NOVEDADES = [
             'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
-            'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD', 'RETARDADO'
+            'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD', 
+            'RETARDADO', 'OTRA NOVEDAD'
         ];
 
         function updateDate() {
@@ -503,20 +504,21 @@
         }
 
         // ============================================================
-        // FUNCIÓN FETCH CON GET (evita CORS con Google Apps Script)
+        // FETCH CON GET + text/plain (evita CORS preflight)
         // ============================================================
         async function fetchData(action, turno) {
             const turnoParam = turno ? '&turno=' + encodeURIComponent(turno) : '';
             const url = API_URL + '?action=' + encodeURIComponent(action) + '&dependency=' + encodeURIComponent(currentDependency) + turnoParam;
-
+            
             console.log('Fetching:', url);
-
+            
             const response = await fetch(url, { 
-                method: 'GET', 
-                mode: 'cors', 
-                cache: 'no-cache'
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                }
             });
-
+            
             if (!response.ok) throw new Error('HTTP ' + response.status);
             return await response.json();
         }
@@ -531,17 +533,18 @@
             params.push('row=' + encodeURIComponent(row.toString()));
             params.push('novedad=' + encodeURIComponent(novedad || ''));
             params.push('observation=' + encodeURIComponent(observation || ''));
-
+            
             const url = API_URL + '?' + params.join('&');
-
+            
             console.log('Saving:', url);
-
+            
             const response = await fetch(url, { 
-                method: 'GET', 
-                mode: 'cors', 
-                cache: 'no-cache'
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                }
             });
-
+            
             if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
             const result = await response.json();
             if (!result.success) throw new Error(result.error || 'Error del servidor');
@@ -597,17 +600,17 @@
         function appendNovedadAccordion(container, items, accordionId, contentId) {
             const contentDiv = document.getElementById(contentId);
             if (!contentDiv) return;
-
+            
             const grid = contentDiv.querySelector('.novedad-grid');
             if (!grid) return;
-
+            
             const headerEl = container.querySelector('[onclick*="' + contentId + '"');
             let novedadName = '';
             if (headerEl) {
                 const titleEl = headerEl.querySelector('.novedad-accordion-title');
                 if (titleEl) novedadName = titleEl.textContent.toUpperCase();
             }
-
+            
             items.forEach(function(item) {
                 const div = document.createElement('div');
                 let colorClass = 'nov-default';
@@ -620,7 +623,7 @@
                 else if (novedadName.indexOf('CITA') !== -1) colorClass = 'nov-cita';
                 else if (novedadName.indexOf('MATERNIDAD') !== -1) colorClass = 'nov-maternidad';
                 else if (novedadName.indexOf('RETARDADO') !== -1) colorClass = 'nov-retardado';
-
+                
                 div.className = 'summary-item novedad-item ' + colorClass;
                 div.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
                 grid.appendChild(div);
@@ -633,18 +636,18 @@
         function renderSummary(data) {
             const container = document.getElementById('summaryContainer');
             container.innerHTML = '';
-
+            
             if (!data || data.length === 0) {
                 container.innerHTML = '<p style="text-align:center; padding:20px;">No hay datos de resumen</p>';
                 return;
             }
-
+            
             let currentGrid = null;
             let novedadAccordionId = null;
             let novedadContentId = null;
             let novedadItems = [];
             let isInNovedadSection = false;
-
+            
             data.forEach(function(item, index) {
                 if (item.section === 'header') {
                     if (isInNovedadSection && novedadItems.length > 0) {
@@ -652,62 +655,62 @@
                         novedadItems = [];
                         isInNovedadSection = false;
                     }
-
+                    
                     const sectionDiv = document.createElement('div');
                     sectionDiv.className = 'summary-grid-6';
                     container.appendChild(sectionDiv);
                     currentGrid = sectionDiv;
-
+                    
                     const titleDiv = document.createElement('div');
                     titleDiv.className = 'summary-item header-style';
                     titleDiv.innerHTML = '<div class="label">' + item.label + '</div><div class="value">-</div>';
                     currentGrid.appendChild(titleDiv);
-
+                    
                 } else if (item.section === 'novedad-header') {
                     if (isInNovedadSection && novedadItems.length > 0) {
                         appendNovedadAccordion(container, novedadItems, novedadAccordionId, novedadContentId);
                         novedadItems = [];
                     }
-
+                    
                     isInNovedadSection = true;
                     novedadAccordionId = 'novedad-acc-' + index;
                     novedadContentId = 'novedad-content-' + index;
-
+                    
                     const accordionHeader = document.createElement('div');
                     accordionHeader.className = 'novedad-accordion-header';
                     accordionHeader.setAttribute('onclick', 'toggleNovedadAccordion("' + novedadContentId + '", "' + novedadAccordionId + '-icon")');
                     accordionHeader.innerHTML = '<span class="novedad-accordion-title">📋 ' + item.label + '</span><span class="novedad-accordion-icon collapsed" id="' + novedadAccordionId + '-icon">▼</span>';
                     container.appendChild(accordionHeader);
-
+                    
                     const accordionContent = document.createElement('div');
                     accordionContent.className = 'novedad-accordion-content collapsed';
                     accordionContent.id = novedadContentId;
                     container.appendChild(accordionContent);
-
+                    
                     const novedadDiv = document.createElement('div');
                     novedadDiv.className = 'novedad-grid';
                     accordionContent.appendChild(novedadDiv);
                     currentGrid = novedadDiv;
-
+                    
                 } else if (item.section === 'novedad-item') {
                     if (isInNovedadSection) {
                         novedadItems.push(item);
                     }
-
+                    
                 } else {
                     if (isInNovedadSection && novedadItems.length > 0) {
                         appendNovedadAccordion(container, novedadItems, novedadAccordionId, novedadContentId);
                         novedadItems = [];
                         isInNovedadSection = false;
                     }
-
+                    
                     const div = document.createElement('div');
                     div.className = 'summary-item';
                     div.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
                     currentGrid.appendChild(div);
                 }
             });
-
+            
             if (isInNovedadSection && novedadItems.length > 0) {
                 appendNovedadAccordion(container, novedadItems, novedadAccordionId, novedadContentId);
             }
@@ -718,13 +721,13 @@
         // ============================================================
         async function filterByTurno(turno) {
             currentFilter = turno;
-
+            
             document.querySelectorAll('.filter-btn').forEach(function(btn) { btn.classList.remove('active'); });
             if (turno === 'A') document.getElementById('btn-turno-a').classList.add('active');
             else if (turno === 'B') document.getElementById('btn-turno-b').classList.add('active');
             else if (turno === 'C') document.getElementById('btn-turno-c').classList.add('active');
             else document.getElementById('btn-turno-all').classList.add('active');
-
+            
             if (turno !== 'ALL') {
                 try {
                     document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen Turno ' + turno + '...</p></div>';
@@ -742,7 +745,7 @@
                     console.error('Error cargando resumen general:', e);
                 }
             }
-
+            
             let filteredData = allTableData;
             if (turno !== 'ALL') {
                 filteredData = allTableData.filter(function(person) {
@@ -750,14 +753,14 @@
                     return turnoPersona === turno;
                 });
             }
-
+            
             const info = document.getElementById('filterInfo');
             if (turno === 'ALL') {
                 info.textContent = 'Mostrando todos los registros (' + filteredData.length + ')';
             } else {
                 info.textContent = 'Filtrado: Turno ' + turno + ' (' + filteredData.length + ' registros)';
             }
-
+            
             renderTable(filteredData);
         }
 
@@ -767,22 +770,22 @@
         async function saveNovedad(select, row) {
             const novedad = select.value;
             const status = document.getElementById('status-novedad-' + row);
-
+            
             status.textContent = '⏳ Guardando...';
             status.className = 'status-msg show';
-
+            
             try {
                 await saveData(row, novedad, '');
-
+                
                 status.textContent = '✓ Guardado';
                 status.className = 'status-msg show success';
-
+                
                 const badge = document.getElementById('badge-' + row);
                 if (badge) {
                     badge.className = 'col-novedad ' + getNovedadClass(novedad);
                     badge.textContent = novedad || 'SIN NOVEDAD';
                 }
-
+                
                 setTimeout(function() { status.classList.remove('show'); }, 3000);
             } catch (error) {
                 status.textContent = '✗ Error: ' + error.message;
@@ -796,10 +799,10 @@
         async function saveObservation(textarea, row) {
             const observation = textarea.value.trim();
             const status = document.getElementById('status-' + row);
-
+            
             status.textContent = '⏳ Guardando...';
             status.className = 'status-msg show';
-
+            
             try {
                 await saveData(row, '', observation);
                 status.textContent = '✓ Guardado';
@@ -822,6 +825,7 @@
             if (n.indexOf('CITA') !== -1) return 'novedad-cita';
             if (n.indexOf('MATERNIDAD') !== -1) return 'novedad-maternidad';
             if (n.indexOf('RETARDADO') !== -1) return 'novedad-retardado';
+            if (n.indexOf('OTRA') !== -1) return 'novedad-otra';
             return 'novedad-normal';
         }
 
@@ -831,24 +835,24 @@
                 const selected = (currentValue === n) ? 'selected' : '';
                 options += '<option value="' + n + '" ' + selected + '>' + n + '</option>';
             });
-
+            
             return '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><select class="novedad-select" onchange="saveNovedad(this, ' + row + ')">' + options + '</select><span class="col-novedad ' + getNovedadClass(currentValue) + '" id="badge-' + row + '">' + (currentValue || 'SIN NOVEDAD') + '</span><span class="status-msg" id="status-novedad-' + row + '">✓ Guardado</span></div>';
         }
 
         function renderTable(data) {
             const container = document.getElementById('tableContainer');
-
+            
             if (!data || data.length === 0) {
                 container.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p style="font-size:1.2rem; margin-bottom:10px;">📭 No hay registros</p><p>La dependencia <strong>' + currentDependency + '</strong> no tiene datos</p></div>';
                 return;
             }
-
+            
             let html = '<table><thead><tr><th>GRADO</th><th>APELLIDOS Y NOMBRES</th><th>TURNO</th><th>NOVEDAD</th><th>OBSERVACIONES</th></tr></thead><tbody>';
-
+            
             data.forEach(function(person) {
                 html += '<tr><td><span class="col-grado">' + (person.grado || '-') + '</span></td><td>' + (person.nombres || '-') + '</td><td>' + (person.turno || '-') + '</td><td>' + createNovedadSelect(person.novedad, person.row) + '</td><td><div class="obs-container"><textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ' + person.row + ')">' + (person.observacion || '') + '</textarea><div class="obs-actions"><button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ' + person.row + ')">💾 Guardar</button><span class="status-msg" id="status-' + person.row + '">✓ Guardado</span></div></div></td></tr>';
             });
-
+            
             html += '</tbody></table>';
             container.innerHTML = html;
         }
