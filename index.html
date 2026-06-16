@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Novedades - Policía Nacional de Colombia</title>
+
     <style>
         * {
             margin: 0;
@@ -21,25 +22,21 @@
             --gris-texto: #5F6368;
             --gris-oscuro: #3C4043;
             --borde: #DADCE0;
-            --sombra-suave: 0 1px 3px rgba(0,0,0,0.08);
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
             color: var(--gris-oscuro);
-            font-size: 13px;
-            /* FONDO CON IMAGEN DE LA POLICÍA */
+
             background-image: url('https://raw.githubusercontent.com/jesepgutahnotificaciones-blip/RADICADOS_JESEP/main/1-fescol-policia-abuso-cilives-1.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             background-repeat: no-repeat;
-            /* Fallback si la imagen no carga */
             background-color: var(--gris-fondo);
         }
 
-        /* Capa oscura semi-transparente para mejorar legibilidad */
         body::before {
             content: '';
             position: fixed;
@@ -47,295 +44,291 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(1,89,47,0.85) 0%, rgba(23,62,86,0.85) 100%);
+            background: linear-gradient(
+                135deg,
+                rgba(1,89,47,0.85) 0%,
+                rgba(23,62,86,0.85) 100%
+            );
             z-index: -1;
         }
 
-        /* ===== HEADER CON DEGRADADO INSTITUCIONAL ===== */
         .header-institutional {
-            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
-            color: var(--blanco);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            background: linear-gradient(
+                135deg,
+                #01592F 0%,
+                #173E56 100%
+            );
+
+            color: white;
+            padding:15px 30px;
+
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .header-left{
+            display:flex;
+            align-items:center;
+            gap:15px;
         }
 
-        .header-left img {
-            width: 50px;
-            height: auto;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        .header-left img{
+            width:50px;
         }
 
-        .header-text h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
+        .header-text h1{
+            font-size:1.2rem;
         }
 
-        .header-text .subtitle {
-            color: var(--amarillo-policia);
-            font-size: 0.85rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .subtitle{
+            color:#C9A227;
+            font-size:.85rem;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .main-content{
+            max-width:1400px;
+            margin:25px auto;
+            padding:0 25px;
         }
 
-        .date-display {
-            color: var(--blanco);
-            font-size: 0.85rem;
-            opacity: 0.9;
+        .welcome-section{
+            background:rgba(255,255,255,.95);
+            padding:25px;
+            border-radius:12px;
+            margin-bottom:25px;
+            text-align:center;
         }
 
-        /* ===== CONTENIDO PRINCIPAL ===== */
-        .main-content {
-            max-width: 1400px;
-            margin: 25px auto;
-            padding: 0 25px;
+        .welcome-section h2{
+            color:#01592F;
+            margin-bottom:10px;
         }
 
-        .welcome-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            border-top: 5px solid var(--amarillo-policia);
-            text-align: center;
+        .buttons-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+            gap:15px;
         }
 
-        .welcome-section h2 {
-            color: var(--verde-policia);
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+        .btn-dependency{
+            background:rgba(255,255,255,.95);
+            border:2px solid #DADCE0;
+            padding:18px;
+            border-radius:8px;
+            cursor:pointer;
+            transition:.3s;
+            font-weight:600;
+            position:relative;
         }
 
-        .welcome-section p {
-            color: var(--gris-texto);
-            font-size: 0.95rem;
-            line-height: 1.5;
+        .btn-dependency:hover{
+            transform:translateY(-3px);
+            border-color:#01592F;
         }
 
-        /* ===== GRID DE DEPENDENCIAS ===== */
-        .buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
+        .icon{
+            display:block;
+            font-size:1.5rem;
+            margin-bottom:8px;
         }
 
-        .btn-dependency {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--borde);
-            padding: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--gris-oscuro);
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+        .name{
+            display:block;
+            color:#01592F;
+            font-weight:bold;
         }
 
-        .btn-dependency::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(180deg, #01592F 0%, #173E56 100%);
-            transition: width 0.3s ease;
+        .type{
+            display:block;
+            font-size:.75rem;
+            color:#5F6368;
+            margin-top:5px;
         }
 
-        .btn-dependency:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            border-color: var(--verde-policia);
-            background: var(--blanco);
+        .footer-institutional{
+            text-align:center;
+            padding:20px;
+            margin-top:30px;
+            background:linear-gradient(
+                135deg,
+                #01592F 0%,
+                #173E56 100%
+            );
+            color:white;
         }
 
-        .btn-dependency:hover::before {
-            width: 6px;
+        .motto{
+            color:#C9A227;
+            margin-top:10px;
         }
 
-        .btn-dependency:active {
-            transform: translateY(0);
-        }
-
-        .btn-dependency .icon {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .btn-dependency .name {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--verde-policia);
-        }
-
-        .btn-dependency .type {
-            display: block;
-            font-size: 0.7rem;
-            color: var(--gris-texto);
-            margin-top: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* ===== FOOTER INSTITUCIONAL ===== */
-        .footer-institutional {
-            text-align: center;
-            padding: 20px;
-            margin-top: 30px;
-            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
-        }
-
-        .footer-institutional p {
-            color: var(--blanco);
-            font-size: 0.8rem;
-            opacity: 0.9;
-        }
-
-        .footer-institutional .motto {
-            color: var(--amarillo-policia);
-            font-weight: 700;
-            font-size: 1rem;
-            margin-top: 8px;
-            letter-spacing: 2px;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .header-institutional {
-                flex-direction: column;
-                gap: 10px;
-                padding: 12px 15px;
-            }
-
-            .header-left img {
-                width: 40px;
-            }
-
-            .header-text h1 {
-                font-size: 1rem;
-            }
-
-            .buttons-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 10px;
-            }
-
-            .btn-dependency {
-                padding: 14px;
+        @media(max-width:768px){
+            .buttons-grid{
+                grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
             }
         }
 
-        @media (max-width: 480px) {
-            .buttons-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
     </style>
+
 </head>
 <body>
-    <!-- HEADER INSTITUCIONAL -->
-    <div class="header-institutional">
-        <div class="header-left">
-            <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
-                 alt="Escudo Policía Nacional" 
-                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
-            <div class="header-text">
-                <h1>Jefatura Nacional del Servicio de Policia</h1>
-                <p class="subtitle">Sistema de Gestión de Novedades</p>
-            </div>
+
+<div class="header-institutional">
+
+    <div class="header-left">
+
+        <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png">
+
+        <div class="header-text">
+            <h1>Jefatura Nacional del Servicio de Policía</h1>
+            <p class="subtitle">
+                Sistema de Gestión de Novedades
+            </p>
         </div>
-        <div class="header-right">
-            <span class="date-display" id="currentDate"></span>
-        </div>
+
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="main-content">
-        <div class="welcome-section">
-            <h2>🏛️ Seleccione una Dependencia</h2>
-            <p>Seleccione la dependencia para gestionar el registro de novedades del personal</p>
-        </div>
+    <span id="currentDate"></span>
 
-        <div class="buttons-grid" id="buttonsContainer">
-            <!-- Botones se generan automáticamente -->
-        </div>
+</div>
+
+
+<div class="main-content">
+
+    <div class="welcome-section">
+        <h2>🏛️ Seleccione una Dependencia</h2>
+        <p>
+            Seleccione la dependencia para gestionar el registro de novedades
+        </p>
     </div>
 
-    <!-- FOOTER INSTITUCIONAL -->
-    <div class="footer-institutional">
-        <p>Sistema de Gestión de Novedades - Jefatura Nacional del Servicio de Policia</p>
-        <p class="motto">★ DIOS Y PATRIA ★</p>
-    </div>
+    <div class="buttons-grid" id="buttonsContainer"></div>
 
-    <script>
-        const dependencies = [
-            'ASJUR', 'CEPOL', 'ARSEG', 'GRUES', 'COINT', 'ARGOP', 
-            'GRUIS', 'GUCOE', 'GUDEH', 'GUFAC', 'GUGEC', 'GUGED', 
-            'GUGET', 'GULOG', 'GURIN', 'GUSEP', 'GUTAH', 'GUTIC', 
-            'GUVIP', 'COVAR', 'OAC', 'PLAN DEMOCRACIA', 'PLANE', 
-            'SEPRI', 'SUMEC', 'SUSEP', 'GRUPOS OPERATIVOS', 'EXCUSADOS','PARTE FINAL'
-        ];
+</div>
 
-        const container = document.getElementById('buttonsContainer');
-        
-        dependencies.forEach(dep => {
-            const btn = document.createElement('button');
-            btn.className = 'btn-dependency';
-            btn.setAttribute('data-type', dep);
-            btn.innerHTML = `
-                <span class="icon">🛡️</span>
-                <span class="name">${dep}</span>
-                <span class="type">Dependencia</span>
-            `;
-            btn.onclick = () => {
-                localStorage.setItem('currentDependency', dep);
-                window.location.href = 'dashboard.html';
-            };
-            container.appendChild(btn);
-        });
 
-        function updateDate() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
-        }
+<div class="footer-institutional">
 
-        updateDate();
-    </script>
+    <p>
+        Sistema de Gestión de Novedades
+    </p>
+
+    <p class="motto">
+        ★ DIOS Y PATRIA ★
+    </p>
+
+</div>
+
+
+<script>
+
+const dependencies=[
+
+'ASJUR',
+'CEPOL',
+'ARSEG',
+'GRUES',
+'COINT',
+'ARGOP',
+'GRUIS',
+'GUCOE',
+'GUDEH',
+'GUFAC',
+'GUGEC',
+'GUGED',
+'GUGET',
+'GULOG',
+'GURIN',
+'GUSEP',
+'GUTAH',
+'GUTIC',
+'GUVIP',
+'COVAR',
+'OAC',
+'PLAN DEMOCRACIA',
+'PLANE',
+'SEPRI',
+'SUMEC',
+'SUSEP',
+'PARTE FINAL'
+
+];
+
+const container=document.getElementById(
+'buttonsContainer'
+);
+
+dependencies.forEach(dep=>{
+
+const btn=document.createElement('button');
+
+btn.className='btn-dependency';
+
+btn.innerHTML=`
+
+<span class="icon">🛡️</span>
+<span class="name">${dep}</span>
+<span class="type">Dependencia</span>
+
+`;
+
+btn.onclick=()=>{
+
+localStorage.setItem(
+'currentDependency',
+dep
+);
+
+// SOLO ESTE BOTÓN REDIRIGE A index_main
+if(dep==="PARTE FINAL"){
+
+window.location.href=
+'https://jesepgutahnotificaciones-blip.github.io/parte_jesep/index_main.html';
+
+}else{
+
+window.location.href=
+'dashboard.html';
+
+}
+
+};
+
+container.appendChild(btn);
+
+});
+
+
+function updateDate(){
+
+const now=new Date();
+
+const options={
+
+weekday:'long',
+year:'numeric',
+month:'long',
+day:'numeric',
+hour:'2-digit',
+minute:'2-digit'
+
+};
+
+document.getElementById(
+'currentDate'
+).textContent=
+
+now.toLocaleDateString(
+'es-CO',
+options
+);
+
+}
+
+updateDate();
+
+</script>
+
 </body>
 </html>
