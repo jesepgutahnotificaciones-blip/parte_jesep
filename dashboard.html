@@ -76,6 +76,7 @@
 
         .main-content { max-width: 1400px; margin: 12px auto; padding: 0 16px; }
 
+        /* ====== NUEVA CLASE PARA CONTROL DE VISIBILIDAD ====== */
         .summary-section {
             background: var(--blanco);
             border-radius: 6px;
@@ -83,6 +84,17 @@
             margin-bottom: 12px;
             box-shadow: var(--sombra-suave);
             border: 1px solid var(--borde);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .summary-section.hidden {
+            display: none;
+            opacity: 0;
+            max-height: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
         }
 
         .summary-section h2 {
@@ -490,7 +502,8 @@
             </div>
         </div>
 
-        <div class="summary-section">
+        <!-- ====== SECCIÓN RESUMEN CON ID PARA CONTROL DE VISIBILIDAD ====== -->
+        <div class="summary-section hidden" id="summarySection">
             <h2>📊 Resumen General de la Dependencia</h2>
             <div id="summaryContainer">
                 <div class="loading">
@@ -711,20 +724,33 @@
 
         async function loadRealData(turno) {
             try {
-                document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen de ' + currentDependency + '...</p></div>';
+                // ====== CONDICIONAL: Solo mostrar resumen si NO es TODOS ======
+                const summarySection = document.getElementById('summarySection');
+                
+                if (turno && turno !== 'ALL') {
+                    // Mostrar sección de resumen para turnos específicos
+                    summarySection.classList.remove('hidden');
+                    document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen de ' + currentDependency + '...</p></div>';
+                } else {
+                    // Ocultar sección de resumen cuando es TODOS
+                    summarySection.classList.add('hidden');
+                }
+                
                 document.getElementById('tableContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando personal de ' + currentDependency + '...</p></div>';
 
-                // Cargar resumen
-                const summaryParams = turno ? { turno: turno } : {};
-                const summaryData = await apiFetch('getSummary', summaryParams);
-                
-                if (summaryData.success) {
-                    renderSummary(summaryData.summary);
-                } else {
-                    throw new Error(summaryData.error || 'Error al cargar resumen');
+                // Cargar resumen SOLO si hay un turno específico
+                if (turno && turno !== 'ALL') {
+                    const summaryParams = { turno: turno };
+                    const summaryData = await apiFetch('getSummary', summaryParams);
+                    
+                    if (summaryData.success) {
+                        renderSummary(summaryData.summary);
+                    } else {
+                        throw new Error(summaryData.error || 'Error al cargar resumen');
+                    }
                 }
 
-                // Cargar datos de tabla
+                // Cargar datos de tabla (siempre se carga)
                 const data = await apiFetch('getData');
                 
                 if (data.success) {
@@ -894,22 +920,23 @@
             else if (turno === 'C') document.getElementById('btn-turno-c').classList.add('active');
             else document.getElementById('btn-turno-all').classList.add('active');
             
+            // ====== CONDICIONAL: Controlar visibilidad del resumen ======
+            const summarySection = document.getElementById('summarySection');
+            
             if (turno !== 'ALL') {
+                // Mostrar resumen cuando se filtra por turno específico
+                summarySection.classList.remove('hidden');
+                document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen Turno ' + turno + '...</p></div>';
+                
                 try {
-                    document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen Turno ' + turno + '...</p></div>';
                     const summaryData = await apiFetch('getSummary', { turno: turno });
                     if (summaryData.success) renderSummary(summaryData.summary);
                 } catch (e) {
                     console.error('Error cargando resumen por turno:', e);
                 }
             } else {
-                try {
-                    document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen general...</p></div>';
-                    const summaryData = await apiFetch('getSummary');
-                    if (summaryData.success) renderSummary(summaryData.summary);
-                } catch (e) {
-                    console.error('Error cargando resumen general:', e);
-                }
+                // Ocultar resumen cuando es TODOS
+                summarySection.classList.add('hidden');
             }
             
             let filteredData = allTableData;
@@ -1025,4 +1052,3 @@
         loadRealData();
     </script>
 </body>
-</html>
