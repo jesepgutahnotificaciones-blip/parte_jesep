@@ -76,7 +76,6 @@
 
         .main-content { max-width: 1400px; margin: 12px auto; padding: 0 16px; }
 
-        /* ====== NUEVA CLASE PARA CONTROL DE VISIBILIDAD ====== */
         .summary-section {
             background: var(--blanco);
             border-radius: 6px;
@@ -260,6 +259,13 @@
         }
         .summary-item.novedad-item.nov-retardado .value { color: #F9A825; }
 
+        /* ====== NUEVO ESTILO: CURSO DE ASCENSO ====== */
+        .summary-item.novedad-item.nov-curso {
+            background: #E3F2FD;
+            color: #0D47A1;
+        }
+        .summary-item.novedad-item.nov-curso .value { color: #0D47A1; }
+
         .summary-item.novedad-item.nov-default {
             background: #F1F3F4;
             color: #5F6368;
@@ -408,6 +414,10 @@
         .novedad-otra { background: #F3E5F5; color: #6A1B9A; }
         .novedad-retardada { background: #FFF3E0; color: #E65100; }
         .novedad-excusa-parcial { background: #E8EAF6; color: #303F9F; }
+        
+        /* ====== NUEVO ESTILO BADGE: CURSO DE ASCENSO ====== */
+        .novedad-curso { background: #E3F2FD; color: #0D47A1; }
+
         .obs-container { display: flex; flex-direction: column; gap: 4px; }
         .obs-input { width: 100%; padding: 5px; border: 1px solid var(--borde); border-radius: 4px; font-family: inherit; font-size: 0.78rem; resize: vertical; min-height: 32px; }
         .obs-input:focus { outline: none; border-color: var(--verde-policia); }
@@ -502,7 +512,6 @@
             </div>
         </div>
 
-        <!-- ====== SECCIÓN RESUMEN CON ID PARA CONTROL DE VISIBILIDAD ====== -->
         <div class="summary-section hidden" id="summarySection">
             <h2>📊 Resumen General de la Dependencia</h2>
             <div id="summaryContainer">
@@ -529,10 +538,12 @@
         let allTableData = [];
         let currentFilter = 'ALL';
 
+        // ====== NUEVA NOVEDAD AGREGADA: CURSO DE ASCENSO ======
         const NOVEDADES = [
             'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
             'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD', 
-            'OTRA NOVEDAD', 'RETARDAD@', 'EXCUSA PARCIAL'
+            'RETARDADO', 'OTRA NOVEDAD', 'RETARDAD@', 'EXCUSA PARCIAL',
+            'CURSO DE ASCENSO'
         ];
 
         function updateDate() {
@@ -545,17 +556,12 @@
         // JSONP FETCH - EVITA PROBLEMAS DE CORS
         // ============================================================
         
-        // Contador único para callbacks JSONP
         let jsonpCallbackId = 0;
         
         function apiFetchJSONP(action, params = {}) {
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonpCallback_' + (++jsonpCallbackId) + '_' + Date.now();
-                
-                // Crear script tag
                 const script = document.createElement('script');
-                
-                // Construir URL con parámetros
                 const urlParams = new URLSearchParams();
                 urlParams.append('action', action);
                 urlParams.append('dependency', currentDependency);
@@ -568,16 +574,13 @@
                 }
                 
                 const url = API_URL + '?' + urlParams.toString();
-                
                 console.log('JSONP Fetch:', url);
                 
-                // Timeout de seguridad
                 const timeout = setTimeout(() => {
                     cleanup();
                     reject(new Error('Timeout JSONP'));
                 }, 15000);
                 
-                // Función de callback global
                 window[callbackName] = function(data) {
                     clearTimeout(timeout);
                     cleanup();
@@ -585,7 +588,6 @@
                     resolve(data);
                 };
                 
-                // Limpieza
                 function cleanup() {
                     delete window[callbackName];
                     if (script.parentNode) {
@@ -593,7 +595,6 @@
                     }
                 }
                 
-                // Manejar errores de carga
                 script.onerror = function() {
                     clearTimeout(timeout);
                     cleanup();
@@ -605,10 +606,6 @@
             });
         }
 
-        // ============================================================
-        // FETCH CON REDIRECT (alternativa si JSONP no funciona)
-        // ============================================================
-        
         async function apiFetchRedirect(action, params = {}) {
             const urlParams = new URLSearchParams();
             urlParams.append('action', action);
@@ -621,11 +618,9 @@
             }
             
             const url = API_URL + '?' + urlParams.toString();
-            
             console.log('Redirect Fetch:', url);
             
             try {
-                // Crear un iframe invisible para manejar la redirección
                 return new Promise((resolve, reject) => {
                     const iframe = document.createElement('iframe');
                     iframe.style.display = 'none';
@@ -667,12 +662,7 @@
             }
         }
 
-        // ============================================================
-        // FETCH PRINCIPAL (intenta múltiples métodos)
-        // ============================================================
-        
         async function apiFetch(action, params = {}) {
-            // Primero intentar con fetch normal
             try {
                 const urlParams = new URLSearchParams();
                 urlParams.append('action', action);
@@ -700,7 +690,6 @@
             } catch (fetchError) {
                 console.log('Fetch normal falló, intentando JSONP:', fetchError.message);
                 
-                // Si fetch falla, intentar JSONP
                 try {
                     return await apiFetchJSONP(action, params);
                 } catch (jsonpError) {
@@ -724,21 +713,17 @@
 
         async function loadRealData(turno) {
             try {
-                // ====== CONDICIONAL: Solo mostrar resumen si NO es TODOS ======
                 const summarySection = document.getElementById('summarySection');
                 
                 if (turno && turno !== 'ALL') {
-                    // Mostrar sección de resumen para turnos específicos
                     summarySection.classList.remove('hidden');
                     document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen de ' + currentDependency + '...</p></div>';
                 } else {
-                    // Ocultar sección de resumen cuando es TODOS
                     summarySection.classList.add('hidden');
                 }
                 
                 document.getElementById('tableContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando personal de ' + currentDependency + '...</p></div>';
 
-                // Cargar resumen SOLO si hay un turno específico
                 if (turno && turno !== 'ALL') {
                     const summaryParams = { turno: turno };
                     const summaryData = await apiFetch('getSummary', summaryParams);
@@ -750,7 +735,6 @@
                     }
                 }
 
-                // Cargar datos de tabla (siempre se carga)
                 const data = await apiFetch('getData');
                 
                 if (data.success) {
@@ -821,6 +805,8 @@
                 else if (novedadName.indexOf('CITA') !== -1) colorClass = 'nov-cita';
                 else if (novedadName.indexOf('MATERNIDAD') !== -1) colorClass = 'nov-maternidad';
                 else if (novedadName.indexOf('RETARDADO') !== -1) colorClass = 'nov-retardado';
+                // ====== NUEVO COLOR CURSO DE ASCENSO ======
+                else if (novedadName.indexOf('CURSO') !== -1) colorClass = 'nov-curso';
                 
                 div.className = 'summary-item novedad-item ' + colorClass;
                 div.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
@@ -920,11 +906,9 @@
             else if (turno === 'C') document.getElementById('btn-turno-c').classList.add('active');
             else document.getElementById('btn-turno-all').classList.add('active');
             
-            // ====== CONDICIONAL: Controlar visibilidad del resumen ======
             const summarySection = document.getElementById('summarySection');
             
             if (turno !== 'ALL') {
-                // Mostrar resumen cuando se filtra por turno específico
                 summarySection.classList.remove('hidden');
                 document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen Turno ' + turno + '...</p></div>';
                 
@@ -935,7 +919,6 @@
                     console.error('Error cargando resumen por turno:', e);
                 }
             } else {
-                // Ocultar resumen cuando es TODOS
                 summarySection.classList.add('hidden');
             }
             
@@ -1014,6 +997,8 @@
             if (n.indexOf('MATERNIDAD') !== -1) return 'novedad-maternidad';
             if (n === 'RETARDAD@') return 'novedad-retardada';
             if (n.indexOf('OTRA') !== -1) return 'novedad-otra';
+            // ====== NUEVA CLASE CURSO DE ASCENSO ======
+            if (n.indexOf('CURSO') !== -1) return 'novedad-curso';
             return 'novedad-normal';
         }
 
