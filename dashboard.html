@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Policía Nacional de Colombia</title>
     <style>
+        /* [TU CSS EXISTENTE - SE MANTIENE IGUAL] */
         :root {
             --verde-policia: #01592F;
             --azul-oscuro: #173E56;
@@ -509,7 +510,7 @@
         // ============================================================
         // CONFIGURACIÓN API - URL DE TU GOOGLE APPS SCRIPT
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwNWNAa-Pn2EtwdB8ATALnPSbxFiHIAX9f6C5UKxdLmVDNVI96Ef1eqgtD-lMR2KNF1/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxe3XvGG1Z2PMlFBrQ-8l1C2CxaxOAtj8LwsKjomMvRyO-H73WaDPUgZXry7gP3XZTq/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
         let allTableData = [];
@@ -528,11 +529,74 @@
         }
 
         // ============================================================
-        // FETCH API CON MANEJO DE CORS
+        // JSONP FETCH - EVITA PROBLEMAS DE CORS
         // ============================================================
         
-        async function apiFetch(action, params = {}) {
-            // Construir URL con parámetros
+        // Contador único para callbacks JSONP
+        let jsonpCallbackId = 0;
+        
+        function apiFetchJSONP(action, params = {}) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonpCallback_' + (++jsonpCallbackId) + '_' + Date.now();
+                
+                // Crear script tag
+                const script = document.createElement('script');
+                
+                // Construir URL con parámetros
+                const urlParams = new URLSearchParams();
+                urlParams.append('action', action);
+                urlParams.append('dependency', currentDependency);
+                urlParams.append('callback', callbackName);
+                
+                for (const [key, value] of Object.entries(params)) {
+                    if (value !== undefined && value !== null) {
+                        urlParams.append(key, value);
+                    }
+                }
+                
+                const url = API_URL + '?' + urlParams.toString();
+                
+                console.log('JSONP Fetch:', url);
+                
+                // Timeout de seguridad
+                const timeout = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('Timeout JSONP'));
+                }, 15000);
+                
+                // Función de callback global
+                window[callbackName] = function(data) {
+                    clearTimeout(timeout);
+                    cleanup();
+                    console.log('JSONP Response:', data);
+                    resolve(data);
+                };
+                
+                // Limpieza
+                function cleanup() {
+                    delete window[callbackName];
+                    if (script.parentNode) {
+                        script.parentNode.removeChild(script);
+                    }
+                }
+                
+                // Manejar errores de carga
+                script.onerror = function() {
+                    clearTimeout(timeout);
+                    cleanup();
+                    reject(new Error('Error cargando script JSONP'));
+                };
+                
+                script.src = url;
+                document.head.appendChild(script);
+            });
+        }
+
+        // ============================================================
+        // FETCH CON REDIRECT (alternativa si JSONP no funciona)
+        // ============================================================
+        
+        async function apiFetchRedirect(action, params = {}) {
             const urlParams = new URLSearchParams();
             urlParams.append('action', action);
             urlParams.append('dependency', currentDependency);
@@ -545,29 +609,91 @@
             
             const url = API_URL + '?' + urlParams.toString();
             
-            console.log('Fetching:', url);
+            console.log('Redirect Fetch:', url);
             
             try {
-                // Usar fetch con redirect: follow para manejar redirecciones de Google
+                // Crear un iframe invisible para manejar la redirección
+                return new Promise((resolve, reject) => {
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.name = 'apiFrame_' + Date.now();
+                    
+                    const form = document.createElement('form');
+                    form.method = 'GET';
+                    form.action = url;
+                    form.target = iframe.name;
+                    
+                    document.body.appendChild(iframe);
+                    document.body.appendChild(form);
+                    
+                    iframe.onload = function() {
+                        try {
+                            const responseText = iframe.contentDocument.body.innerText;
+                            const data = JSON.parse(responseText);
+                            resolve(data);
+                        } catch (e) {
+                            reject(new Error('Error parseando respuesta'));
+                        } finally {
+                            document.body.removeChild(iframe);
+                            document.body.removeChild(form);
+                        }
+                    };
+                    
+                    iframe.onerror = function() {
+                        reject(new Error('Error iframe'));
+                        document.body.removeChild(iframe);
+                        document.body.removeChild(form);
+                    };
+                    
+                    form.submit();
+                });
+                
+            } catch (error) {
+                console.error('Redirect fetch error:', error);
+                throw error;
+            }
+        }
+
+        // ============================================================
+        // FETCH PRINCIPAL (intenta múltiples métodos)
+        // ============================================================
+        
+        async function apiFetch(action, params = {}) {
+            // Primero intentar con fetch normal
+            try {
+                const urlParams = new URLSearchParams();
+                urlParams.append('action', action);
+                urlParams.append('dependency', currentDependency);
+                
+                for (const [key, value] of Object.entries(params)) {
+                    if (value !== undefined && value !== null) {
+                        urlParams.append(key, value);
+                    }
+                }
+                
+                const url = API_URL + '?' + urlParams.toString();
+                
                 const response = await fetch(url, {
                     method: 'GET',
                     redirect: 'follow',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Accept': 'application/json' }
                 });
                 
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                }
+                if (!response.ok) throw new Error('HTTP ' + response.status);
                 
                 const data = await response.json();
-                console.log('Response:', data);
                 return data;
                 
-            } catch (error) {
-                console.error('Fetch error:', error);
-                throw error;
+            } catch (fetchError) {
+                console.log('Fetch normal falló, intentando JSONP:', fetchError.message);
+                
+                // Si fetch falla, intentar JSONP
+                try {
+                    return await apiFetchJSONP(action, params);
+                } catch (jsonpError) {
+                    console.log('JSONP falló:', jsonpError.message);
+                    throw new Error('No se pudo conectar con el servidor. Verifica la URL del deployment.');
+                }
             }
         }
 
@@ -860,7 +986,6 @@
             if (n.indexOf('CITA') !== -1) return 'novedad-cita';
             if (n.indexOf('MATERNIDAD') !== -1) return 'novedad-maternidad';
             if (n === 'RETARDAD@') return 'novedad-retardada';
-            if (n.indexOf('RETARDADO') !== -1) return 'novedad-retardado';
             if (n.indexOf('OTRA') !== -1) return 'novedad-otra';
             return 'novedad-normal';
         }
