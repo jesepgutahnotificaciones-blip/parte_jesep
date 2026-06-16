@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Resumen - Policía Nacional de Colombia</title>
+    <style>
+        :root {
+            --verde-policia: #01592F;
+            --azul-oscuro: #173E56;
+            --amarillo-policia: #C9A227;
+            --blanco: #FFFFFF;
+            --gris-fondo: #F0F2F5;
+            --gris-suave: #E8EAED;
+            --gris-texto: #5F6368;
+            --gris-oscuro: #3C4043;
+            --rojo-suave: #D93025;
+            --borde: #DADCE0;
+            --sombra-suave: 0 2px 8px rgba(0,0,0,0.12);
+            --sombra-card: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+            color: var(--gris-oscuro);
+            font-size: 14px;
+        }
+
+        /* HEADER INSTITUCIONAL */
+        .header-institutional {
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
+            color: var(--blanco);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--sombra-suave);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-left img { 
+            width: 48px; 
+            height: auto; 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            background: var(--blanco);
+            padding: 4px;
+            border-radius: 50%;
+        }
+        .header-text h1 { 
+            font-size: 1.2rem; 
+            font-weight: 700; 
+            letter-spacing: 0.8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .header-text .subtitulo { 
+            color: var(--amarillo-policia); 
+            font-size: 0.85rem; 
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .date-display { 
+            color: var(--blanco); 
+            font-size: 0.8rem; 
+            opacity: 0.9;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        .btn-refresh {
+            background: var(--amarillo-policia);
+            color: var(--azul-oscuro);
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-refresh:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201,162,39,0.4);
+        }
+        .btn-refresh:active { transform: translateY(0); }
+
+        /* MAIN CONTENT */
+        .main-content { 
+            max-width: 1400px; 
+            margin: 24px auto; 
+            padding: 0 24px; 
+        }
+
+        /* TITULO SECCION */
+        .section-title {
+            text-align: center;
+            margin-bottom: 24px;
+            color: var(--verde-policia);
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            padding-bottom: 12px;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--amarillo-policia), var(--verde-policia));
+            border-radius: 2px;
+        }
+
+        /* GRID DE TURNOS */
+        .turnos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        /* CARD DE TURNO */
+        .turno-card {
+            background: var(--blanco);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--sombra-card);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid var(--borde);
+        }
+        .turno-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+
+        /* HEADER DE CARD */
+        .turno-header {
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
+            color: var(--blanco);
+            padding: 16px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .turno-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        .turno-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+        }
+        .turno-header .turno-badge {
+            display: inline-block;
+            background: var(--amarillo-policia);
+            color: var(--azul-oscuro);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+
+        /* SUBTITULO FORMAN */
+        .forman-subtitle {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 12px 16px;
+            text-align: center;
+            border-bottom: 2px solid var(--borde);
+        }
+        .forman-subtitle h3 {
+            color: var(--verde-policia);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* CUERPO DE CARD */
+        .turno-body {
+            padding: 16px;
+        }
+
+        /* GRID DE CATEGORIAS */
+        .categorias-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        /* ITEM DE CATEGORIA */
+        .categoria-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .categoria-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--verde-policia);
+        }
+        .categoria-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .categoria-item .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--gris-texto);
+            font-weight: 600;
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .categoria-item .value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--verde-policia);
+            line-height: 1;
+        }
+
+        .categoria-item .value.zero {
+            color: var(--gris-texto);
+            opacity: 0.5;
+        }
+
+        /* COLORES ESPECIFICOS POR CATEGORIA */
+        .cat-oficiales::before { background: #1967D2; }
+        .cat-oficiales .value { color: #1967D2; }
+
+        .cat-ne::before { background: #1E8E3E; }
+        .cat-ne .value { color: #1E8E3E; }
+
+        .cat-patrulleros::before { background: #B06000; }
+        .cat-patrulleros .value { color: #B06000; }
+
+        .cat-pp::before { background: #9C1B6A; }
+        .cat-pp .value { color: #9C1B6A; }
+
+        .cat-axp::before { background: #7B1FA2; }
+        .cat-axp .value { color: #7B1FA2; }
+
+        .cat-nouni::before { background: #C53929; }
+        .cat-nouni .value { color: #C53929; }
+
+        /* TOTAL CARD */
+        .total-card {
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
+            color: var(--blanco);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 16px;
+            box-shadow: var(--sombra-card);
+        }
+        .total-card .total-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .total-card .total-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--amarillo-policia);
+        }
+
+        /* FOOTER */
+        .footer-institutional {
+            text-align: center;
+            padding: 20px;
+            margin-top: 32px;
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
+        }
+        .footer-institutional p { 
+            color: var(--blanco); 
+            font-size: 0.75rem; 
+            opacity: 0.8; 
+        }
+        .footer-institutional .motto { 
+            color: var(--amarillo-policia); 
+            font-weight: 700; 
+            font-size: 0.9rem; 
+            margin-top: 6px; 
+            letter-spacing: 2px; 
+        }
+
+        /* LOADING */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--gris-suave);
+            border-top-color: var(--amarillo-policia);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text {
+            color: var(--verde-policia);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .turnos-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .turnos-grid { grid-template-columns: 1fr; }
+            .header-institutional { flex-direction: column; gap: 12px; padding: 12px 16px; }
+            .header-left img { width: 36px; }
+            .header-text h1 { font-size: 1rem; }
+            .categorias-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .categorias-grid { grid-template-columns: repeat(2, 1fr); }
+            .categoria-item .value { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Cargando información del comando...</div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header-institutional">
+        <div class="header-left">
+            <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
+                 alt="Escudo Policía Nacional" 
+                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
+            <div class="header-text">
+                <h1>POLICÍA NACIONAL DE COLOMBIA</h1>
+                <div class="subtitulo">Dashboard de Formación - Resumen General</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="date-display" id="currentDate"></span>
+            <button class="btn-refresh" onclick="cargarDatos()">🔄 Actualizar</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <h2 class="section-title">📊 Estado de Formación por Turnos</h2>
+
+        <div class="turnos-grid">
+            <!-- TURNO A -->
+            <div class="turno-card">
+                <div class="turno-header">
+                    <h2>🅰️ EN FORMACIÓN</h2>
+                    <div class="turno-badge">TURNO A</div>
+                </div>
+                <div class="forman-subtitle">
+                    <h3>FORMAN</h3>
+                </div>
+                <div class="turno-body">
+                    <div class="categorias-grid">
+                        <div class="categoria-item cat-oficiales">
+                            <div class="label">Oficiales</div>
+                            <div class="value" id="turnoA-oficiales">-</div>
+                        </div>
+                        <div class="categoria-item cat-ne">
+                            <div class="label">Nivel Ejecutivo</div>
+                            <div class="value" id="turnoA-ne">-</div>
+                        </div>
+                        <div class="categoria-item cat-patrulleros">
+                            <div class="label">Patrulleros</div>
+                            <div class="value" id="turnoA-patrulleros">-</div>
+                        </div>
+                        <div class="categoria-item cat-pp">
+                            <div class="label">Patrulleros de Policía</div>
+                            <div class="value" id="turnoA-pp">-</div>
+                        </div>
+                        <div class="categoria-item cat-axp">
+                            <div class="label">AXP</div>
+                            <div class="value" id="turnoA-axp">-</div>
+                        </div>
+                        <div class="categoria-item cat-nouni">
+                            <div class="label">No Uniformados</div>
+                            <div class="value" id="turnoA-nouni">-</div>
+                        </div>
+                    </div>
+                    <div class="total-card">
+                        <div class="total-label">Total Turno A</div>
+                        <div class="total-value" id="turnoA-total">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TURNO B -->
+            <div class="turno-card">
+                <div class="turno-header">
+                    <h2>🅱️ EN FORMACIÓN</h2>
+                    <div class="turno-badge">TURNO B</div>
+                </div>
+                <div class="forman-subtitle">
+                    <h3>FORMAN</h3>
+                </div>
+                <div class="turno-body">
+                    <div class="categorias-grid">
+                        <div class="categoria-item cat-oficiales">
+                            <div class="label">Oficiales</div>
+                            <div class="value" id="turnoB-oficiales">-</div>
+                        </div>
+                        <div class="categoria-item cat-ne">
+                            <div class="label">Nivel Ejecutivo</div>
+                            <div class="value" id="turnoB-ne">-</div>
+                        </div>
+                        <div class="categoria-item cat-patrulleros">
+                            <div class="label">Patrulleros</div>
+                            <div class="value" id="turnoB-patrulleros">-</div>
+                        </div>
+                        <div class="categoria-item cat-pp">
+                            <div class="label">Patrulleros de Policía</div>
+                            <div class="value" id="turnoB-pp">-</div>
+                        </div>
+                        <div class="categoria-item cat-axp">
+                            <div class="label">AXP</div>
+                            <div class="value" id="turnoB-axp">-</div>
+                        </div>
+                        <div class="categoria-item cat-nouni">
+                            <div class="label">No Uniformados</div>
+                            <div class="value" id="turnoB-nouni">-</div>
+                        </div>
+                    </div>
+                    <div class="total-card">
+                        <div class="total-label">Total Turno B</div>
+                        <div class="total-value" id="turnoB-total">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TURNO C -->
+            <div class="turno-card">
+                <div class="turno-header">
+                    <h2>🅲️ EN FORMACIÓN</h2>
+                    <div class="turno-badge">TURNO C</div>
+                </div>
+                <div class="forman-subtitle">
+                    <h3>FORMAN</h3>
+                </div>
+                <div class="turno-body">
+                    <div class="categorias-grid">
+                        <div class="categoria-item cat-oficiales">
+                            <div class="label">Oficiales</div>
+                            <div class="value" id="turnoC-oficiales">-</div>
+                        </div>
+                        <div class="categoria-item cat-ne">
+                            <div class="label">Nivel Ejecutivo</div>
+                            <div class="value" id="turnoC-ne">-</div>
+                        </div>
+                        <div class="categoria-item cat-patrulleros">
+                            <div class="label">Patrulleros</div>
+                            <div class="value" id="turnoC-patrulleros">-</div>
+                        </div>
+                        <div class="categoria-item cat-pp">
+                            <div class="label">Patrulleros de Policía</div>
+                            <div class="value" id="turnoC-pp">-</div>
+                        </div>
+                        <div class="categoria-item cat-axp">
+                            <div class="label">AXP</div>
+                            <div class="value" id="turnoC-axp">-</div>
+                        </div>
+                        <div class="categoria-item cat-nouni">
+                            <div class="label">No Uniformados</div>
+                            <div class="value" id="turnoC-nouni">-</div>
+                        </div>
+                    </div>
+                    <div class="total-card">
+                        <div class="total-label">Total Turno C</div>
+                        <div class="total-value" id="turnoC-total">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-institutional">
+        <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
+        <p class="motto">★ DIOS Y PATRIA ★</p>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN API
+        // ============================================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxMlh0DU-KcCqLy42TdFtKLA2lhSatYLbtIKuPqQW1j_NV9E6jtBmJehj9sQ7HTDmRB/exec';
+
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
+        }
+
+        // ============================================================
+        // FETCH CON JSONP (evita CORS)
+        // ============================================================
+        
+        let jsonpCallbackId = 0;
+        
+        function apiFetchJSONP(action, params = {}) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonpCallback_' + (++jsonpCallbackId) + '_' + Date.now();
+                const script = document.createElement('script');
+                
+                const urlParams = new URLSearchParams();
+                urlParams.append('action', action);
+                urlParams.append('callback', callbackName);
+                
+                for (const [key, value] of Object.entries(params)) {
+                    if (value !== undefined && value !== null) {
+                        urlParams.append(key, value);
+                    }
+                }
+                
+                const url = API_URL + '?' + urlParams.toString();
+                
+                console.log('JSONP Fetch:', url);
+                
+                const timeout = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('Timeout JSONP'));
+                }, 15000);
+                
+                window[callbackName] = function(data) {
+                    clearTimeout(timeout);
+                    cleanup();
+                    console.log('JSONP Response:', data);
+                    resolve(data);
+                };
+                
+                function cleanup() {
+                    delete window[callbackName];
+                    if (script.parentNode) {
+                        script.parentNode.removeChild(script);
+                    }
+                }
+                
+                script.onerror = function() {
+                    clearTimeout(timeout);
+                    cleanup();
+                    reject(new Error('Error cargando script JSONP'));
+                };
+                
+                script.src = url;
+                document.head.appendChild(script);
+            });
+        }
+
+        // ============================================================
+        // CARGAR DATOS DEL DASHBOARD
+        // ============================================================
+        
+        async function cargarDatos() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            try {
+                // Usar la nueva función getDashboardData
+                const response = await apiFetchJSONP('getDashboardData');
+                
+                if (response.success && response.data) {
+                    const datos = response.data;
+                    
+                    // Actualizar Turno A
+                    actualizarTurno('turnoA', datos.turnoA);
+                    
+                    // Actualizar Turno B
+                    actualizarTurno('turnoB', datos.turnoB);
+                    
+                    // Actualizar Turno C
+                    actualizarTurno('turnoC', datos.turnoC);
+                    
+                } else {
+                    throw new Error(response.error || 'Error al cargar datos');
+                }
+                
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                // Intentar con getCells como fallback
+                try {
+                    await cargarDatosFallback();
+                } catch (fallbackError) {
+                    alert('Error cargando datos: ' + fallbackError.message);
+                }
+            } finally {
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                }, 500);
+            }
+        }
+
+        // Fallback: leer celdas individuales
+        async function cargarDatosFallback() {
+            const celdas = 'J2,K2,L2,M2,N2,O2,Q2,R2,S2,T2,U2,V2,X2,Y2,Z2,AA2,AB2,AC2';
+            
+            const response = await apiFetchJSONP('getCells', { cells: celdas });
+            
+            if (response.success && response.values) {
+                const v = response.values;
+                
+                actualizarTurno('turnoA', {
+                    oficiales: v['J2'] || 0,
+                    ne: v['K2'] || 0,
+                    patrulleros: v['L2'] || 0,
+                    pp: v['M2'] || 0,
+                    axp: v['N2'] || 0,
+                    nouni: v['O2'] || 0
+                });
+                
+                actualizarTurno('turnoB', {
+                    oficiales: v['Q2'] || 0,
+                    ne: v['R2'] || 0,
+                    patrulleros: v['S2'] || 0,
+                    pp: v['T2'] || 0,
+                    axp: v['U2'] || 0,
+                    nouni: v['V2'] || 0
+                });
+                
+                actualizarTurno('turnoC', {
+                    oficiales: v['X2'] || 0,
+                    ne: v['Y2'] || 0,
+                    patrulleros: v['Z2'] || 0,
+                    pp: v['AA2'] || 0,
+                    axp: v['AB2'] || 0,
+                    nouni: v['AC2'] || 0
+                });
+            }
+        }
+
+        function actualizarTurno(turnoId, datos) {
+            // Convertir a números
+            const oficiales = parseInt(datos.oficiales) || 0;
+            const ne = parseInt(datos.ne) || 0;
+            const patrulleros = parseInt(datos.patrulleros) || 0;
+            const pp = parseInt(datos.pp) || 0;
+            const axp = parseInt(datos.axp) || 0;
+            const nouni = parseInt(datos.nouni) || 0;
+            
+            // Actualizar cada categoría
+            document.getElementById(turnoId + '-oficiales').textContent = oficiales;
+            document.getElementById(turnoId + '-ne').textContent = ne;
+            document.getElementById(turnoId + '-patrulleros').textContent = patrulleros;
+            document.getElementById(turnoId + '-pp').textContent = pp;
+            document.getElementById(turnoId + '-axp').textContent = axp;
+            document.getElementById(turnoId + '-nouni').textContent = nouni;
+            
+            // Calcular y mostrar total
+            const total = oficiales + ne + patrulleros + pp + axp + nouni;
+            document.getElementById(turnoId + '-total').textContent = total;
+            
+            // Aplicar clase zero si el valor es 0
+            const categorias = [
+                { id: 'oficiales', val: oficiales },
+                { id: 'ne', val: ne },
+                { id: 'patrulleros', val: patrulleros },
+                { id: 'pp', val: pp },
+                { id: 'axp', val: axp },
+                { id: 'nouni', val: nouni }
+            ];
+            
+            categorias.forEach(cat => {
+                const el = document.getElementById(turnoId + '-' + cat.id);
+                if (cat.val === 0) {
+                    el.classList.add('zero');
+                } else {
+                    el.classList.remove('zero');
+                }
+            });
+        }
+
+        // Inicialización
+        updateDate();
+        cargarDatos();
+        
+        // Actualizar cada 30 segundos
+        setInterval(cargarDatos, 30000);
+    </script>
+</body>
+</html>
