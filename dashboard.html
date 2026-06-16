@@ -450,7 +450,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="header-institutional">
         <div class="header-left">
@@ -507,8 +506,10 @@
     </div>
 
     <script>
-
-                const API_URL = 'https://script.google.com/macros/s/AKfycbxJ-gaLv5kfnByYOM5ca4GH2_HlUO426c6dYTGqnB4DFiYQRGycStVLJUlUF6Y160qK/exec';
+        // ============================================================
+        // CONFIGURACIÓN API - URL DE TU GOOGLE APPS SCRIPT
+        // ============================================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwNWNAa-Pn2EtwdB8ATALnPSbxFiHIAX9f6C5UKxdLmVDNVI96Ef1eqgtD-lMR2KNF1/exec';
 
         let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
         let allTableData = [];
@@ -526,12 +527,53 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
+        // ============================================================
+        // FETCH API CON MANEJO DE CORS
+        // ============================================================
+        
+        async function apiFetch(action, params = {}) {
+            // Construir URL con parámetros
+            const urlParams = new URLSearchParams();
+            urlParams.append('action', action);
+            urlParams.append('dependency', currentDependency);
+            
+            for (const [key, value] of Object.entries(params)) {
+                if (value !== undefined && value !== null) {
+                    urlParams.append(key, value);
+                }
+            }
+            
+            const url = API_URL + '?' + urlParams.toString();
+            
+            console.log('Fetching:', url);
+            
+            try {
+                // Usar fetch con redirect: follow para manejar redirecciones de Google
+                const response = await fetch(url, {
+                    method: 'GET',
+                    redirect: 'follow',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                }
+                
+                const data = await response.json();
+                console.log('Response:', data);
+                return data;
+                
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error;
+            }
+        }
+
         async function loadTotalFuncionarios() {
             try {
-                const url = API_URL + '?action=getTotalFuncionarios&dependency=' + encodeURIComponent(currentDependency);
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                const result = await response.json();
+                const result = await apiFetch('getTotalFuncionarios');
                 if (result.success && result.total !== undefined) {
                     document.getElementById('totalFuncionarios').textContent = result.total;
                     document.getElementById('headerStats').style.display = 'flex';
@@ -541,59 +583,47 @@
             }
         }
 
-        async function fetchData(action, turno) {
-            const turnoParam = turno ? '&turno=' + encodeURIComponent(turno) : '';
-            const url = API_URL + '?action=' + encodeURIComponent(action) + '&dependency=' + encodeURIComponent(currentDependency) + turnoParam;
-            
-            console.log('Fetching:', url);
-            
-            const response = await fetch(url);
-            
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            return await response.json();
-        }
-
-        async function saveData(row, novedad, observation) {
-            const params = [];
-            params.push('action=' + encodeURIComponent('saveData'));
-            params.push('dependency=' + encodeURIComponent(currentDependency));
-            params.push('row=' + encodeURIComponent(row.toString()));
-            params.push('novedad=' + encodeURIComponent(novedad || ''));
-            params.push('observation=' + encodeURIComponent(observation || ''));
-            
-            const url = API_URL + '?' + params.join('&');
-            
-            console.log('Saving:', url);
-            
-            const response = await fetch(url);
-            
-            if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-            const result = await response.json();
-            if (!result.success) throw new Error(result.error || 'Error del servidor');
-            return result;
-        }
-
         async function loadRealData(turno) {
             try {
                 document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen de ' + currentDependency + '...</p></div>';
                 document.getElementById('tableContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando personal de ' + currentDependency + '...</p></div>';
 
-                const summaryData = await fetchData('getSummary', turno);
-                if (summaryData.success) renderSummary(summaryData.summary);
-                else throw new Error(summaryData.error || 'Error al cargar resumen');
+                // Cargar resumen
+                const summaryParams = turno ? { turno: turno } : {};
+                const summaryData = await apiFetch('getSummary', summaryParams);
+                
+                if (summaryData.success) {
+                    renderSummary(summaryData.summary);
+                } else {
+                    throw new Error(summaryData.error || 'Error al cargar resumen');
+                }
 
-                const data = await fetchData('getData');
+                // Cargar datos de tabla
+                const data = await apiFetch('getData');
+                
                 if (data.success) {
                     allTableData = data.data || [];
                     if (!turno) {
                         filterByTurno('ALL');
                     }
+                } else {
+                    throw new Error(data.error || 'Error al cargar datos');
                 }
-                else throw new Error(data.error || 'Error al cargar datos');
+                
             } catch (error) {
                 console.error('Error:', error);
                 showError(error.message);
             }
+        }
+
+        async function saveData(row, novedad, observation) {
+            const params = {
+                row: row.toString(),
+                novedad: novedad || '',
+                observation: observation || ''
+            };
+            
+            return await apiFetch('saveData', params);
         }
 
         function showError(message) {
@@ -620,7 +650,7 @@
             const grid = contentDiv.querySelector('.novedad-grid');
             if (!grid) return;
             
-            const headerEl = container.querySelector('[onclick*="' + contentId + '"');
+            const headerEl = container.querySelector('[onclick*="' + contentId + '"]');
             let novedadName = '';
             if (headerEl) {
                 const titleEl = headerEl.querySelector('.novedad-accordion-title');
@@ -741,7 +771,7 @@
             if (turno !== 'ALL') {
                 try {
                     document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen Turno ' + turno + '...</p></div>';
-                    const summaryData = await fetchData('getSummary', turno);
+                    const summaryData = await apiFetch('getSummary', { turno: turno });
                     if (summaryData.success) renderSummary(summaryData.summary);
                 } catch (e) {
                     console.error('Error cargando resumen por turno:', e);
@@ -749,7 +779,7 @@
             } else {
                 try {
                     document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen general...</p></div>';
-                    const summaryData = await fetchData('getSummary', '');
+                    const summaryData = await apiFetch('getSummary');
                     if (summaryData.success) renderSummary(summaryData.summary);
                 } catch (e) {
                     console.error('Error cargando resumen general:', e);
@@ -863,6 +893,7 @@
             container.innerHTML = html;
         }
 
+        // Inicialización
         document.getElementById('depTitle').textContent = currentDependency;
         updateDate();
         loadTotalFuncionarios();
