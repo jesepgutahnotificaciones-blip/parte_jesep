@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Novedades - Policía Nacional de Colombia</title>
+    <title>Dashboard - Policía Nacional de Colombia</title>
     <style>
         :root {
             --verde-policia: #01592F;
@@ -16,25 +16,23 @@
             --gris-oscuro: #3C4043;
             --rojo-suave: #D93025;
             --borde: #DADCE0;
-            --sombra-suave: 0 2px 8px rgba(0,0,0,0.1);
-            --sombra-card: 0 4px 12px rgba(0,0,0,0.15);
+            --sombra-suave: 0 1px 3px rgba(0,0,0,0.08);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, var(--gris-fondo) 0%, #e8ecef 100%);
+            background: var(--gris-fondo);
             min-height: 100vh;
             color: var(--gris-oscuro);
-            font-size: 14px;
+            font-size: 13px;
         }
 
-        /* ===== HEADER ===== */
         .header-institutional {
             background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
             color: var(--blanco);
-            padding: 12px 24px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -42,363 +40,418 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            height: 56px;
         }
 
-        .header-left { display: flex; align-items: center; gap: 14px; }
-        .header-left img { width: 42px; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
-        .header-text h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
-        .header-text .subtitulo { color: var(--amarillo-policia); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-left img { width: 36px; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        .header-text h1 { font-size: 0.95rem; font-weight: 600; letter-spacing: 0.5px; }
+        .header-text .dep-name { color: var(--amarillo-policia); font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .btn-back { background: var(--amarillo-policia); color: var(--azul-oscuro); border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.75rem; transition: opacity 0.2s; text-transform: uppercase; }
+        .btn-back:hover { opacity: 0.85; }
+        .date-display { color: var(--blanco); font-size: 0.75rem; opacity: 0.85; }
 
-        .header-right { display: flex; align-items: center; gap: 16px; }
-        .date-display { color: var(--blanco); font-size: 0.8rem; opacity: 0.9; }
-        .btn-refresh {
-            background: linear-gradient(135deg, var(--amarillo-policia) 0%, #B8941F 100%);
-            color: var(--azul-oscuro);
-            border: none;
-            padding: 8px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        .btn-refresh:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .btn-refresh:active { transform: translateY(0); }
-
-        /* ===== MAIN CONTENT ===== */
-        .main-content { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
-
-        .section-title {
-            color: var(--verde-policia);
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 20px;
+        .header-stats {
             display: flex;
             align-items: center;
-            gap: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 4px;
+            margin-left: 12px;
         }
-        .section-title::before {
+        .header-stats .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+        .header-stats .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--amarillo-policia);
+        }
+
+        .main-content { max-width: 1400px; margin: 12px auto; padding: 0 16px; }
+
+        .summary-section {
+            background: var(--blanco);
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--sombra-suave);
+            border: 1px solid var(--borde);
+        }
+
+        .summary-section h2 {
+            color: var(--verde-policia);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .summary-section h2::before {
             content: '';
             display: inline-block;
-            width: 4px;
-            height: 24px;
+            width: 3px;
+            height: 16px;
             background: var(--amarillo-policia);
             border-radius: 2px;
         }
 
-        /* ===== TURNOS GRID ===== */
-        .turnos-grid {
+        .summary-grid-6 {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .turno-card {
-            background: var(--blanco);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--sombra-card);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid var(--borde);
-        }
-        .turno-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-
-        .turno-header {
-            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
-            color: var(--blanco);
-            padding: 14px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .turno-header h2 { font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; }
-        .turno-badge {
-            background: var(--amarillo-policia);
-            color: var(--azul-oscuro);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-        }
-
-        .forman-subtitle {
-            background: linear-gradient(135deg, #1a5f3f 0%, #0d3d2d 100%);
-            color: var(--blanco);
-            text-align: center;
-            padding: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .turno-body { padding: 16px; }
-
-        /* ===== CATEGORÍAS (PARTE) ===== */
-        .categorias-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 8px;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
         }
 
-        .categoria-item {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 10px 6px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid var(--borde);
-            transition: all 0.2s ease;
-        }
-        .categoria-item:hover { transform: scale(1.05); }
-
-        .categoria-item .label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--gris-texto);
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .categoria-item .value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--verde-policia);
-        }
-        .categoria-item .value.zero { color: #ccc; font-weight: 400; }
-
-        /* Colores por categoría */
-        .cat-oficiales { border-left: 3px solid #1967D2; }
-        .cat-ne { border-left: 3px solid #1E8E3E; }
-        .cat-patrulleros { border-left: 3px solid #B06000; }
-        .cat-pp { border-left: 3px solid #9C1B6A; }
-        .cat-axp { border-left: 3px solid #7B1FA2; }
-        .cat-nouni { border-left: 3px solid #5F6368; }
-
-        .total-card {
-            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
-            color: var(--blanco);
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .total-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
-        .total-value { font-size: 1.8rem; font-weight: 700; color: var(--amarillo-policia); }
-
-        /* ===== SECCIÓN NOVEDADES ===== */
-        .novedades-section {
-            margin-top: 30px;
-        }
-
-        .novedades-section .section-title {
-            color: var(--azul-oscuro);
-        }
-        .novedades-section .section-title::before {
-            background: var(--rojo-suave);
-        }
-
-        .novedades-grid {
+        .novedad-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .novedades-card {
-            background: var(--blanco);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--sombra-card);
-            border: 1px solid var(--borde);
-        }
-
-        .novedades-header {
-            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
-            color: var(--blanco);
-            padding: 12px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .novedades-header h3 { font-size: 1rem; font-weight: 700; }
-        .novedades-badge {
-            background: var(--amarillo-policia);
-            color: var(--azul-oscuro);
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-weight: 700;
-            font-size: 0.7rem;
-        }
-
-        .novedades-body { padding: 14px; }
-
-        .novedad-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
             margin-bottom: 6px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            border-left: 3px solid transparent;
-        }
-        .novedad-item:hover {
-            background: #f8f9fa;
-            transform: translateX(4px);
         }
 
-        .novedad-nombre {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--gris-oscuro);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .novedad-icon {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        /* Colores por tipo de novedad */
-        .nov-oficina { border-left-color: #1967D2; }
-        .nov-oficina .novedad-icon { background: #1967D2; }
-        
-        .nov-vacaciones { border-left-color: #1E8E3E; }
-        .nov-vacaciones .novedad-icon { background: #1E8E3E; }
-        
-        .nov-servicio { border-left-color: #B06000; }
-        .nov-servicio .novedad-icon { background: #B06000; }
-        
-        .nov-gravidez { border-left-color: #9C1B6A; }
-        .nov-gravidez .novedad-icon { background: #9C1B6A; }
-        
-        .nov-excusa { border-left-color: #7B1FA2; }
-        .nov-excusa .novedad-icon { background: #7B1FA2; }
-        
-        .nov-permiso { border-left-color: #00796B; }
-        .nov-permiso .novedad-icon { background: #00796B; }
-        
-        .nov-cita { border-left-color: #0277BD; }
-        .nov-cita .novedad-icon { background: #0277BD; }
-        
-        .nov-maternidad { border-left-color: #C53929; }
-        .nov-maternidad .novedad-icon { background: #C53929; }
-        
-        .nov-excusa-servicio { border-left-color: #6A1B9A; }
-        .nov-excusa-servicio .novedad-icon { background: #6A1B9A; }
-        
-        .nov-otra { border-left-color: #F9A825; }
-        .nov-otra .novedad-icon { background: #F9A825; }
-        
-        .nov-retardado { border-left-color: #E65100; }
-        .nov-retardado .novedad-icon { background: #E65100; }
-        
-        .nov-excusa-parcial { border-left-color: #303F9F; }
-        .nov-excusa-parcial .novedad-icon { background: #303F9F; }
-        
-        .nov-curso { border-left-color: #0D47A1; }
-        .nov-curso .novedad-icon { background: #0D47A1; }
-
-        .novedad-total {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--verde-policia);
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            padding: 2px 10px;
-            border-radius: 12px;
-            min-width: 28px;
+        .summary-item {
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
+            padding: 8px 4px;
+            border-radius: 4px;
             text-align: center;
-        }
-        .novedad-total.zero {
-            color: #bbb;
-            background: #f5f5f5;
-            font-weight: 400;
-        }
-
-        .novedades-total-card {
-            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
             color: var(--blanco);
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .novedades-total-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-        .novedades-total-value { font-size: 1.5rem; font-weight: 700; color: var(--amarillo-policia); }
-
-        /* ===== LOADING ===== */
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.95);
+            box-shadow: var(--sombra-suave);
+            min-height: 48px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
         }
-        .loading-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 4px solid var(--gris-suave);
-            border-top-color: var(--amarillo-policia);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 16px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { color: var(--gris-texto); font-size: 1rem; font-weight: 500; }
 
-        /* ===== FOOTER ===== */
+        .summary-item .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.85;
+            margin-bottom: 2px;
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        .summary-item .value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--amarillo-policia);
+        }
+
+        .summary-item.alert {
+            background: linear-gradient(135deg, #D93025 0%, #B71C1C 100%);
+        }
+        .summary-item.alert .value { color: var(--blanco); }
+
+        .summary-item.header-style {
+            background: linear-gradient(135deg, #173E56 0%, #01592F 100%);
+            grid-column: 1 / -1;
+            min-height: 32px;
+            padding: 6px 10px;
+        }
+        .summary-item.header-style .label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--amarillo-policia);
+            margin-bottom: 0;
+        }
+        .summary-item.header-style .value { display: none; }
+
+        .summary-item.novedad-title {
+            background: linear-gradient(135deg, #3C4043 0%, #5F6368 100%);
+            grid-column: 1 / -1;
+            padding: 5px 10px;
+            min-height: 28px;
+        }
+        .summary-item.novedad-title .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--blanco);
+            margin-bottom: 0;
+        }
+        .summary-item.novedad-title .value { display: none; }
+
+        .summary-item.novedad-item {
+            padding: 5px 3px;
+            min-height: 38px;
+        }
+        .summary-item.novedad-item .label {
+            font-size: 0.55rem;
+            font-weight: 600;
+            line-height: 1.1;
+            margin-bottom: 1px;
+        }
+        .summary-item.novedad-item .value {
+            font-size: 0.95rem;
+        }
+
+        .summary-item.novedad-item.nov-oficina {
+            background: #E8F0FE;
+            color: #1967D2;
+        }
+        .summary-item.novedad-item.nov-oficina .value { color: #1967D2; }
+
+        .summary-item.novedad-item.nov-vacaciones {
+            background: #E6F4EA;
+            color: #1E8E3E;
+        }
+        .summary-item.novedad-item.nov-vacaciones .value { color: #1E8E3E; }
+
+        .summary-item.novedad-item.nov-servicio {
+            background: #FEF3E8;
+            color: #B06000;
+        }
+        .summary-item.novedad-item.nov-servicio .value { color: #B06000; }
+
+        .summary-item.novedad-item.nov-gravidez {
+            background: #FCE8F0;
+            color: #9C1B6A;
+        }
+        .summary-item.novedad-item.nov-gravidez .value { color: #9C1B6A; }
+
+        .summary-item.novedad-item.nov-excusa {
+            background: #F3E8FD;
+            color: #7B1FA2;
+        }
+        .summary-item.novedad-item.nov-excusa .value { color: #7B1FA2; }
+
+        .summary-item.novedad-item.nov-permiso {
+            background: #E0F7FA;
+            color: #00796B;
+        }
+        .summary-item.novedad-item.nov-permiso .value { color: #00796B; }
+
+        .summary-item.novedad-item.nov-cita {
+            background: #E1F5FE;
+            color: #0277BD;
+        }
+        .summary-item.novedad-item.nov-cita .value { color: #0277BD; }
+
+        .summary-item.novedad-item.nov-maternidad {
+            background: #FBE9E7;
+            color: #C53929;
+        }
+        .summary-item.novedad-item.nov-maternidad .value { color: #C53929; }
+
+        .summary-item.novedad-item.nov-retardado {
+            background: #FFF8E1;
+            color: #F9A825;
+        }
+        .summary-item.novedad-item.nov-retardado .value { color: #F9A825; }
+
+        .summary-item.novedad-item.nov-default {
+            background: #F1F3F4;
+            color: #5F6368;
+        }
+        .summary-item.novedad-item.nov-default .value { color: #5F6368; }
+
+        .novedad-accordion-header {
+            background: linear-gradient(135deg, #3C4043 0%, #5F6368 100%);
+            color: var(--blanco);
+            padding: 10px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: all 0.2s ease;
+            margin: 8px 0;
+            box-shadow: var(--sombra-suave);
+        }
+        .novedad-accordion-header:hover {
+            opacity: 0.9;
+            transform: translateX(2px);
+        }
+        .novedad-accordion-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--blanco);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .novedad-accordion-icon {
+            font-size: 0.8rem;
+            color: var(--amarillo-policia);
+            transition: transform 0.3s ease;
+            font-weight: 700;
+        }
+        .novedad-accordion-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+        .novedad-accordion-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+            opacity: 1;
+            margin-bottom: 8px;
+        }
+        .novedad-accordion-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+
+        .data-section {
+            background: var(--blanco);
+            border-radius: 6px;
+            padding: 14px 16px;
+            box-shadow: var(--sombra-suave);
+            border: 1px solid var(--borde);
+            margin-bottom: 12px;
+        }
+
+        .data-section h2 {
+            color: var(--verde-policia);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .data-section h2::before {
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 16px;
+            background: var(--verde-policia);
+            border-radius: 2px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-btn {
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
+            color: var(--blanco);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.78rem;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: var(--sombra-suave);
+        }
+        .filter-btn:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+        .filter-btn:active {
+            transform: translateY(0);
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #C9A227 0%, #B8941F 100%);
+            color: var(--azul-oscuro);
+        }
+        .filter-btn.clear {
+            background: var(--gris-suave);
+            color: var(--gris-oscuro);
+            border: 1px solid var(--borde);
+        }
+        .filter-info {
+            font-size: 0.75rem;
+            color: var(--gris-texto);
+            margin-left: auto;
+            font-weight: 500;
+        }
+
+        .table-wrapper { overflow-x: auto; border-radius: 4px; border: 1px solid var(--borde); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        thead { background: linear-gradient(135deg, #01592F 0%, #173E56 100%); color: var(--blanco); }
+        th { padding: 8px 10px; text-align: left; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.3px; white-space: nowrap; }
+        td { padding: 6px 10px; border-bottom: 1px solid var(--gris-suave); color: var(--gris-oscuro); }
+        tr:nth-child(even) { background: #FAFBFC; }
+        tr:hover { background: #F0F7FF; transition: background 0.15s; }
+        .col-grado { background: var(--amarillo-policia); color: var(--azul-oscuro); padding: 2px 6px; border-radius: 3px; font-weight: 600; font-size: 0.7rem; display: inline-block; }
+        .novedad-select { width: 100%; padding: 4px 6px; border: 1px solid var(--borde); border-radius: 4px; font-family: inherit; font-size: 0.78rem; background: var(--blanco); cursor: pointer; }
+        .novedad-select:focus { outline: none; border-color: var(--verde-policia); }
+        .col-novedad { padding: 2px 6px; border-radius: 3px; font-weight: 600; font-size: 0.7rem; display: inline-block; }
+        .novedad-normal { background: #E6F4EA; color: #1E8E3E; }
+        .novedad-oficina { background: #E8F0FE; color: #1967D2; }
+        .novedad-vacaciones { background: #E6F4EA; color: #1E8E3E; }
+        .novedad-servicio { background: #FEF3E8; color: #B06000; }
+        .novedad-gravidez { background: #FCE8F0; color: #9C1B6A; }
+        .novedad-excusa { background: #F3E8FD; color: #7B1FA2; }
+        .novedad-permiso { background: #E0F7FA; color: #00796B; }
+        .novedad-cita { background: #E1F5FE; color: #0277BD; }
+        .novedad-maternidad { background: #FBE9E7; color: #C53929; }
+        .novedad-retardado { background: #FFF8E1; color: #F9A825; }
+        .novedad-otra { background: #F3E5F5; color: #6A1B9A; }
+        .novedad-retardada { background: #FFF3E0; color: #E65100; }
+        .novedad-excusa-parcial { background: #E8EAF6; color: #303F9F; }
+        .obs-container { display: flex; flex-direction: column; gap: 4px; }
+        .obs-input { width: 100%; padding: 5px; border: 1px solid var(--borde); border-radius: 4px; font-family: inherit; font-size: 0.78rem; resize: vertical; min-height: 32px; }
+        .obs-input:focus { outline: none; border-color: var(--verde-policia); }
+        .obs-actions { display: flex; align-items: center; gap: 6px; }
+        .btn-save { background: linear-gradient(135deg, #01592F 0%, #173E56 100%); color: var(--blanco); border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.7rem; transition: opacity 0.2s; }
+        .btn-save:hover { opacity: 0.85; }
+        .status-msg { font-size: 0.7rem; font-weight: 500; opacity: 0; transition: opacity 0.3s; }
+        .status-msg.show { opacity: 1; }
+        .status-msg.success { color: #1E8E3E; }
+        .status-msg.error { color: var(--rojo-suave); }
+        .loading { text-align: center; padding: 30px; color: var(--gris-texto); }
+        .spinner { border: 3px solid var(--gris-suave); border-top: 3px solid var(--amarillo-policia); border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite; margin: 0 auto 12px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error-box { background: #FDEDEC; border: 1px solid var(--rojo-suave); border-radius: 6px; padding: 20px; text-align: center; color: var(--rojo-suave); }
+        .error-box h3 { margin-bottom: 6px; font-size: 0.9rem; }
+        .retry-btn { background: var(--rojo-suave); color: white; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight: 600; font-size: 0.75rem; }
+        
         .footer-institutional {
             text-align: center;
-            padding: 20px;
-            margin-top: 40px;
+            padding: 12px;
+            margin-top: 16px;
             background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
         }
-        .footer-institutional p { color: var(--blanco); font-size: 0.8rem; opacity: 0.8; }
-        .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1rem; margin-top: 6px; letter-spacing: 2px; }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .turnos-grid, .novedades-grid { grid-template-columns: 1fr; }
-            .categorias-grid { grid-template-columns: repeat(3, 1fr); }
-        }
+        .footer-institutional p { color: var(--blanco); font-size: 0.7rem; opacity: 0.8; }
+        .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 600; font-size: 0.85rem; margin-top: 4px; letter-spacing: 1px; }
+        
         @media (max-width: 768px) {
-            .header-institutional { flex-direction: column; gap: 10px; padding: 10px 16px; }
-            .header-left img { width: 36px; }
-            .header-text h1 { font-size: 0.95rem; }
-            .categorias-grid { grid-template-columns: repeat(2, 1fr); }
-            .section-title { font-size: 1.1rem; }
+            .header-institutional { flex-direction: column; gap: 8px; padding: 8px 12px; height: auto; }
+            .header-left img { width: 28px; }
+            .header-text h1 { font-size: 0.85rem; }
+            .header-stats { margin-left: 0; margin-top: 4px; }
+            .summary-grid-6 { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .novedad-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
+            .summary-item { padding: 6px 3px; min-height: 42px; }
+            .summary-item .label { font-size: 0.55rem; }
+            .summary-item .value { font-size: 1rem; }
+            .summary-item.novedad-item { padding: 4px 2px; min-height: 34px; }
+            .summary-item.novedad-item .label { font-size: 0.5rem; }
+            .summary-item.novedad-item .value { font-size: 0.85rem; }
+            th, td { padding: 5px 6px; font-size: 0.75rem; }
+            .filter-bar { gap: 6px; }
+            .filter-btn { padding: 5px 10px; font-size: 0.7rem; }
+        }
+        
+        @media (max-width: 480px) {
+            .summary-grid-6 { grid-template-columns: repeat(2, 1fr); }
+            .novedad-grid { grid-template-columns: repeat(2, 1fr); gap: 3px; }
+            .summary-item.novedad-item { padding: 4px 2px; min-height: 32px; }
+            .summary-item.novedad-item .label { font-size: 0.48rem; }
+            .summary-item.novedad-item .value { font-size: 0.8rem; }
+            .filter-bar { justify-content: center; }
+            .filter-info { width: 100%; text-align: center; margin-left: 0; margin-top: 4px; }
         }
     </style>
 </head>
+
 <body>
-
-    <!-- LOADING -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <div class="loading-text">Cargando datos del sistema...</div>
-    </div>
-
-    <!-- HEADER -->
     <div class="header-institutional">
         <div class="header-left">
             <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
@@ -406,341 +459,414 @@
                  onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
             <div class="header-text">
                 <h1>POLICÍA NACIONAL DE COLOMBIA</h1>
-                <div class="subtitulo">Dashboard de Novedades - Resumen por Turno</div>
+                <p class="dep-name" id="depTitle">Dashboard</p>
+            </div>
+            <div class="header-stats" id="headerStats" style="display:none;">
+                <span class="stat-label">Total Funcionarios:</span>
+                <span class="stat-value" id="totalFuncionarios">-</span>
             </div>
         </div>
         <div class="header-right">
             <span class="date-display" id="currentDate"></span>
-            <button class="btn-refresh" onclick="cargarDatos()">🔄 Actualizar</button>
+            <button class="btn-back" onclick="window.location.href='index.html'">← Volver</button>
         </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
-        
-        <!-- SECCIÓN 1: PARTE POR TURNO (Fuerza Efectiva/Disponible) -->
-        <h2 class="section-title">📊 Estado de Formación por Turnos</h2>
-        <div class="turnos-grid" id="turnosContainer">
-            <!-- Turnos se generan dinámicamente -->
-        </div>
-
-        <!-- SECCIÓN 2: NOVEDADES POR TURNO -->
-        <div class="novedades-section">
-            <h2 class="section-title">📋 Novedades por Turno</h2>
-            <div class="novedades-grid" id="novedadesContainer">
-                <!-- Novedades se generan dinámicamente -->
+        <div class="data-section">
+            <h2>👥 Registro de Personal</h2>
+            <div class="filter-bar" id="filterBar">
+                <button class="filter-btn" onclick="filterByTurno('A')" id="btn-turno-a">🅰️ TURNO A</button>
+                <button class="filter-btn" onclick="filterByTurno('B')" id="btn-turno-b">🅱️ TURNO B</button>
+                <button class="filter-btn" onclick="filterByTurno('C')" id="btn-turno-c">🅲️ TURNO C</button>
+                <button class="filter-btn clear" onclick="filterByTurno('ALL')" id="btn-turno-all">🔄 TODOS</button>
+                <span class="filter-info" id="filterInfo">Mostrando todos los registros</span>
+            </div>
+            <div class="table-wrapper" id="tableContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando datos del personal...</p>
+                </div>
             </div>
         </div>
 
+        <div class="summary-section">
+            <h2>📊 Resumen General de la Dependencia</h2>
+            <div id="summaryContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando información institucional...</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- FOOTER -->
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
-        <p class="motto">★ DIOS Y PATRIA ★</p>
+        <p class="motto">★ DIOS Y PATRIA JESEP - GUTAH 2026★</p>
     </div>
 
     <script>
-        // ============================================================
-        // CONFIGURACIÓN API
-        // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz4cFlxTVPNTCv7otSqf2fkzP9tGhJV5wPDijSOAH0M2VBbIebBTTVJQFUXV9XIYvhi/exec';
-        const DEPENDENCY = 'ASJUR'; // Ajusta según tu dependencia
 
-        let jsonpCallbackId = 0;
+                const API_URL = 'https://script.google.com/macros/s/AKfycbwfwsLhBCk5TPekU_zK2F9WiwFcPEsLNil9B4m4J_Hzu8xQ-B7P1yh_G1HLjWqQTt_p/exec';
+
+        let currentDependency = localStorage.getItem('currentDependency') || 'ASJUR';
+        let allTableData = [];
+        let currentFilter = 'ALL';
+
+        const NOVEDADES = [
+            'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
+            'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD', 
+            'RETARDADO', 'OTRA NOVEDAD', 'RETARDAD@', 'EXCUSA PARCIAL'
+        ];
 
         function updateDate() {
             const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            };
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
-        // ============================================================
-        // JSONP FETCH
-        // ============================================================
-        function apiFetchJSONP(action, params = {}) {
-            return new Promise((resolve, reject) => {
-                const callbackName = 'jsonpCallback_' + (++jsonpCallbackId) + '_' + Date.now();
-                const script = document.createElement('script');
-                
-                const urlParams = new URLSearchParams();
-                urlParams.append('action', action);
-                urlParams.append('dependency', DEPENDENCY);
-                urlParams.append('callback', callbackName);
-                
-                for (const [key, value] of Object.entries(params)) {
-                    if (value !== undefined && value !== null) {
-                        urlParams.append(key, value);
+        async function loadTotalFuncionarios() {
+            try {
+                const url = API_URL + '?action=getTotalFuncionarios&dependency=' + encodeURIComponent(currentDependency);
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const result = await response.json();
+                if (result.success && result.total !== undefined) {
+                    document.getElementById('totalFuncionarios').textContent = result.total;
+                    document.getElementById('headerStats').style.display = 'flex';
+                }
+            } catch (e) {
+                console.error('Error cargando total funcionarios:', e);
+            }
+        }
+
+        async function fetchData(action, turno) {
+            const turnoParam = turno ? '&turno=' + encodeURIComponent(turno) : '';
+            const url = API_URL + '?action=' + encodeURIComponent(action) + '&dependency=' + encodeURIComponent(currentDependency) + turnoParam;
+            
+            console.log('Fetching:', url);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return await response.json();
+        }
+
+        async function saveData(row, novedad, observation) {
+            const params = [];
+            params.push('action=' + encodeURIComponent('saveData'));
+            params.push('dependency=' + encodeURIComponent(currentDependency));
+            params.push('row=' + encodeURIComponent(row.toString()));
+            params.push('novedad=' + encodeURIComponent(novedad || ''));
+            params.push('observation=' + encodeURIComponent(observation || ''));
+            
+            const url = API_URL + '?' + params.join('&');
+            
+            console.log('Saving:', url);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+            const result = await response.json();
+            if (!result.success) throw new Error(result.error || 'Error del servidor');
+            return result;
+        }
+
+        async function loadRealData(turno) {
+            try {
+                document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen de ' + currentDependency + '...</p></div>';
+                document.getElementById('tableContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando personal de ' + currentDependency + '...</p></div>';
+
+                const summaryData = await fetchData('getSummary', turno);
+                if (summaryData.success) renderSummary(summaryData.summary);
+                else throw new Error(summaryData.error || 'Error al cargar resumen');
+
+                const data = await fetchData('getData');
+                if (data.success) {
+                    allTableData = data.data || [];
+                    if (!turno) {
+                        filterByTurno('ALL');
                     }
                 }
+                else throw new Error(data.error || 'Error al cargar datos');
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message);
+            }
+        }
+
+        function showError(message) {
+            const errorHtml = '<div class="error-box"><h3>⚠️ Error de conexión</h3><p>' + message + '</p><button class="retry-btn" onclick="loadRealData()">🔄 Reintentar</button></div>';
+            document.getElementById('summaryContainer').innerHTML = errorHtml;
+            document.getElementById('tableContainer').innerHTML = errorHtml;
+        }
+
+        function toggleNovedadAccordion(contentId, iconId) {
+            const content = document.getElementById(contentId);
+            const icon = document.getElementById(iconId);
+            if (content) {
+                content.classList.toggle('collapsed');
+            }
+            if (icon) {
+                icon.classList.toggle('collapsed');
+            }
+        }
+
+        function appendNovedadAccordion(container, items, accordionId, contentId) {
+            const contentDiv = document.getElementById(contentId);
+            if (!contentDiv) return;
+            
+            const grid = contentDiv.querySelector('.novedad-grid');
+            if (!grid) return;
+            
+            const headerEl = container.querySelector('[onclick*="' + contentId + '"');
+            let novedadName = '';
+            if (headerEl) {
+                const titleEl = headerEl.querySelector('.novedad-accordion-title');
+                if (titleEl) novedadName = titleEl.textContent.toUpperCase();
+            }
+            
+            items.forEach(function(item) {
+                const div = document.createElement('div');
+                let colorClass = 'nov-default';
+                if (novedadName.indexOf('OFICINA') !== -1) colorClass = 'nov-oficina';
+                else if (novedadName.indexOf('VACACIONES') !== -1) colorClass = 'nov-vacaciones';
+                else if (novedadName.indexOf('SERVICIO') !== -1) colorClass = 'nov-servicio';
+                else if (novedadName.indexOf('GRAVIDEZ') !== -1) colorClass = 'nov-gravidez';
+                else if (novedadName.indexOf('EXCUSA') !== -1) colorClass = 'nov-excusa';
+                else if (novedadName.indexOf('PERMISO') !== -1) colorClass = 'nov-permiso';
+                else if (novedadName.indexOf('CITA') !== -1) colorClass = 'nov-cita';
+                else if (novedadName.indexOf('MATERNIDAD') !== -1) colorClass = 'nov-maternidad';
+                else if (novedadName.indexOf('RETARDADO') !== -1) colorClass = 'nov-retardado';
                 
-                const url = API_URL + '?' + urlParams.toString();
-                
-                const timeout = setTimeout(() => {
-                    cleanup();
-                    reject(new Error('Timeout JSONP'));
-                }, 15000);
-                
-                window[callbackName] = function(data) {
-                    clearTimeout(timeout);
-                    cleanup();
-                    resolve(data);
-                };
-                
-                function cleanup() {
-                    delete window[callbackName];
-                    if (script.parentNode) script.parentNode.removeChild(script);
+                div.className = 'summary-item novedad-item ' + colorClass;
+                div.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
+                grid.appendChild(div);
+            });
+        }
+
+        function renderSummary(data) {
+            const container = document.getElementById('summaryContainer');
+            container.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:20px;">No hay datos de resumen</p>';
+                return;
+            }
+            
+            let currentGrid = null;
+            let novedadAccordionId = null;
+            let novedadContentId = null;
+            let novedadItems = [];
+            let isInNovedadSection = false;
+            
+            data.forEach(function(item, index) {
+                if (item.section === 'header') {
+                    if (isInNovedadSection && novedadItems.length > 0) {
+                        appendNovedadAccordion(container, novedadItems, novedadAccordionId, novedadContentId);
+                        novedadItems = [];
+                        isInNovedadSection = false;
+                    }
+                    
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.className = 'summary-grid-6';
+                    container.appendChild(sectionDiv);
+                    currentGrid = sectionDiv;
+                    
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'summary-item header-style';
+                    titleDiv.innerHTML = '<div class="label">' + item.label + '</div><div class="value">-</div>';
+                    currentGrid.appendChild(titleDiv);
+                    
+                } else if (item.section === 'novedad-header') {
+                    if (isInNovedadSection && novedadItems.length > 0) {
+                        appendNovedadAccordion(container, novedadItems, novedadAccordionId, novedadContentId);
+                        novedadItems = [];
+                    }
+                    
+                    isInNovedadSection = true;
+                    novedadAccordionId = 'novedad-acc-' + index;
+                    novedadContentId = 'novedad-content-' + index;
+                    
+                    const accordionHeader = document.createElement('div');
+                    accordionHeader.className = 'novedad-accordion-header';
+                    accordionHeader.setAttribute('onclick', 'toggleNovedadAccordion("' + novedadContentId + '", "' + novedadAccordionId + '-icon")');
+                    accordionHeader.innerHTML = '<span class="novedad-accordion-title">📋 ' + item.label + '</span><span class="novedad-accordion-icon collapsed" id="' + novedadAccordionId + '-icon">▼</span>';
+                    container.appendChild(accordionHeader);
+                    
+                    const accordionContent = document.createElement('div');
+                    accordionContent.className = 'novedad-accordion-content collapsed';
+                    accordionContent.id = novedadContentId;
+                    container.appendChild(accordionContent);
+                    
+                    const novedadDiv = document.createElement('div');
+                    novedadDiv.className = 'novedad-grid';
+                    accordionContent.appendChild(novedadDiv);
+                    currentGrid = novedadDiv;
+                    
+                } else if (item.section === 'novedad-item') {
+                    if (isInNovedadSection) {
+                        novedadItems.push(item);
+                    }
+                    
+                } else {
+                    if (isInNovedadSection && novedadItems.length > 0) {
+                        appendNovedadAccordion(container, novedadItems, novedadAccordionId, novedadContentId);
+                        novedadItems = [];
+                        isInNovedadSection = false;
+                    }
+                    
+                    const div = document.createElement('div');
+                    div.className = 'summary-item';
+                    div.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
+                    currentGrid.appendChild(div);
                 }
-                
-                script.onerror = function() {
-                    clearTimeout(timeout);
-                    cleanup();
-                    reject(new Error('Error JSONP'));
-                };
-                
-                script.src = url;
-                document.head.appendChild(script);
             });
+            
+            if (isInNovedadSection && novedadItems.length > 0) {
+                appendNovedadAccordion(container, novedadItems, novedadAccordionId, novedadContentId);
+            }
         }
 
-        // ============================================================
-        // CONFIGURACIÓN DE NOVEDADES (13 tipos con sus clases CSS)
-        // ============================================================
-        const NOVEDADES_CSS = {
-            'OFICINA': 'nov-oficina',
-            'VACACIONES': 'nov-vacaciones',
-            'SERVICIO': 'nov-servicio',
-            'ESTADO DE GRAVIDEZ': 'nov-gravidez',
-            'EXCUSA TOTAL': 'nov-excusa',
-            'PERMISO': 'nov-permiso',
-            'CITA MEDICA': 'nov-cita',
-            'LICENCIA DE MATERNIDAD': 'nov-maternidad',
-            'EXCUSADO DEL SERVICIO': 'nov-excusa-servicio',
-            'OTRA NOVEDAD': 'nov-otra',
-            'RETARDAD@': 'nov-retardado',
-            'EXCUSA PARCIAL': 'nov-excusa-parcial',
-            'CURSO DE ASCENSO': 'nov-curso'
-        };
-
-        // ============================================================
-        // RENDERIZAR PARTE POR TURNO
-        // ============================================================
-        function renderizarParteTurno(turnoId, turnoLetra, datos) {
-            const oficiales = parseInt(datos.oficiales) || 0;
-            const ne = parseInt(datos.ne) || 0;
-            const patrulleros = parseInt(datos.patrulleros) || 0;
-            const pp = parseInt(datos.pp) || 0;
-            const axp = parseInt(datos.axp) || 0;
-            const nouni = parseInt(datos.nouni) || 0;
-            const total = oficiales + ne + patrulleros + pp + axp + nouni;
-
-            return `
-                <div class="turno-card">
-                    <div class="turno-header">
-                        <h2>🅰️ EN FORMACIÓN</h2>
-                        <div class="turno-badge">TURNO ${turnoLetra}</div>
-                    </div>
-                    <div class="forman-subtitle">
-                        <h3>FORMAN</h3>
-                    </div>
-                    <div class="turno-body">
-                        <div class="categorias-grid">
-                            <div class="categoria-item cat-oficiales">
-                                <div class="label">Oficiales</div>
-                                <div class="value ${oficiales === 0 ? 'zero' : ''}">${oficiales}</div>
-                            </div>
-                            <div class="categoria-item cat-ne">
-                                <div class="label">Nivel Ejecutivo</div>
-                                <div class="value ${ne === 0 ? 'zero' : ''}">${ne}</div>
-                            </div>
-                            <div class="categoria-item cat-patrulleros">
-                                <div class="label">Patrulleros</div>
-                                <div class="value ${patrulleros === 0 ? 'zero' : ''}">${patrulleros}</div>
-                            </div>
-                            <div class="categoria-item cat-pp">
-                                <div class="label">Patrulleros de Policía</div>
-                                <div class="value ${pp === 0 ? 'zero' : ''}">${pp}</div>
-                            </div>
-                            <div class="categoria-item cat-axp">
-                                <div class="label">AXP</div>
-                                <div class="value ${axp === 0 ? 'zero' : ''}">${axp}</div>
-                            </div>
-                            <div class="categoria-item cat-nouni">
-                                <div class="label">No Uniformados</div>
-                                <div class="value ${nouni === 0 ? 'zero' : ''}">${nouni}</div>
-                            </div>
-                        </div>
-                        <div class="total-card">
-                            <div class="total-label">Total Turno ${turnoLetra}</div>
-                            <div class="total-value">${total}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+        async function filterByTurno(turno) {
+            currentFilter = turno;
+            
+            document.querySelectorAll('.filter-btn').forEach(function(btn) { btn.classList.remove('active'); });
+            if (turno === 'A') document.getElementById('btn-turno-a').classList.add('active');
+            else if (turno === 'B') document.getElementById('btn-turno-b').classList.add('active');
+            else if (turno === 'C') document.getElementById('btn-turno-c').classList.add('active');
+            else document.getElementById('btn-turno-all').classList.add('active');
+            
+            if (turno !== 'ALL') {
+                try {
+                    document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen Turno ' + turno + '...</p></div>';
+                    const summaryData = await fetchData('getSummary', turno);
+                    if (summaryData.success) renderSummary(summaryData.summary);
+                } catch (e) {
+                    console.error('Error cargando resumen por turno:', e);
+                }
+            } else {
+                try {
+                    document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen general...</p></div>';
+                    const summaryData = await fetchData('getSummary', '');
+                    if (summaryData.success) renderSummary(summaryData.summary);
+                } catch (e) {
+                    console.error('Error cargando resumen general:', e);
+                }
+            }
+            
+            let filteredData = allTableData;
+            if (turno !== 'ALL') {
+                filteredData = allTableData.filter(function(person) {
+                    const turnoPersona = (person.turno || '').toString().trim().toUpperCase();
+                    return turnoPersona === turno;
+                });
+            }
+            
+            const info = document.getElementById('filterInfo');
+            if (turno === 'ALL') {
+                info.textContent = 'Mostrando todos los registros (' + filteredData.length + ')';
+            } else {
+                info.textContent = 'Filtrado: Turno ' + turno + ' (' + filteredData.length + ' registros)';
+            }
+            
+            renderTable(filteredData);
         }
 
-        // ============================================================
-        // RENDERIZAR NOVEDADES POR TURNO (USA getNovedadesPorTurno)
-        // ============================================================
-        function renderizarNovedadesTurno(turnoLetra, novedades) {
-            let itemsHTML = '';
-            let totalNovedades = 0;
-
-            novedades.forEach((novedad) => {
-                const total = parseInt(novedad.total) || 0;
-                totalNovedades += total;
-                const cssClass = NOVEDADES_CSS[novedad.nombre] || 'nov-otra';
-
-                itemsHTML += `
-                    <div class="novedad-item ${cssClass}">
-                        <div class="novedad-nombre">
-                            <span class="novedad-icon"></span>
-                            ${novedad.nombre}
-                        </div>
-                        <div class="novedad-total ${total === 0 ? 'zero' : ''}">${total}</div>
-                    </div>
-                `;
-            });
-
-            return `
-                <div class="novedades-card">
-                    <div class="novedades-header">
-                        <h3>📋 NOVEDADES</h3>
-                        <div class="novedades-badge">TURNO ${turnoLetra}</div>
-                    </div>
-                    <div class="novedades-body">
-                        ${itemsHTML}
-                        <div class="novedades-total-card">
-                            <div class="novedades-total-label">Total Novedades</div>
-                            <div class="novedades-total-value">${totalNovedades}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // ============================================================
-        // CARGAR DATOS - USA getNovedadesPorTurno DIRECTAMENTE
-        // ============================================================
-        async function cargarDatos() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
+        async function saveNovedad(select, row) {
+            const novedad = select.value;
+            const status = document.getElementById('status-novedad-' + row);
+            
+            status.textContent = '⏳ Guardando...';
+            status.className = 'status-msg show';
             
             try {
-                // Cargar datos en paralelo: parte + novedades por turno
-                const [parteResponse, novedadesA, novedadesB, novedadesC] = await Promise.all([
-                    apiFetchJSONP('getDashboardData'),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'A' }),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'B' }),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'C' })
-                ]);
-
-                // Renderizar Parte por Turno
-                if (parteResponse.success && parteResponse.data) {
-                    const datos = parteResponse.data;
-                    document.getElementById('turnosContainer').innerHTML = `
-                        ${renderizarParteTurno('turnoA', 'A', datos.turnoA)}
-                        ${renderizarParteTurno('turnoB', 'B', datos.turnoB)}
-                        ${renderizarParteTurno('turnoC', 'C', datos.turnoC)}
-                    `;
-                }
-
-                // Renderizar Novedades por Turno (datos ya estructurados del backend)
-                const novedadesContainer = document.getElementById('novedadesContainer');
-                let novedadesHTML = '';
-
-                if (novedadesA.success && novedadesA.novedades) {
-                    novedadesHTML += renderizarNovedadesTurno('A', novedadesA.novedades);
-                }
-                if (novedadesB.success && novedadesB.novedades) {
-                    novedadesHTML += renderizarNovedadesTurno('B', novedadesB.novedades);
-                }
-                if (novedadesC.success && novedadesC.novedades) {
-                    novedadesHTML += renderizarNovedadesTurno('C', novedadesC.novedades);
-                }
-
-                novedadesContainer.innerHTML = novedadesHTML || `
-                    <div class="novedades-card" style="grid-column: 1 / -1;">
-                        <div class="novedades-body" style="padding:40px; text-align:center; color:#999;">
-                            No se pudieron cargar las novedades. Intenta recargar la página.
-                        </div>
-                    </div>
-                `;
+                await saveData(row, novedad, '');
                 
+                status.textContent = '✓ Guardado';
+                status.className = 'status-msg show success';
+                
+                const badge = document.getElementById('badge-' + row);
+                if (badge) {
+                    badge.className = 'col-novedad ' + getNovedadClass(novedad);
+                    badge.textContent = novedad || 'SIN NOVEDAD';
+                }
+                
+                setTimeout(function() { status.classList.remove('show'); }, 3000);
             } catch (error) {
-                console.error('Error cargando datos:', error);
-                // Fallback con getCells
-                try {
-                    await cargarDatosFallback();
-                } catch (fallbackError) {
-                    console.error('Fallback error:', fallbackError);
-                    document.getElementById('novedadesContainer').innerHTML = `
-                        <div class="novedades-card" style="grid-column: 1 / -1;">
-                            <div class="novedades-body" style="padding:40px; text-align:center; color:#D93025;">
-                                ⚠️ Error de conexión. Verifica tu conexión e intenta de nuevo.
-                            </div>
-                        </div>
-                    `;
-                }
-            } finally {
-                setTimeout(() => {
-                    document.getElementById('loadingOverlay').classList.add('hidden');
-                }, 500);
+                status.textContent = '✗ Error: ' + error.message;
+                status.className = 'status-msg show error';
             }
         }
 
-        // ============================================================
-        // FALLBACK CON GETCELLS (solo parte, sin novedades detalladas)
-        // ============================================================
-        async function cargarDatosFallback() {
-            const celdas = 'J2,K2,L2,M2,N2,O2,Q2,R2,S2,T2,U2,V2,X2,Y2,Z2,AA2,AB2,AC2';
+        async function saveObservation(textarea, row) {
+            const observation = textarea.value.trim();
+            const status = document.getElementById('status-' + row);
             
-            const response = await apiFetchJSONP('getCells', { cells: celdas });
+            status.textContent = '⏳ Guardando...';
+            status.className = 'status-msg show';
             
-            if (response.success && response.values) {
-                const v = response.values;
-                
-                document.getElementById('turnosContainer').innerHTML = `
-                    ${renderizarParteTurno('turnoA', 'A', {
-                        oficiales: v['J2'] || 0, ne: v['K2'] || 0, patrulleros: v['L2'] || 0,
-                        pp: v['M2'] || 0, axp: v['N2'] || 0, nouni: v['O2'] || 0
-                    })}
-                    ${renderizarParteTurno('turnoB', 'B', {
-                        oficiales: v['Q2'] || 0, ne: v['R2'] || 0, patrulleros: v['S2'] || 0,
-                        pp: v['T2'] || 0, axp: v['U2'] || 0, nouni: v['V2'] || 0
-                    })}
-                    ${renderizarParteTurno('turnoC', 'C', {
-                        oficiales: v['X2'] || 0, ne: v['Y2'] || 0, patrulleros: v['Z2'] || 0,
-                        pp: v['AA2'] || 0, axp: v['AB2'] || 0, nouni: v['AC2'] || 0
-                    })}
-                `;
-
-                // En fallback, novedades no disponibles
-                document.getElementById('novedadesContainer').innerHTML = `
-                    <div class="novedades-card" style="grid-column: 1 / -1;">
-                        <div class="novedades-body" style="padding:40px; text-align:center; color:#999;">
-                            📋 Novedades detalladas no disponibles en modo fallback.<br>
-                            <button onclick="cargarDatos()" style="margin-top:10px; padding:8px 16px; background:var(--verde-policia); color:white; border:none; border-radius:4px; cursor:pointer;">Reintentar</button>
-                        </div>
-                    </div>
-                `;
+            try {
+                await saveData(row, '', observation);
+                status.textContent = '✓ Guardado';
+                status.className = 'status-msg show success';
+                setTimeout(function() { status.classList.remove('show'); }, 3000);
+            } catch (error) {
+                status.textContent = '✗ Error: ' + error.message;
+                status.className = 'status-msg show error';
             }
         }
 
-        // ============================================================
-        // INICIALIZACIÓN
-        // ============================================================
+        function getNovedadClass(novedad) {
+            const n = (novedad || '').toUpperCase();
+            if (n.indexOf('OFICINA') !== -1) return 'novedad-oficina';
+            if (n.indexOf('VACACIONES') !== -1) return 'novedad-vacaciones';
+            if (n.indexOf('SERVICIO') !== -1) return 'novedad-servicio';
+            if (n.indexOf('GRAVIDEZ') !== -1) return 'novedad-gravidez';
+            if (n === 'EXCUSA PARCIAL') return 'novedad-excusa-parcial';
+            if (n.indexOf('EXCUSA') !== -1) return 'novedad-excusa';
+            if (n.indexOf('PERMISO') !== -1) return 'novedad-permiso';
+            if (n.indexOf('CITA') !== -1) return 'novedad-cita';
+            if (n.indexOf('MATERNIDAD') !== -1) return 'novedad-maternidad';
+            if (n === 'RETARDAD@') return 'novedad-retardada';
+            if (n.indexOf('RETARDADO') !== -1) return 'novedad-retardado';
+            if (n.indexOf('OTRA') !== -1) return 'novedad-otra';
+            return 'novedad-normal';
+        }
+
+        function createNovedadSelect(currentValue, row) {
+            let options = '<option value="">SIN NOVEDAD</option>';
+            NOVEDADES.forEach(function(n) {
+                const selected = (currentValue === n) ? 'selected' : '';
+                options += '<option value="' + n + '" ' + selected + '>' + n + '</option>';
+            });
+
+            return '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><select class="novedad-select" onchange="saveNovedad(this, ' + row + ')">' + options + '</select><span class="col-novedad ' + getNovedadClass(currentValue) + '" id="badge-' + row + '">' + (currentValue || 'SIN NOVEDAD') + '</span><span class="status-msg" id="status-novedad-' + row + '">✓ Guardado</span></div>';
+        }
+
+        function renderTable(data) {
+            const container = document.getElementById('tableContainer');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p style="font-size:1.2rem; margin-bottom:10px;">📭 No hay registros</p><p>La dependencia <strong>' + currentDependency + '</strong> no tiene datos</p></div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>GRADO</th><th>APELLIDOS Y NOMBRES</th><th>TURNO</th><th>NOVEDAD</th><th>OBSERVACIONES</th></tr></thead><tbody>';
+
+            data.forEach(function(person) {
+                html += '<tr><td><span class="col-grado">' + (person.grado || '-') + '</span></td><td>' + (person.nombres || '-') + '</td><td>' + (person.turno || '-') + '</td><td>' + createNovedadSelect(person.novedad, person.row) + '</td><td><div class="obs-container"><textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ' + person.row + ')">' + (person.observacion || '') + '</textarea><div class="obs-actions"><button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ' + person.row + ')">💾 Guardar</button><span class="status-msg" id="status-' + person.row + '">✓ Guardado</span></div></div></td></tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        document.getElementById('depTitle').textContent = currentDependency;
         updateDate();
-        cargarDatos();
-        
-        // Auto-refresh cada 30 segundos
-        setInterval(cargarDatos, 30000);
+        loadTotalFuncionarios();
+        loadRealData();
     </script>
 </body>
 </html>
