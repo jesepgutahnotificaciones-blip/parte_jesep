@@ -308,6 +308,9 @@
         
         .nov-curso { border-left-color: #0D47A1; }
         .nov-curso .novedad-icon { background: #0D47A1; }
+        
+        .nov-comision { border-left-color: #00695C; }
+        .nov-comision .novedad-icon { background: #00695C; }
 
         .novedad-total {
             font-size: 1rem;
@@ -444,7 +447,7 @@
         // ============================================================
         // CONFIGURACIÓN API
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxx_FSZ8kCvz6ZasXC9ArA63kxAzIzAsvXzFuajiSh_WpEqK2gcIpijLVq2-oIe6nGg/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyHNtICOCZJSUoT1c_j6oLIUHH5XrCvJ6Q1uvZ1Yt2eVvIMXZkLzsE7mIX9HdBeCmLi/exec';
         const DEPENDENCY = 'ASJUR'; // Ajusta según tu dependencia
 
         let jsonpCallbackId = 0;
@@ -511,7 +514,7 @@
         }
 
         // ============================================================
-        // CONFIGURACIÓN DE NOVEDADES (13 tipos con sus clases CSS)
+        // CONFIGURACIÓN DE NOVEDADES (14 tipos con sus clases CSS)
         // ============================================================
         const NOVEDADES_CSS = {
             'OFICINA': 'nov-oficina',
@@ -526,7 +529,8 @@
             'OTRA NOVEDAD': 'nov-otra',
             'RETARDAD@': 'nov-retardado',
             'EXCUSA PARCIAL': 'nov-excusa-parcial',
-            'CURSO DE ASCENSO': 'nov-curso'
+            'CURSO DE ASCENSO': 'nov-curso',
+            'COMISION': 'nov-comision'
         };
 
         // ============================================================
