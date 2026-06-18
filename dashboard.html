@@ -265,6 +265,16 @@
             color: #0D47A1;
         }
         .summary-item.novedad-item.nov-curso .value { color: #0D47A1; }
+        .summary-item.novedad-item.nov-excusa-servicio {
+            background: #F3E5F5;
+            color: #6A1B9A;
+        }
+        .summary-item.novedad-item.nov-excusa-servicio .value { color: #6A1B9A; }
+        .summary-item.novedad-item.nov-comision {
+            background: #E0F2F1;
+            color: #00695C;
+        }
+        .summary-item.novedad-item.nov-comision .value { color: #00695C; }
 
         .summary-item.novedad-item.nov-default {
             background: #F1F3F4;
@@ -410,13 +420,14 @@
         .novedad-permiso { background: #E0F7FA; color: #00796B; }
         .novedad-cita { background: #E1F5FE; color: #0277BD; }
         .novedad-maternidad { background: #FBE9E7; color: #C53929; }
-        .novedad-retardado { background: #FFF8E1; color: #F9A825; }
-        .novedad-otra { background: #F3E5F5; color: #6A1B9A; }
         .novedad-retardada { background: #FFF3E0; color: #E65100; }
+        .novedad-otra { background: #F3E5F5; color: #6A1B9A; }
         .novedad-excusa-parcial { background: #E8EAF6; color: #303F9F; }
         
         /* ====== NUEVO ESTILO BADGE: CURSO DE ASCENSO ====== */
         .novedad-curso { background: #E3F2FD; color: #0D47A1; }
+        .novedad-excusa-servicio { background: #F3E5F5; color: #6A1B9A; }
+        .novedad-comision { background: #E0F2F1; color: #00695C; }
 
         .obs-container { display: flex; flex-direction: column; gap: 4px; }
         .obs-input { width: 100%; padding: 5px; border: 1px solid var(--borde); border-radius: 4px; font-family: inherit; font-size: 0.78rem; resize: vertical; min-height: 32px; }
@@ -538,12 +549,11 @@
         let allTableData = [];
         let currentFilter = 'ALL';
 
-        // ====== NUEVA NOVEDAD AGREGADA: CURSO DE ASCENSO ======
         const NOVEDADES = [
             'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
-            'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD', 
-            'RETARDADO', 'OTRA NOVEDAD', 'RETARDAD@', 'EXCUSA PARCIAL',
-            'CURSO DE ASCENSO'
+            'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD',
+            'EXCUSADO DEL SERVICIO', 'OTRA NOVEDAD', 'RETARDAD@', 'EXCUSA PARCIAL',
+            'CURSO DE ASCENSO', 'COMISION'
         ];
 
         function updateDate() {
@@ -800,13 +810,14 @@
                 else if (novedadName.indexOf('VACACIONES') !== -1) colorClass = 'nov-vacaciones';
                 else if (novedadName.indexOf('SERVICIO') !== -1) colorClass = 'nov-servicio';
                 else if (novedadName.indexOf('GRAVIDEZ') !== -1) colorClass = 'nov-gravidez';
+                else if (novedadName.indexOf('EXCUSADO DEL SERVICIO') !== -1) colorClass = 'nov-excusa-servicio';
                 else if (novedadName.indexOf('EXCUSA') !== -1) colorClass = 'nov-excusa';
                 else if (novedadName.indexOf('PERMISO') !== -1) colorClass = 'nov-permiso';
                 else if (novedadName.indexOf('CITA') !== -1) colorClass = 'nov-cita';
                 else if (novedadName.indexOf('MATERNIDAD') !== -1) colorClass = 'nov-maternidad';
-                else if (novedadName.indexOf('RETARDADO') !== -1) colorClass = 'nov-retardado';
-                // ====== NUEVO COLOR CURSO DE ASCENSO ======
+                else if (novedadName.indexOf('RETARDAD') !== -1) colorClass = 'nov-retardado';
                 else if (novedadName.indexOf('CURSO') !== -1) colorClass = 'nov-curso';
+                else if (novedadName.indexOf('COMISION') !== -1) colorClass = 'nov-comision';
                 
                 div.className = 'summary-item novedad-item ' + colorClass;
                 div.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
@@ -991,14 +1002,15 @@
             if (n.indexOf('SERVICIO') !== -1) return 'novedad-servicio';
             if (n.indexOf('GRAVIDEZ') !== -1) return 'novedad-gravidez';
             if (n === 'EXCUSA PARCIAL') return 'novedad-excusa-parcial';
+            if (n === 'EXCUSADO DEL SERVICIO') return 'novedad-excusa-servicio';
             if (n.indexOf('EXCUSA') !== -1) return 'novedad-excusa';
             if (n.indexOf('PERMISO') !== -1) return 'novedad-permiso';
             if (n.indexOf('CITA') !== -1) return 'novedad-cita';
             if (n.indexOf('MATERNIDAD') !== -1) return 'novedad-maternidad';
             if (n === 'RETARDAD@') return 'novedad-retardada';
             if (n.indexOf('OTRA') !== -1) return 'novedad-otra';
-            // ====== NUEVA CLASE CURSO DE ASCENSO ======
             if (n.indexOf('CURSO') !== -1) return 'novedad-curso';
+            if (n.indexOf('COMISION') !== -1) return 'novedad-comision';
             return 'novedad-normal';
         }
 
@@ -1037,4 +1049,3 @@
         loadRealData();
     </script>
 </body>
-</html>
