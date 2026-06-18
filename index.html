@@ -234,7 +234,7 @@
             background: rgba(255,255,255,0.3);
         }
 
-        /* ===== RESTO DE ESTILOS (igual que antes) ===== */
+        /* ===== RESTO DE ESTILOS ===== */
         .header-institutional {
             background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
             color: white;
@@ -366,7 +366,7 @@
                  alt="Escudo Policía Nacional"
                  onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
             <h2>Policía Nacional de Colombia</h2>
-            <p class="subtitle">Sistema de Gestión de Novedades JESEP</p>
+            <p class="subtitle">Sistema de Gestión de Novedades</p>
             
             <form class="login-form" id="loginForm" onsubmit="return false;">
                 <div class="input-group">
@@ -421,12 +421,12 @@
         // ============================================================
         // CONFIGURACIÓN API
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyHNtICOCZJSUoT1c_j6oLIUHH5XrCvJ6Q1uvZ1Yt2eVvIMXZkLzsE7mIX9HdBeCmLi/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwzcTtFWcK3sfDjYSNdc11HjvNNN2M2anfXLwoP_vR0uDdC2ZSBC5pV-Hz7HPy54YMs/exec';
         
         let jsonpCallbackId = 0;
 
         // ============================================================
-        // JSONP FETCH (POST simulado con GET)
+        // JSONP FETCH (GET - único método que funciona con CORS)
         // ============================================================
         function apiFetchJSONP(action, params = {}) {
             return new Promise((resolve, reject) => {
@@ -473,7 +473,7 @@
         }
 
         // ============================================================
-        // LOGIN
+        // LOGIN (CORREGIDO - usa GET con JSONP)
         // ============================================================
         async function handleLogin() {
             const username = document.getElementById('username').value.trim();
@@ -492,21 +492,19 @@
             errorDiv.classList.remove('show');
             
             try {
+                // CORREGIDO: Usar GET con JSONP (no POST - CORS lo bloquea)
                 const response = await apiFetchJSONP('login', {
                     username: username,
                     password: password
                 });
                 
                 if (response.success && response.usuario) {
-                    // Guardar sesión
                     const session = {
                         usuario: response.usuario,
                         token: response.token,
                         timestamp: Date.now()
                     };
                     localStorage.setItem('policiaSession', JSON.stringify(session));
-                    
-                    // Mostrar dashboard
                     showDashboard(response.usuario);
                 } else {
                     errorDiv.textContent = response.error || 'Error de autenticación';
@@ -527,15 +525,12 @@
         // MOSTRAR DASHBOARD
         // ============================================================
         function showDashboard(usuario) {
-            // Ocultar login
             document.getElementById('loginOverlay').classList.add('hidden');
             
-            // Mostrar info de usuario
             document.getElementById('userInfo').style.display = 'flex';
             document.getElementById('userName').textContent = usuario.username;
             document.getElementById('userRole').textContent = usuario.rol;
             
-            // Actualizar mensaje de bienvenida
             const welcomeText = document.getElementById('welcomeText');
             if (usuario.rol === 'administrador') {
                 welcomeText.textContent = 'Administrador - Acceso a todas las dependencias';
@@ -543,7 +538,6 @@
                 welcomeText.textContent = 'Operador - Dependencia asignada: ' + usuario.dependencia;
             }
             
-            // Generar botones filtrados por rol
             generateButtons(usuario);
         }
 
@@ -562,17 +556,15 @@
             container.innerHTML = '';
 
             dependencies.forEach(dep => {
-                // Si es operador, solo mostrar su dependencia
                 if (usuario.rol === 'operador' && usuario.dependencia !== 'TODAS') {
                     if (dep !== usuario.dependencia && dep !== 'PARTE FINAL') {
-                        return; // No mostrar otras dependencias
+                        return;
                     }
                 }
 
                 const btn = document.createElement('button');
                 btn.className = 'btn-dependency';
                 
-                // Destacar dependencia del operador
                 const isUserDep = dep === usuario.dependencia;
                 if (isUserDep) {
                     btn.style.borderColor = '#C9A227';
@@ -617,7 +609,6 @@
             
             try {
                 const session = JSON.parse(sessionStr);
-                // Sesión válida por 8 horas
                 if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) {
                     localStorage.removeItem('policiaSession');
                     return false;
@@ -636,7 +627,6 @@
             if (usuario) {
                 showDashboard(usuario);
             } else {
-                // Mostrar login
                 document.getElementById('loginOverlay').classList.remove('hidden');
             }
             
