@@ -173,6 +173,23 @@
             transform: none;
         }
 
+        .btn-login-secondary {
+            background: var(--gris-texto);
+            color: var(--blanco);
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login-secondary:hover {
+            background: var(--gris-oscuro);
+        }
+
         .login-error {
             color: var(--rojo-error);
             font-size: 0.85rem;
@@ -198,6 +215,17 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dep-name {
+            color: var(--verde-policia);
+            font-weight: 700;
+            font-size: 1.1rem;
         }
 
         /* ===== HEADER CON USUARIO ===== */
@@ -361,7 +389,7 @@
 
     <!-- LOGIN SCREEN -->
     <div class="login-overlay" id="loginOverlay">
-        <div class="login-card">
+        <div class="login-card" id="loginCard">
             <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
                  alt="Escudo Policía Nacional"
                  onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
@@ -421,12 +449,13 @@
         // ============================================================
         // CONFIGURACIÓN API
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwzcTtFWcK3sfDjYSNdc11HjvNNN2M2anfXLwoP_vR0uDdC2ZSBC5pV-Hz7HPy54YMs/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzkcQkR42i4QFlLj9UBWDoDBLaVCMBf72QHoLhD3qteBVFYDl-A8cMxEmE2k2aQPsk/exec';
         
         let jsonpCallbackId = 0;
+        let tempUsuario = null;
 
         // ============================================================
-        // JSONP FETCH (GET - único método que funciona con CORS)
+        // JSONP FETCH
         // ============================================================
         function apiFetchJSONP(action, params = {}) {
             return new Promise((resolve, reject) => {
@@ -473,7 +502,7 @@
         }
 
         // ============================================================
-        // LOGIN (CORREGIDO - usa GET con JSONP)
+        // LOGIN (Paso 1: Validar usuario)
         // ============================================================
         async function handleLogin() {
             const username = document.getElementById('username').value.trim();
@@ -492,22 +521,23 @@
             errorDiv.classList.remove('show');
             
             try {
-                // CORREGIDO: Usar GET con JSONP (no POST - CORS lo bloquea)
                 const response = await apiFetchJSONP('login', {
                     username: username,
                     password: password
                 });
                 
                 if (response.success && response.usuario) {
-                    const session = {
-                        usuario: response.usuario,
-                        token: response.token,
-                        timestamp: Date.now()
-                    };
-                    localStorage.setItem('policiaSession', JSON.stringify(session));
-                    showDashboard(response.usuario);
+                    tempUsuario = response.usuario;
+                    
+                    // Si es administrador, ir directo al dashboard
+                    if (response.usuario.rol === 'administrador') {
+                        completeLogin(response.usuario);
+                    } else {
+                        // Si es operador, pedir clave de dependencia
+                        showDepKeyPrompt(response.usuario);
+                    }
                 } else {
-                    errorDiv.textContent = response.error || 'Error de autenticación';
+                    errorDiv.textContent = response.error || 'Usuario o contraseña incorrectos';
                     errorDiv.classList.add('show');
                     btn.disabled = false;
                     btn.textContent = 'Ingresar';
@@ -519,6 +549,115 @@
                 btn.disabled = false;
                 btn.textContent = 'Ingresar';
             }
+        }
+
+        // ============================================================
+        // MOSTRAR PROMPT DE CLAVE DE DEPENDENCIA (Paso 2)
+        // ============================================================
+        function showDepKeyPrompt(usuario) {
+            const loginCard = document.getElementById('loginCard');
+            
+            loginCard.innerHTML = `
+                <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
+                     alt="Escudo Policía Nacional"
+                     onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
+                <h2>Verificación de Dependencia</h2>
+                <p class="subtitle">Dependencia: <span class="dep-name">${usuario.dependencia}</span></p>
+                <p style="font-size: 0.85rem; color: var(--gris-texto); margin-bottom: 20px;">
+                    Ingrese la clave de acceso asignada a su dependencia
+                </p>
+                
+                <form class="login-form" onsubmit="return false;">
+                    <div class="input-group">
+                        <input type="password" id="depKeyInput" placeholder=" " required autocomplete="off">
+                        <label for="depKeyInput">Clave de Dependencia</label>
+                    </div>
+                    <button type="submit" class="btn-login" id="btnDepKey" onclick="verifyDepKey()">
+                        Verificar Clave
+                    </button>
+                    <button type="button" class="btn-login-secondary" onclick="backToLogin()">
+                        ← Volver al Login
+                    </button>
+                    <div class="login-error" id="depKeyError"></div>
+                </form>
+            `;
+            
+            // Focus automático
+            setTimeout(() => {
+                const input = document.getElementById('depKeyInput');
+                if (input) input.focus();
+            }, 100);
+            
+            // Enter key
+            const depInput = document.getElementById('depKeyInput');
+            if (depInput) {
+                depInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') verifyDepKey();
+                });
+            }
+        }
+
+        // ============================================================
+        // VERIFICAR CLAVE DE DEPENDENCIA
+        // ============================================================
+        async function verifyDepKey() {
+            const depKey = document.getElementById('depKeyInput').value.trim();
+            const btn = document.getElementById('btnDepKey');
+            const errorDiv = document.getElementById('depKeyError');
+            
+            if (!depKey) {
+                errorDiv.textContent = 'Ingrese la clave de dependencia';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Verificando... <span class="spinner"></span>';
+            errorDiv.classList.remove('show');
+            
+            try {
+                const response = await apiFetchJSONP('verifyDepKey', {
+                    username: tempUsuario.username,
+                    depKey: depKey,
+                    dependencia: tempUsuario.dependencia
+                });
+                
+                if (response.success) {
+                    completeLogin(tempUsuario);
+                } else {
+                    errorDiv.textContent = response.error || 'Clave de dependencia incorrecta';
+                    errorDiv.classList.add('show');
+                    btn.disabled = false;
+                    btn.textContent = 'Verificar Clave';
+                }
+            } catch (error) {
+                console.error('Error verifyDepKey:', error);
+                errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
+                errorDiv.classList.add('show');
+                btn.disabled = false;
+                btn.textContent = 'Verificar Clave';
+            }
+        }
+
+        // ============================================================
+        // VOLVER AL LOGIN
+        // ============================================================
+        function backToLogin() {
+            tempUsuario = null;
+            location.reload();
+        }
+
+        // ============================================================
+        // COMPLETAR LOGIN (guardar sesión y mostrar dashboard)
+        // ============================================================
+        function completeLogin(usuario) {
+            const session = {
+                usuario: usuario,
+                token: usuario.token || Date.now().toString(),
+                timestamp: Date.now()
+            };
+            localStorage.setItem('policiaSession', JSON.stringify(session));
+            showDashboard(usuario);
         }
 
         // ============================================================
@@ -597,6 +736,7 @@
         function logout() {
             localStorage.removeItem('policiaSession');
             localStorage.removeItem('currentDependency');
+            tempUsuario = null;
             location.reload();
         }
 
@@ -646,12 +786,21 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
-        // Enter en inputs
-        document.getElementById('username').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') document.getElementById('password').focus();
-        });
-        document.getElementById('password').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') handleLogin();
+        // Enter en inputs del login inicial
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            
+            if (usernameInput) {
+                usernameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') passwordInput.focus();
+                });
+            }
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') handleLogin();
+                });
+            }
         });
 
         // Iniciar
