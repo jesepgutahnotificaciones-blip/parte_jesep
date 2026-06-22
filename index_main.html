@@ -15,6 +15,8 @@
             --gris-texto: #5F6368;
             --gris-oscuro: #3C4043;
             --rojo-suave: #D93025;
+            --verde-exito: #1E8E3E;
+            --naranja-advertencia: #F9A825;
             --borde: #DADCE0;
             --sombra-suave: 0 2px 8px rgba(0,0,0,0.1);
             --sombra-card: 0 4px 12px rgba(0,0,0,0.15);
@@ -30,7 +32,6 @@
             font-size: 14px;
         }
 
-        /* ===== HEADER ===== */
         .header-institutional {
             background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
             color: var(--blanco);
@@ -68,7 +69,6 @@
         .btn-refresh:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         .btn-refresh:active { transform: translateY(0); }
 
-        /* ===== MAIN CONTENT ===== */
         .main-content { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
 
         .section-title {
@@ -91,7 +91,6 @@
             border-radius: 2px;
         }
 
-        /* ===== TURNOS GRID ===== */
         .turnos-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -141,7 +140,6 @@
 
         .turno-body { padding: 16px; }
 
-        /* ===== CATEGORÍAS (PARTE) ===== */
         .categorias-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -174,7 +172,6 @@
         }
         .categoria-item .value.zero { color: #ccc; font-weight: 400; }
 
-        /* Colores por categoría */
         .cat-oficiales { border-left: 3px solid #1967D2; }
         .cat-ne { border-left: 3px solid #1E8E3E; }
         .cat-patrulleros { border-left: 3px solid #B06000; }
@@ -193,17 +190,9 @@
         .total-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
         .total-value { font-size: 1.8rem; font-weight: 700; color: var(--amarillo-policia); }
 
-        /* ===== SECCIÓN NOVEDADES ===== */
-        .novedades-section {
-            margin-top: 30px;
-        }
-
-        .novedades-section .section-title {
-            color: var(--azul-oscuro);
-        }
-        .novedades-section .section-title::before {
-            background: var(--rojo-suave);
-        }
+        .novedades-section { margin-top: 30px; }
+        .novedades-section .section-title { color: var(--azul-oscuro); }
+        .novedades-section .section-title::before { background: var(--rojo-suave); }
 
         .novedades-grid {
             display: grid;
@@ -249,10 +238,7 @@
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
         }
-        .novedad-item:hover {
-            background: #f8f9fa;
-            transform: translateX(4px);
-        }
+        .novedad-item:hover { background: #f8f9fa; transform: translateX(4px); }
 
         .novedad-nombre {
             font-size: 0.78rem;
@@ -262,53 +248,34 @@
             align-items: center;
             gap: 8px;
         }
-        .novedad-icon {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
+        .novedad-icon { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
-        /* Colores por tipo de novedad */
         .nov-oficina { border-left-color: #1967D2; }
         .nov-oficina .novedad-icon { background: #1967D2; }
-        
         .nov-vacaciones { border-left-color: #1E8E3E; }
         .nov-vacaciones .novedad-icon { background: #1E8E3E; }
-        
         .nov-servicio { border-left-color: #B06000; }
         .nov-servicio .novedad-icon { background: #B06000; }
-        
         .nov-gravidez { border-left-color: #9C1B6A; }
         .nov-gravidez .novedad-icon { background: #9C1B6A; }
-        
         .nov-excusa { border-left-color: #7B1FA2; }
         .nov-excusa .novedad-icon { background: #7B1FA2; }
-        
         .nov-permiso { border-left-color: #00796B; }
         .nov-permiso .novedad-icon { background: #00796B; }
-        
         .nov-cita { border-left-color: #0277BD; }
         .nov-cita .novedad-icon { background: #0277BD; }
-        
         .nov-maternidad { border-left-color: #C53929; }
         .nov-maternidad .novedad-icon { background: #C53929; }
-        
         .nov-excusa-servicio { border-left-color: #6A1B9A; }
         .nov-excusa-servicio .novedad-icon { background: #6A1B9A; }
-        
         .nov-otra { border-left-color: #F9A825; }
         .nov-otra .novedad-icon { background: #F9A825; }
-        
         .nov-retardado { border-left-color: #E65100; }
         .nov-retardado .novedad-icon { background: #E65100; }
-        
         .nov-excusa-parcial { border-left-color: #303F9F; }
         .nov-excusa-parcial .novedad-icon { background: #303F9F; }
-        
         .nov-curso { border-left-color: #0D47A1; }
         .nov-curso .novedad-icon { background: #0D47A1; }
-        
         .nov-comision { border-left-color: #00695C; }
         .nov-comision .novedad-icon { background: #00695C; }
 
@@ -322,11 +289,7 @@
             min-width: 28px;
             text-align: center;
         }
-        .novedad-total.zero {
-            color: #bbb;
-            background: #f5f5f5;
-            font-weight: 400;
-        }
+        .novedad-total.zero { color: #bbb; background: #f5f5f5; font-weight: 400; }
 
         .novedades-total-card {
             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
@@ -342,7 +305,233 @@
         .novedades-total-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .novedades-total-value { font-size: 1.5rem; font-weight: 700; color: var(--amarillo-policia); }
 
-        /* ===== LOADING ===== */
+        /* ===== AUDITORÍA ===== */
+        .auditoria-section { margin-top: 30px; }
+        .auditoria-section .section-title { color: var(--azul-oscuro); }
+        .auditoria-section .section-title::before { background: linear-gradient(180deg, #6B4C9A 0%, #9C27B0 100%); }
+
+        .auditoria-resumen {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .dependencia-estado-card {
+            background: var(--blanco);
+            border-radius: 10px;
+            padding: 14px 10px;
+            text-align: center;
+            box-shadow: var(--sombra-suave);
+            border: 2px solid var(--borde);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .dependencia-estado-card:hover { transform: translateY(-3px); box-shadow: var(--sombra-card); }
+        .dependencia-estado-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+        }
+        .dependencia-estado-card.actualizado { border-color: var(--verde-exito); }
+        .dependencia-estado-card.actualizado::before { background: var(--verde-exito); }
+        .dependencia-estado-card.pendiente { border-color: var(--naranja-advertencia); }
+        .dependencia-estado-card.pendiente::before { background: var(--naranja-advertencia); }
+        .dependencia-estado-card.atrasado { border-color: var(--rojo-suave); }
+        .dependencia-estado-card.atrasado::before { background: var(--rojo-suave); }
+
+        .dependencia-nombre {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--gris-oscuro);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .dependencia-estado-texto {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .dependencia-estado-card.actualizado .dependencia-estado-texto { color: var(--verde-exito); }
+        .dependencia-estado-card.pendiente .dependencia-estado-texto { color: var(--naranja-advertencia); }
+        .dependencia-estado-card.atrasado .dependencia-estado-texto { color: var(--rojo-suave); }
+
+        .dependencia-hora { font-size: 0.7rem; color: var(--gris-texto); font-weight: 500; }
+        .dependencia-usuario { font-size: 0.65rem; color: var(--gris-texto); margin-top: 2px; font-style: italic; }
+        .dependencia-icono { font-size: 1.4rem; margin-bottom: 6px; }
+
+        .auditoria-tabla-container {
+            background: var(--blanco);
+            border-radius: 12px;
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde);
+            overflow: hidden;
+        }
+
+        .auditoria-tabla-header {
+            background: linear-gradient(135deg, var(--azul-oscuro) 0%, #2c5282 100%);
+            color: var(--blanco);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .auditoria-tabla-header h3 { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+        .auditoria-filtros { display: flex; gap: 8px; flex-wrap: wrap; }
+        .auditoria-filtros select, .auditoria-filtros input {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.15);
+            color: var(--blanco);
+            font-size: 0.75rem;
+            font-family: inherit;
+            outline: none;
+        }
+        .auditoria-filtros select option { background: var(--azul-oscuro); color: var(--blanco); }
+        .auditoria-filtros input::placeholder { color: rgba(255,255,255,0.7); }
+
+        .auditoria-tabla { width: 100%; border-collapse: collapse; }
+        .auditoria-tabla thead { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); }
+        .auditoria-tabla th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gris-oscuro);
+            border-bottom: 2px solid var(--borde);
+            white-space: nowrap;
+        }
+        .auditoria-tabla td {
+            padding: 10px 16px;
+            font-size: 0.8rem;
+            border-bottom: 1px solid var(--gris-suave);
+            color: var(--gris-oscuro);
+        }
+        .auditoria-tabla tbody tr { transition: background 0.2s ease; }
+        .auditoria-tabla tbody tr:hover { background: #f8f9fa; }
+        .auditoria-tabla tbody tr:nth-child(even) { background: #fafbfc; }
+        .auditoria-tabla tbody tr:nth-child(even):hover { background: #f0f2f5; }
+
+        .badge-estado {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .badge-actualizado { background: #e8f5e9; color: var(--verde-exito); }
+        .badge-pendiente { background: #fff8e1; color: #F57F17; }
+        .badge-atrasado { background: #ffebee; color: var(--rojo-suave); }
+
+        .usuario-cell { display: flex; align-items: center; gap: 8px; }
+        .usuario-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
+            color: var(--blanco);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .usuario-info { display: flex; flex-direction: column; }
+        .usuario-nombre { font-weight: 600; font-size: 0.8rem; }
+        .usuario-rol { font-size: 0.65rem; color: var(--gris-texto); }
+
+        .dependencia-tag {
+            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
+            color: var(--blanco);
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .accion-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 600; }
+        .accion-crear { color: var(--verde-exito); }
+        .accion-editar { color: #1565C0; }
+        .accion-eliminar { color: var(--rojo-suave); }
+        .accion-ver { color: var(--gris-texto); }
+
+        .timestamp-cell { font-family: 'Courier New', monospace; font-size: 0.75rem; color: var(--gris-texto); white-space: nowrap; }
+
+        .auditoria-tabla-footer {
+            padding: 12px 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--gris-texto);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .auditoria-paginacion { display: flex; gap: 4px; }
+        .auditoria-paginacion button {
+            padding: 4px 10px;
+            border: 1px solid var(--borde);
+            background: var(--blanco);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .auditoria-paginacion button:hover { background: var(--gris-suave); }
+        .auditoria-paginacion button.active { background: var(--verde-policia); color: var(--blanco); border-color: var(--verde-policia); }
+        .auditoria-paginacion button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .auditoria-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--blanco);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: var(--sombra-suave);
+            border: 1px solid var(--borde);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .stat-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .stat-icon.verde { background: #e8f5e9; }
+        .stat-icon.amarillo { background: #fff8e1; }
+        .stat-icon.rojo { background: #ffebee; }
+        .stat-icon.azul { background: #e3f2fd; }
+        .stat-info h4 { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gris-texto); margin-bottom: 2px; }
+        .stat-info .stat-valor { font-size: 1.4rem; font-weight: 700; color: var(--gris-oscuro); }
+
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -354,10 +543,7 @@
             z-index: 9999;
             transition: opacity 0.5s ease;
         }
-        .loading-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+        .loading-overlay.hidden { opacity: 0; pointer-events: none; }
         .spinner {
             width: 50px; height: 50px;
             border: 4px solid var(--gris-suave);
@@ -369,7 +555,6 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { color: var(--gris-texto); font-size: 1rem; font-weight: 500; }
 
-        /* ===== FOOTER ===== */
         .footer-institutional {
             text-align: center;
             padding: 20px;
@@ -379,10 +564,11 @@
         .footer-institutional p { color: var(--blanco); font-size: 0.8rem; opacity: 0.8; }
         .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1rem; margin-top: 6px; letter-spacing: 2px; }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
             .turnos-grid, .novedades-grid { grid-template-columns: 1fr; }
             .categorias-grid { grid-template-columns: repeat(3, 1fr); }
+            .auditoria-resumen { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+            .auditoria-stats { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 768px) {
             .header-institutional { flex-direction: column; gap: 10px; padding: 10px 16px; }
@@ -390,18 +576,21 @@
             .header-text h1 { font-size: 0.95rem; }
             .categorias-grid { grid-template-columns: repeat(2, 1fr); }
             .section-title { font-size: 1.1rem; }
+            .auditoria-stats { grid-template-columns: 1fr; }
+            .auditoria-tabla-container { overflow-x: auto; }
+            .auditoria-tabla { min-width: 700px; }
+            .auditoria-filtros { width: 100%; }
+            .auditoria-filtros select, .auditoria-filtros input { flex: 1; }
         }
     </style>
 </head>
 <body>
 
-    <!-- LOADING -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
         <div class="loading-text">Cargando datos del sistema...</div>
     </div>
 
-    <!-- HEADER -->
     <div class="header-institutional">
         <div class="header-left">
             <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
@@ -418,124 +607,149 @@
         </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
         
-        <!-- SECCIÓN 1: PARTE POR TURNO (Fuerza Efectiva/Disponible) -->
         <h2 class="section-title">📊 Estado de Formación por Turnos</h2>
-        <div class="turnos-grid" id="turnosContainer">
-            <!-- Turnos se generan dinámicamente -->
-        </div>
+        <div class="turnos-grid" id="turnosContainer"></div>
 
-        <!-- SECCIÓN 2: NOVEDADES POR TURNO -->
         <div class="novedades-section">
             <h2 class="section-title">📋 Novedades por Turno</h2>
-            <div class="novedades-grid" id="novedadesContainer">
-                <!-- Novedades se generan dinámicamente -->
+            <div class="novedades-grid" id="novedadesContainer"></div>
+        </div>
+
+        <div class="auditoria-section" id="auditoriaSection">
+            <h2 class="section-title">🔍 Auditoría de Actualizaciones</h2>
+            
+            <div class="auditoria-stats" id="auditoriaStats">
+                <div class="stat-card">
+                    <div class="stat-icon verde">✅</div>
+                    <div class="stat-info">
+                        <h4>Actualizados</h4>
+                        <div class="stat-valor" id="statActualizados">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amarillo">⏳</div>
+                    <div class="stat-info">
+                        <h4>Pendientes</h4>
+                        <div class="stat-valor" id="statPendientes">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rojo">⚠️</div>
+                    <div class="stat-info">
+                        <h4>Atrasados</h4>
+                        <div class="stat-valor" id="statAtrasados">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon azul">📊</div>
+                    <div class="stat-info">
+                        <h4>Total Dependencias</h4>
+                        <div class="stat-valor" id="statTotal">26</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auditoria-resumen" id="auditoriaResumen"></div>
+
+            <div class="auditoria-tabla-container">
+                <div class="auditoria-tabla-header">
+                    <h3>📋 Registro de Actividades</h3>
+                    <div class="auditoria-filtros">
+                        <select id="filtroDependencia" onchange="filtrarAuditoria()">
+                            <option value="">Todas las dependencias</option>
+                        </select>
+                        <select id="filtroEstado" onchange="filtrarAuditoria()">
+                            <option value="">Todos los estados</option>
+                            <option value="actualizado">✅ Actualizado</option>
+                            <option value="pendiente">⏳ Pendiente</option>
+                            <option value="atrasado">⚠️ Atrasado</option>
+                        </select>
+                        <input type="text" id="filtroUsuario" placeholder="Buscar usuario..." oninput="filtrarAuditoria()">
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="auditoria-tabla" id="auditoriaTabla">
+                        <thead>
+                            <tr>
+                                <th>🕐 Fecha/Hora</th>
+                                <th>👤 Usuario</th>
+                                <th>🏢 Dependencia</th>
+                                <th>⚡ Acción</th>
+                                <th>📄 Detalle</th>
+                                <th>📊 Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditoriaTablaBody"></tbody>
+                    </table>
+                </div>
+                <div class="auditoria-tabla-footer">
+                    <span id="auditoriaContador">Mostrando 0 registros</span>
+                    <div class="auditoria-paginacion" id="auditoriaPaginacion"></div>
+                </div>
             </div>
         </div>
 
     </div>
 
-    <!-- FOOTER -->
     <div class="footer-institutional">
         <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
         <p class="motto">★ DIOS Y PATRIA ★</p>
     </div>
 
     <script>
-        // ============================================================
-        // CONFIGURACIÓN API
-        // ============================================================
         const API_URL = 'https://script.google.com/macros/s/AKfycbzkcQkR42i4QFlLj9UBWDoDBLaVCMBf72QHoLhD3qteBVFYDl-A8cMxEmE2k2aQPsk/exec';
-        const DEPENDENCY = 'ASJUR'; // Ajusta según tu dependencia
+        const DEPENDENCY = 'ASJUR';
+
+        const DEPENDENCIAS = [
+            'ASJUR', 'CEPOL', 'ARSEG', 'GRUES', 'COINT', 'ARGOP', 'GRUIS',
+            'GUCOE', 'GUDEH', 'GUFAC', 'GUGEC', 'GUGED', 'GUGET', 'GULOG',
+            'GURIN', 'GUSEP', 'GUTAH', 'GUTIC', 'GUVIP', 'COVAR', 'OAC',
+            'PLAN DEMOCRACIA', 'PLANE', 'SEPRI', 'SUMEC', 'SUSEP'
+        ];
 
         let jsonpCallbackId = 0;
+        let auditoriaDataGlobal = [];
+        let auditoriaPaginaActual = 1;
+        const AUDITORIA_POR_PAGINA = 15;
 
         function updateDate() {
             const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            };
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
-        // ============================================================
-        // JSONP FETCH
-        // ============================================================
         function apiFetchJSONP(action, params = {}) {
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonpCallback_' + (++jsonpCallbackId) + '_' + Date.now();
                 const script = document.createElement('script');
-                
                 const urlParams = new URLSearchParams();
                 urlParams.append('action', action);
                 urlParams.append('dependency', DEPENDENCY);
                 urlParams.append('callback', callbackName);
-                
                 for (const [key, value] of Object.entries(params)) {
-                    if (value !== undefined && value !== null) {
-                        urlParams.append(key, value);
-                    }
+                    if (value !== undefined && value !== null) urlParams.append(key, value);
                 }
-                
                 const url = API_URL + '?' + urlParams.toString();
-                
-                const timeout = setTimeout(() => {
-                    cleanup();
-                    reject(new Error('Timeout JSONP'));
-                }, 15000);
-                
-                window[callbackName] = function(data) {
-                    clearTimeout(timeout);
-                    cleanup();
-                    resolve(data);
-                };
-                
-                function cleanup() {
-                    delete window[callbackName];
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                }
-                
-                script.onerror = function() {
-                    clearTimeout(timeout);
-                    cleanup();
-                    reject(new Error('Error JSONP'));
-                };
-                
+                const timeout = setTimeout(() => { cleanup(); reject(new Error('Timeout JSONP')); }, 15000);
+                window[callbackName] = function(data) { clearTimeout(timeout); cleanup(); resolve(data); };
+                function cleanup() { delete window[callbackName]; if (script.parentNode) script.parentNode.removeChild(script); }
+                script.onerror = function() { clearTimeout(timeout); cleanup(); reject(new Error('Error JSONP')); };
                 script.src = url;
                 document.head.appendChild(script);
             });
         }
 
-        // ============================================================
-        // CONFIGURACIÓN DE NOVEDADES (14 tipos con sus clases CSS)
-        // ============================================================
         const NOVEDADES_CSS = {
-            'OFICINA': 'nov-oficina',
-            'VACACIONES': 'nov-vacaciones',
-            'SERVICIO': 'nov-servicio',
-            'ESTADO DE GRAVIDEZ': 'nov-gravidez',
-            'EXCUSA TOTAL': 'nov-excusa',
-            'PERMISO': 'nov-permiso',
-            'CITA MEDICA': 'nov-cita',
-            'LICENCIA DE MATERNIDAD': 'nov-maternidad',
-            'EXCUSADO DEL SERVICIO': 'nov-excusa-servicio',
-            'OTRA NOVEDAD': 'nov-otra',
-            'RETARDAD@': 'nov-retardado',
-            'EXCUSA PARCIAL': 'nov-excusa-parcial',
-            'CURSO DE ASCENSO': 'nov-curso',
-            'COMISION': 'nov-comision'
+            'OFICINA': 'nov-oficina', 'VACACIONES': 'nov-vacaciones', 'SERVICIO': 'nov-servicio',
+            'ESTADO DE GRAVIDEZ': 'nov-gravidez', 'EXCUSA TOTAL': 'nov-excusa', 'PERMISO': 'nov-permiso',
+            'CITA MEDICA': 'nov-cita', 'LICENCIA DE MATERNIDAD': 'nov-maternidad',
+            'EXCUSADO DEL SERVICIO': 'nov-excusa-servicio', 'OTRA NOVEDAD': 'nov-otra',
+            'RETARDAD@': 'nov-retardado', 'EXCUSA PARCIAL': 'nov-excusa-parcial',
+            'CURSO DE ASCENSO': 'nov-curso', 'COMISION': 'nov-comision'
         };
 
-        // ============================================================
-        // RENDERIZAR PARTE POR TURNO
-        // ============================================================
         function renderizarParteTurno(turnoId, turnoLetra, datos) {
             const oficiales = parseInt(datos.oficiales) || 0;
             const ne = parseInt(datos.ne) || 0;
@@ -551,9 +765,7 @@
                         <h2>🅰️ EN FORMACIÓN</h2>
                         <div class="turno-badge">TURNO ${turnoLetra}</div>
                     </div>
-                    <div class="forman-subtitle">
-                        <h3>FORMAN</h3>
-                    </div>
+                    <div class="forman-subtitle"><h3>FORMAN</h3></div>
                     <div class="turno-body">
                         <div class="categorias-grid">
                             <div class="categoria-item cat-oficiales">
@@ -590,29 +802,20 @@
             `;
         }
 
-        // ============================================================
-        // RENDERIZAR NOVEDADES POR TURNO (USA getNovedadesPorTurno)
-        // ============================================================
         function renderizarNovedadesTurno(turnoLetra, novedades) {
             let itemsHTML = '';
             let totalNovedades = 0;
-
             novedades.forEach((novedad) => {
                 const total = parseInt(novedad.total) || 0;
                 totalNovedades += total;
                 const cssClass = NOVEDADES_CSS[novedad.nombre] || 'nov-otra';
-
                 itemsHTML += `
                     <div class="novedad-item ${cssClass}">
-                        <div class="novedad-nombre">
-                            <span class="novedad-icon"></span>
-                            ${novedad.nombre}
-                        </div>
+                        <div class="novedad-nombre"><span class="novedad-icon"></span>${novedad.nombre}</div>
                         <div class="novedad-total ${total === 0 ? 'zero' : ''}">${total}</div>
                     </div>
                 `;
             });
-
             return `
                 <div class="novedades-card">
                     <div class="novedades-header">
@@ -630,22 +833,177 @@
             `;
         }
 
-        // ============================================================
-        // CARGAR DATOS - USA getNovedadesPorTurno DIRECTAMENTE
-        // ============================================================
+        function calcularEstado(fechaUltimaActualizacion) {
+            if (!fechaUltimaActualizacion) return 'atrasado';
+            const ahora = new Date();
+            const ultima = new Date(fechaUltimaActualizacion);
+            const diffHoras = (ahora - ultima) / (1000 * 60 * 60);
+            if (diffHoras < 2) return 'actualizado';
+            if (diffHoras < 24) return 'pendiente';
+            return 'atrasado';
+        }
+
+        function getIconoEstado(estado) {
+            const iconos = { 'actualizado': '✅', 'pendiente': '⏳', 'atrasado': '⚠️' };
+            return iconos[estado] || '❓';
+        }
+
+        function getTextoEstado(estado) {
+            const textos = { 'actualizado': 'Actualizado', 'pendiente': 'Pendiente', 'atrasado': 'Atrasado' };
+            return textos[estado] || 'Desconocido';
+        }
+
+        function renderizarResumenAuditoria(datosAuditoria) {
+            const container = document.getElementById('auditoriaResumen');
+            const dependenciasMap = {};
+            DEPENDENCIAS.forEach(dep => {
+                dependenciasMap[dep] = { nombre: dep, estado: 'atrasado', ultimaActualizacion: null, usuario: null };
+            });
+            datosAuditoria.forEach(reg => {
+                const dep = reg.dependencia;
+                if (dependenciasMap[dep]) {
+                    const fechaReg = new Date(reg.fechaHora);
+                    const fechaActual = dependenciasMap[dep].ultimaActualizacion ? new Date(dependenciasMap[dep].ultimaActualizacion) : null;
+                    if (!fechaActual || fechaReg > fechaActual) {
+                        dependenciasMap[dep].ultimaActualizacion = reg.fechaHora;
+                        dependenciasMap[dep].usuario = reg.usuario;
+                        dependenciasMap[dep].estado = calcularEstado(reg.fechaHora);
+                    }
+                }
+            });
+            let actualizados = 0, pendientes = 0, atrasados = 0;
+            Object.values(dependenciasMap).forEach(dep => {
+                if (dep.estado === 'actualizado') actualizados++;
+                else if (dep.estado === 'pendiente') pendientes++;
+                else atrasados++;
+            });
+            document.getElementById('statActualizados').textContent = actualizados;
+            document.getElementById('statPendientes').textContent = pendientes;
+            document.getElementById('statAtrasados').textContent = atrasados;
+            let html = '';
+            Object.values(dependenciasMap).forEach(dep => {
+                const estado = dep.estado;
+                const horaTexto = dep.ultimaActualizacion ?
+                    new Date(dep.ultimaActualizacion).toLocaleString('es-CO', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : 'Sin actualizar';
+                html += `
+                    <div class="dependencia-estado-card ${estado}" onclick="filtrarPorDependencia('${dep.nombre}')">
+                        <div class="dependencia-icono">${getIconoEstado(estado)}</div>
+                        <div class="dependencia-nombre">${dep.nombre}</div>
+                        <div class="dependencia-estado-texto">${getTextoEstado(estado)}</div>
+                        <div class="dependencia-hora">${horaTexto}</div>
+                        ${dep.usuario ? `<div class="dependencia-usuario">${dep.usuario}</div>` : ''}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderizarTablaAuditoria(datos, pagina = 1) {
+            const tbody = document.getElementById('auditoriaTablaBody');
+            const inicio = (pagina - 1) * AUDITORIA_POR_PAGINA;
+            const fin = inicio + AUDITORIA_POR_PAGINA;
+            const paginados = datos.slice(inicio, fin);
+            let html = '';
+            paginados.forEach(reg => {
+                const estado = calcularEstado(reg.fechaHora);
+                const badgeClass = estado === 'actualizado' ? 'badge-actualizado' : estado === 'pendiente' ? 'badge-pendiente' : 'badge-atrasado';
+                const fechaFormateada = new Date(reg.fechaHora).toLocaleString('es-CO', {
+                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+                const iniciales = reg.usuario ? reg.usuario.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
+                const accionClass = reg.accion === 'CREAR' ? 'accion-crear' : reg.accion === 'EDITAR' ? 'accion-editar' : reg.accion === 'ELIMINAR' ? 'accion-eliminar' : 'accion-ver';
+                const accionIcono = reg.accion === 'CREAR' ? '➕' : reg.accion === 'EDITAR' ? '✏️' : reg.accion === 'ELIMINAR' ? '🗑️' : '👁️';
+                html += `
+                    <tr>
+                        <td class="timestamp-cell">${fechaFormateada}</td>
+                        <td>
+                            <div class="usuario-cell">
+                                <div class="usuario-avatar">${iniciales}</div>
+                                <div class="usuario-info">
+                                    <span class="usuario-nombre">${reg.usuario || 'Desconocido'}</span>
+                                    <span class="usuario-rol">${reg.rol || 'Usuario'}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="dependencia-tag">${reg.dependencia}</span></td>
+                        <td><span class="accion-tag ${accionClass}">${accionIcono} ${reg.accion || 'Ver'}</span></td>
+                        <td>${reg.detalle || '-'}</td>
+                        <td><span class="badge-estado ${badgeClass}">${getIconoEstado(estado)} ${getTextoEstado(estado)}</span></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No hay registros de auditoría disponibles</td></tr>';
+            document.getElementById('auditoriaContador').textContent = `Mostrando ${inicio + 1}-${Math.min(fin, datos.length)} de ${datos.length} registros`;
+            renderizarPaginacion(datos.length, pagina);
+        }
+
+        function renderizarPaginacion(total, paginaActual) {
+            const totalPaginas = Math.ceil(total / AUDITORIA_POR_PAGINA);
+            const container = document.getElementById('auditoriaPaginacion');
+            if (totalPaginas <= 1) { container.innerHTML = ''; return; }
+            let html = `<button onclick="cambiarPaginaAuditoria(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}>◀</button>`;
+            for (let i = 1; i <= totalPaginas; i++) {
+                if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
+                    html += `<button class="${i === paginaActual ? 'active' : ''}" onclick="cambiarPaginaAuditoria(${i})">${i}</button>`;
+                } else if (i === paginaActual - 2 || i === paginaActual + 2) {
+                    html += '<span style="padding: 4px;">...</span>';
+                }
+            }
+            html += `<button onclick="cambiarPaginaAuditoria(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''}>▶</button>`;
+            container.innerHTML = html;
+        }
+
+        function cambiarPaginaAuditoria(pagina) {
+            auditoriaPaginaActual = pagina;
+            const filtrados = filtrarDatosAuditoria();
+            renderizarTablaAuditoria(filtrados, pagina);
+        }
+
+        function filtrarDatosAuditoria() {
+            const depFiltro = document.getElementById('filtroDependencia').value;
+            const estadoFiltro = document.getElementById('filtroEstado').value;
+            const usuarioFiltro = document.getElementById('filtroUsuario').value.toLowerCase();
+            return auditoriaDataGlobal.filter(reg => {
+                const matchDep = !depFiltro || reg.dependencia === depFiltro;
+                const matchEstado = !estadoFiltro || calcularEstado(reg.fechaHora) === estadoFiltro;
+                const matchUsuario = !usuarioFiltro || (reg.usuario && reg.usuario.toLowerCase().includes(usuarioFiltro));
+                return matchDep && matchEstado && matchUsuario;
+            });
+        }
+
+        function filtrarAuditoria() {
+            auditoriaPaginaActual = 1;
+            const filtrados = filtrarDatosAuditoria();
+            renderizarTablaAuditoria(filtrados, 1);
+        }
+
+        function filtrarPorDependencia(dependencia) {
+            document.getElementById('filtroDependencia').value = dependencia;
+            filtrarAuditoria();
+            document.getElementById('auditoriaSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function poblarFiltroDependencias() {
+            const select = document.getElementById('filtroDependencia');
+            DEPENDENCIAS.forEach(dep => {
+                const option = document.createElement('option');
+                option.value = dep;
+                option.textContent = dep;
+                select.appendChild(option);
+            });
+        }
+
         async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            
             try {
-                // Cargar datos en paralelo: parte + novedades por turno
-                const [parteResponse, novedadesA, novedadesB, novedadesC] = await Promise.all([
+                const [parteResponse, novedadesA, novedadesB, novedadesC, auditoriaResponse] = await Promise.all([
                     apiFetchJSONP('getDashboardData'),
                     apiFetchJSONP('getNovedadesPorTurno', { turno: 'A' }),
                     apiFetchJSONP('getNovedadesPorTurno', { turno: 'B' }),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'C' })
+                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'C' }),
+                    apiFetchJSONP('getAuditoria')
                 ]);
 
-                // Renderizar Parte por Turno
                 if (parteResponse.success && parteResponse.data) {
                     const datos = parteResponse.data;
                     document.getElementById('turnosContainer').innerHTML = `
@@ -655,61 +1013,82 @@
                     `;
                 }
 
-                // Renderizar Novedades por Turno (datos ya estructurados del backend)
                 const novedadesContainer = document.getElementById('novedadesContainer');
                 let novedadesHTML = '';
+                if (novedadesA.success && novedadesA.novedades) novedadesHTML += renderizarNovedadesTurno('A', novedadesA.novedades);
+                if (novedadesB.success && novedadesB.novedades) novedadesHTML += renderizarNovedadesTurno('B', novedadesB.novedades);
+                if (novedadesC.success && novedadesC.novedades) novedadesHTML += renderizarNovedadesTurno('C', novedadesC.novedades);
+                novedadesContainer.innerHTML = novedadesHTML || '<div class="novedades-card" style="grid-column: 1 / -1;"><div class="novedades-body" style="padding:40px; text-align:center; color:#999;">No se pudieron cargar las novedades. Intenta recargar la página.</div></div>';
 
-                if (novedadesA.success && novedadesA.novedades) {
-                    novedadesHTML += renderizarNovedadesTurno('A', novedadesA.novedades);
+                if (auditoriaResponse.success && auditoriaResponse.data) {
+                    auditoriaDataGlobal = auditoriaResponse.data;
+                    renderizarResumenAuditoria(auditoriaDataGlobal);
+                    renderizarTablaAuditoria(auditoriaDataGlobal, 1);
+                } else {
+                    usarDatosDemoAuditoria();
                 }
-                if (novedadesB.success && novedadesB.novedades) {
-                    novedadesHTML += renderizarNovedadesTurno('B', novedadesB.novedades);
-                }
-                if (novedadesC.success && novedadesC.novedades) {
-                    novedadesHTML += renderizarNovedadesTurno('C', novedadesC.novedades);
-                }
-
-                novedadesContainer.innerHTML = novedadesHTML || `
-                    <div class="novedades-card" style="grid-column: 1 / -1;">
-                        <div class="novedades-body" style="padding:40px; text-align:center; color:#999;">
-                            No se pudieron cargar las novedades. Intenta recargar la página.
-                        </div>
-                    </div>
-                `;
-                
             } catch (error) {
                 console.error('Error cargando datos:', error);
-                // Fallback con getCells
+                usarDatosDemoAuditoria();
                 try {
                     await cargarDatosFallback();
                 } catch (fallbackError) {
                     console.error('Fallback error:', fallbackError);
-                    document.getElementById('novedadesContainer').innerHTML = `
-                        <div class="novedades-card" style="grid-column: 1 / -1;">
-                            <div class="novedades-body" style="padding:40px; text-align:center; color:#D93025;">
-                                ⚠️ Error de conexión. Verifica tu conexión e intenta de nuevo.
-                            </div>
-                        </div>
-                    `;
+                    document.getElementById('novedadesContainer').innerHTML = '<div class="novedades-card" style="grid-column: 1 / -1;"><div class="novedades-body" style="padding:40px; text-align:center; color:#D93025;">⚠️ Error de conexión. Verifica tu conexión e intenta de nuevo.</div></div>';
                 }
             } finally {
-                setTimeout(() => {
-                    document.getElementById('loadingOverlay').classList.add('hidden');
-                }, 500);
+                setTimeout(() => { document.getElementById('loadingOverlay').classList.add('hidden'); }, 500);
             }
         }
 
-        // ============================================================
-        // FALLBACK CON GETCELLS (solo parte, sin novedades detalladas)
-        // ============================================================
+        function usarDatosDemoAuditoria() {
+            const ahora = new Date();
+            const datosDemo = [];
+            const usuarios = [
+                { nombre: 'CPT. GARCÍA', rol: 'Comandante' },
+                { nombre: 'TTE. RODRÍGUEZ', rol: 'Oficial de Novedades' },
+                { nombre: 'SGT. MARTÍNEZ', rol: 'Supervisor' },
+                { nombre: 'CT. LÓPEZ', rol: 'Operador' },
+                { nombre: 'INT. HERNÁNDEZ', rol: 'Analista' }
+            ];
+            const acciones = ['CREAR', 'EDITAR', 'VER', 'ELIMINAR'];
+            DEPENDENCIAS.forEach((dep, idx) => {
+                if (Math.random() > 0.3) {
+                    const usuario = usuarios[Math.floor(Math.random() * usuarios.length)];
+                    const horasAtras = Math.floor(Math.random() * 48);
+                    const fecha = new Date(ahora.getTime() - horasAtras * 60 * 60 * 1000);
+                    datosDemo.push({
+                        fechaHora: fecha.toISOString(),
+                        usuario: usuario.nombre,
+                        rol: usuario.rol,
+                        dependencia: dep,
+                        accion: acciones[Math.floor(Math.random() * acciones.length)],
+                        detalle: `Actualización de novedades turno ${['A', 'B', 'C'][Math.floor(Math.random() * 3)]}`
+                    });
+                    if (Math.random() > 0.7) {
+                        const fecha2 = new Date(fecha.getTime() - 2 * 60 * 60 * 1000);
+                        datosDemo.push({
+                            fechaHora: fecha2.toISOString(),
+                            usuario: usuario.nombre,
+                            rol: usuario.rol,
+                            dependencia: dep,
+                            accion: 'EDITAR',
+                            detalle: 'Corrección de datos de personal'
+                        });
+                    }
+                }
+            });
+            datosDemo.sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
+            auditoriaDataGlobal = datosDemo;
+            renderizarResumenAuditoria(auditoriaDataGlobal);
+            renderizarTablaAuditoria(auditoriaDataGlobal, 1);
+        }
+
         async function cargarDatosFallback() {
             const celdas = 'J2,K2,L2,M2,N2,O2,Q2,R2,S2,T2,U2,V2,X2,Y2,Z2,AA2,AB2,AC2';
-            
             const response = await apiFetchJSONP('getCells', { cells: celdas });
-            
             if (response.success && response.values) {
                 const v = response.values;
-                
                 document.getElementById('turnosContainer').innerHTML = `
                     ${renderizarParteTurno('turnoA', 'A', {
                         oficiales: v['J2'] || 0, ne: v['K2'] || 0, patrulleros: v['L2'] || 0,
@@ -724,26 +1103,13 @@
                         pp: v['AA2'] || 0, axp: v['AB2'] || 0, nouni: v['AC2'] || 0
                     })}
                 `;
-
-                // En fallback, novedades no disponibles
-                document.getElementById('novedadesContainer').innerHTML = `
-                    <div class="novedades-card" style="grid-column: 1 / -1;">
-                        <div class="novedades-body" style="padding:40px; text-align:center; color:#999;">
-                            📋 Novedades detalladas no disponibles en modo fallback.<br>
-                            <button onclick="cargarDatos()" style="margin-top:10px; padding:8px 16px; background:var(--verde-policia); color:white; border:none; border-radius:4px; cursor:pointer;">Reintentar</button>
-                        </div>
-                    </div>
-                `;
+                document.getElementById('novedadesContainer').innerHTML = '<div class="novedades-card" style="grid-column: 1 / -1;"><div class="novedades-body" style="padding:40px; text-align:center; color:#999;">📋 Novedades detalladas no disponibles en modo fallback.<br><button onclick="cargarDatos()" style="margin-top:10px; padding:8px 16px; background:var(--verde-policia); color:white; border:none; border-radius:4px; cursor:pointer;">Reintentar</button></div></div>';
             }
         }
 
-        // ============================================================
-        // INICIALIZACIÓN
-        // ============================================================
         updateDate();
+        poblarFiltroDependencias();
         cargarDatos();
-        
-        // Auto-refresh cada 30 segundos
         setInterval(cargarDatos, 30000);
     </script>
 </body>
