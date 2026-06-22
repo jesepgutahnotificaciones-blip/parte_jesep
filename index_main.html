@@ -637,28 +637,28 @@
         </div>
 
         <div class="auditoria-section" id="auditoriaSection">
-            <h2 class="section-title">🔍 Auditoría de Actualizaciones</h2>
+            <h2 class="section-title">🔍 Usuarios Registrados</h2>
             
             <div class="auditoria-stats" id="auditoriaStats">
                 <div class="stat-card">
                     <div class="stat-icon verde">✅</div>
                     <div class="stat-info">
-                        <h4>Actualizados</h4>
+                        <h4>Usuarios Activos</h4>
                         <div class="stat-valor" id="statActualizados">0</div>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon amarillo">⏳</div>
                     <div class="stat-info">
-                        <h4>Pendientes</h4>
+                        <h4>Total Dependencias</h4>
                         <div class="stat-valor" id="statPendientes">0</div>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon azul">📊</div>
                     <div class="stat-info">
-                        <h4>Total Dependencias</h4>
-                        <div class="stat-valor" id="statTotal">26</div>
+                        <h4>Total Usuarios</h4>
+                        <div class="stat-valor" id="statTotal">0</div>
                     </div>
                 </div>
             </div>
@@ -667,15 +667,15 @@
 
             <div class="auditoria-tabla-container">
                 <div class="auditoria-tabla-header">
-                    <h3>📋 Registro de Actividades</h3>
+                    <h3>📋 Usuarios del Sistema</h3>
                     <div class="auditoria-filtros">
                         <select id="filtroDependencia" onchange="filtrarAuditoria()">
                             <option value="">Todas las dependencias</option>
                         </select>
                         <select id="filtroEstado" onchange="filtrarAuditoria()">
                             <option value="">Todos los estados</option>
-                            <option value="actualizado">✅ Actualizado</option>
-                            <option value="pendiente">⏳ Pendiente</option>
+                            <option value="actualizado">✅ Activo</option>
+                            <option value="pendiente">⏳ Inactivo</option>
                         </select>
                         <input type="text" id="filtroUsuario" placeholder="Buscar usuario..." oninput="filtrarAuditoria()">
                     </div>
@@ -709,7 +709,10 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbw4HnV01zmPIFdAQfqZA5mOpVDu_YOoeKqn2CjZz6hh0GMPsQE7ATquUGT_f-gl1b4N/exec';
+        // ========================================
+        // URL ACTUALIZADA DEL APPS SCRIPT
+        // ========================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzqXs5fh0fTCjlt7PIDaMXObwjWY96-GdLh6_wlljwVAfJXqSqOxYhJL-IK313cpknr/exec';
         const DEPENDENCY = 'ASJUR';
 
         const DEPENDENCIAS = [
@@ -784,10 +787,15 @@
             });
         }
 
+        // ========================================
+        // CARGAR USUARIOS - CORREGIDO
+        // ========================================
         async function cargarUsuarios() {
             try {
                 const response = await apiFetchJSONP('getUsuarios');
-                if (response.success && response.data) {
+                console.log('Respuesta getUsuarios:', response);
+                
+                if (response.success && response.data && response.data.length > 0) {
                     usuariosLista = response.data;
                     const select = document.getElementById('userSelect');
                     select.innerHTML = '<option value="">Seleccionar usuario...</option>';
@@ -795,8 +803,8 @@
                     usuariosLista.forEach(u => {
                         const option = document.createElement('option');
                         option.value = u.usuario;
-                        option.textContent = u.usuario + ' (' + u.rol + ')';
-                        option.setAttribute('data-rol', u.rol);
+                        option.textContent = u.usuario + ' (' + (u.rol || 'Sin rol') + ')';
+                        option.setAttribute('data-rol', u.rol || 'Operador');
                         option.setAttribute('data-dependencia', u.dependencia || '');
                         option.setAttribute('data-clave', u.claveDep || '');
                         select.appendChild(option);
@@ -806,11 +814,13 @@
                     if (guardado) {
                         select.value = guardado;
                     }
+                } else {
+                    console.error('API error:', response.error || 'Sin datos');
+                    document.getElementById('userSelect').innerHTML = '<option value="">⚠️ ' + (response.error || 'No hay usuarios') + '</option>';
                 }
             } catch (error) {
                 console.error('Error cargando usuarios:', error);
-                const select = document.getElementById('userSelect');
-                select.outerHTML = '<input type="text" id="userSelect" placeholder="Tu nombre" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:white;font-size:0.8rem;">';
+                document.getElementById('userSelect').innerHTML = '<option value="">⚠️ Error de conexión</option>';
             }
         }
 
@@ -928,40 +938,44 @@
         }
 
         function getTextoEstado(estado) {
-            const textos = { 'actualizado': 'Actualizado', 'pendiente': 'Pendiente' };
+            const textos = { 'actualizado': 'Activo', 'pendiente': 'Inactivo' };
             return textos[estado] || 'Desconocido';
         }
 
+        // ========================================
+        // RENDERIZAR RESUMEN - CORREGIDO PARA USUARIOS
+        // ========================================
         function renderizarResumenAuditoria(datosAuditoria) {
             const container = document.getElementById('auditoriaResumen');
             const dependenciasMap = {};
             DEPENDENCIAS.forEach(dep => {
                 dependenciasMap[dep] = { nombre: dep, estado: 'pendiente', ultimaActualizacion: null, usuario: null };
             });
+            
             datosAuditoria.forEach(reg => {
                 const dep = reg.dependencia;
                 if (dependenciasMap[dep]) {
-                    const fechaReg = new Date(reg.fechaHora);
-                    const fechaActual = dependenciasMap[dep].ultimaActualizacion ? new Date(dependenciasMap[dep].ultimaActualizacion) : null;
-                    if (!fechaActual || fechaReg > fechaActual) {
-                        dependenciasMap[dep].ultimaActualizacion = reg.fechaHora;
-                        dependenciasMap[dep].usuario = reg.usuario;
-                        dependenciasMap[dep].estado = calcularEstado(reg.fechaHora);
-                    }
+                    dependenciasMap[dep].ultimaActualizacion = reg.fechaHora;
+                    dependenciasMap[dep].usuario = reg.usuario;
+                    dependenciasMap[dep].estado = 'actualizado';
                 }
             });
+            
             let actualizados = 0, pendientes = 0;
             Object.values(dependenciasMap).forEach(dep => {
                 if (dep.estado === 'actualizado') actualizados++;
                 else pendientes++;
             });
+            
             document.getElementById('statActualizados').textContent = actualizados;
             document.getElementById('statPendientes').textContent = pendientes;
+            document.getElementById('statTotal').textContent = datosAuditoria.length;
+            
             let html = '';
             Object.values(dependenciasMap).forEach(dep => {
                 const estado = dep.estado;
                 const horaTexto = dep.ultimaActualizacion ?
-                    new Date(dep.ultimaActualizacion).toLocaleString('es-CO', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : 'Sin actualizar';
+                    new Date(dep.ultimaActualizacion).toLocaleString('es-CO', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : 'Sin usuarios';
                 html += `
                     <div class="dependencia-estado-card ${estado}" onclick="filtrarPorDependencia('${dep.nombre}')">
                         <div class="dependencia-icono">${getIconoEstado(estado)}</div>
@@ -1006,7 +1020,7 @@
                     </tr>
                 `;
             });
-            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">No hay registros de auditoría disponibles</td></tr>';
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">No hay usuarios registrados en el sistema</td></tr>';
             document.getElementById('auditoriaContador').textContent = `Mostrando ${inicio + 1}-${Math.min(fin, datos.length)} de ${datos.length} registros`;
             renderizarPaginacion(datos.length, pagina);
         }
@@ -1067,6 +1081,9 @@
             });
         }
 
+        // ========================================
+        // CARGAR DATOS - CORREGIDO
+        // ========================================
         async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
             try {
@@ -1099,11 +1116,18 @@
                     renderizarResumenAuditoria(auditoriaDataGlobal);
                     renderizarTablaAuditoria(auditoriaDataGlobal, 1);
                 } else {
-                    usarDatosDemoAuditoria();
+                    // NO usar datos demo - mostrar mensaje real
+                    auditoriaDataGlobal = [];
+                    renderizarResumenAuditoria([]);
+                    renderizarTablaAuditoria([], 1);
+                    console.log('ℹ️ No hay usuarios registrados en la hoja USUARIOS');
                 }
             } catch (error) {
                 console.error('Error cargando datos:', error);
-                usarDatosDemoAuditoria();
+                // NO usar datos demo - mostrar mensaje real
+                auditoriaDataGlobal = [];
+                renderizarResumenAuditoria([]);
+                renderizarTablaAuditoria([], 1);
                 try {
                     await cargarDatosFallback();
                 } catch (fallbackError) {
@@ -1115,48 +1139,10 @@
             }
         }
 
-        function usarDatosDemoAuditoria() {
-            const ahora = new Date();
-            const datosDemo = [];
-            const usuarios = [
-                { nombre: 'CPT. GARCÍA', rol: 'Comandante' },
-                { nombre: 'TTE. RODRÍGUEZ', rol: 'Oficial de Novedades' },
-                { nombre: 'SGT. MARTÍNEZ', rol: 'Supervisor' },
-                { nombre: 'CT. LÓPEZ', rol: 'Operador' },
-                { nombre: 'INT. HERNÁNDEZ', rol: 'Analista' }
-            ];
-            const acciones = ['CREAR', 'EDITAR', 'VER', 'ELIMINAR'];
-            DEPENDENCIAS.forEach((dep, idx) => {
-                if (Math.random() > 0.3) {
-                    const usuario = usuarios[Math.floor(Math.random() * usuarios.length)];
-                    const horasAtras = Math.floor(Math.random() * 48);
-                    const fecha = new Date(ahora.getTime() - horasAtras * 60 * 60 * 1000);
-                    datosDemo.push({
-                        fechaHora: fecha.toISOString(),
-                        usuario: usuario.nombre,
-                        rol: usuario.rol,
-                        dependencia: dep,
-                        accion: acciones[Math.floor(Math.random() * acciones.length)],
-                        detalle: `Actualización de novedades turno ${['A', 'B', 'C'][Math.floor(Math.random() * 3)]}`
-                    });
-                    if (Math.random() > 0.7) {
-                        const fecha2 = new Date(fecha.getTime() - 2 * 60 * 60 * 1000);
-                        datosDemo.push({
-                            fechaHora: fecha2.toISOString(),
-                            usuario: usuario.nombre,
-                            rol: usuario.rol,
-                            dependencia: dep,
-                            accion: 'EDITAR',
-                            detalle: 'Corrección de datos de personal'
-                        });
-                    }
-                }
-            });
-            datosDemo.sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
-            auditoriaDataGlobal = datosDemo;
-            renderizarResumenAuditoria(auditoriaDataGlobal);
-            renderizarTablaAuditoria(auditoriaDataGlobal, 1);
-        }
+        // ========================================
+        // ELIMINADO: usarDatosDemoAuditoria()
+        // Ahora solo muestra mensaje de "No hay registros"
+        // ========================================
 
         async function cargarDatosFallback() {
             const celdas = 'J2,K2,L2,M2,N2,O2,Q2,R2,S2,T2,U2,V2,X2,Y2,Z2,AA2,AB2,AC2';
