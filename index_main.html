@@ -832,8 +832,10 @@
             document.getElementById('loadingOverlay').classList.remove('hidden');
 
             try {
-                const [parteResponse, novedadesA, novedadesB, novedadesC, dataResponse, auditoriaResponse, usuariosResponse] = await Promise.all([
+                const [parteResponse, totalesResponse, novedadesA, novedadesB, novedadesC, dataResponse, auditoriaResponse, usuariosResponse] = await Promise.all([
                     apiFetchJSONP('getDashboardData'),
+                    // getCells lee directamente I2, P2, W2 de la hoja — totales reales de la hoja
+                    apiFetchJSONP('getCells', { cells: 'I2,P2,W2' }),
                     apiFetchJSONP('getNovedadesPorTurno', { turno: 'A' }),
                     apiFetchJSONP('getNovedadesPorTurno', { turno: 'B' }),
                     apiFetchJSONP('getNovedadesPorTurno', { turno: 'C' }),
@@ -852,9 +854,18 @@
                     allAuditoriaData = auditoriaResponse.data;
                 }
 
-                // Renderizar formación
+                // Totales directos de las celdas I2, P2, W2
+                const celdas = (totalesResponse.success && totalesResponse.values) ? totalesResponse.values : {};
+                const totalA = parseInt(celdas['I2']) || 0;
+                const totalB = parseInt(celdas['P2']) || 0;
+                const totalC = parseInt(celdas['W2']) || 0;
+
+                // Renderizar formación — inyectar total real de la celda
                 if (parteResponse.success && parteResponse.data) {
                     const d = parteResponse.data;
+                    d.turnoA.total = totalA;
+                    d.turnoB.total = totalB;
+                    d.turnoC.total = totalC;
                     document.getElementById('turnosContainer').innerHTML =
                         renderizarParteTurno('A', d.turnoA) +
                         renderizarParteTurno('B', d.turnoB) +
