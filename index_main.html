@@ -21,9 +21,7 @@
             --sombra-suave: 0 2px 8px rgba(0,0,0,0.1);
             --sombra-card: 0 4px 12px rgba(0,0,0,0.15);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: linear-gradient(135deg, var(--gris-fondo) 0%, #e8ecef 100%);
@@ -31,7 +29,6 @@
             color: var(--gris-oscuro);
             font-size: 14px;
         }
-
         .header-institutional {
             background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
             color: var(--blanco);
@@ -44,12 +41,17 @@
             top: 0;
             z-index: 1000;
         }
-
         .header-left { display: flex; align-items: center; gap: 14px; }
         .header-left img { width: 42px; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
         .header-text h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
-        .header-text .subtitulo { color: var(--amarillo-policia); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-
+        .header-text .subtitulo {
+            color: var(--amarillo-policia);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
         .header-right { display: flex; align-items: center; gap: 16px; }
         .date-display { color: var(--blanco); font-size: 0.8rem; opacity: 0.9; }
         .btn-refresh {
@@ -67,7 +69,6 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         .btn-refresh:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-
         .user-info {
             display: flex;
             align-items: center;
@@ -98,9 +99,7 @@
             font-size: 0.7rem;
         }
         .btn-logout:hover { background: rgba(255,255,255,0.3); }
-
         .main-content { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
-
         .section-title {
             color: var(--verde-policia);
             font-size: 1.3rem;
@@ -120,15 +119,12 @@
             background: var(--amarillo-policia);
             border-radius: 2px;
         }
-
-        /* ===== TURNOS FORMACIÓN ===== */
         .turnos-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 30px;
         }
-
         .turno-card {
             background: var(--blanco);
             border-radius: 12px;
@@ -138,7 +134,6 @@
             border: 1px solid var(--borde);
         }
         .turno-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-
         .turno-header {
             background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
             color: var(--blanco);
@@ -157,7 +152,6 @@
             font-size: 0.75rem;
             text-transform: uppercase;
         }
-
         .forman-subtitle {
             background: linear-gradient(135deg, #1a5f3f 0%, #0d3d2d 100%);
             color: var(--blanco);
@@ -168,16 +162,13 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-
         .turno-body { padding: 16px; }
-
         .categorias-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             margin-bottom: 14px;
         }
-
         .categoria-item {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 10px 6px;
@@ -187,7 +178,6 @@
             transition: all 0.2s ease;
         }
         .categoria-item:hover { transform: scale(1.05); }
-
         .categoria-item .label {
             font-size: 0.6rem;
             text-transform: uppercase;
@@ -202,14 +192,12 @@
             color: var(--verde-policia);
         }
         .categoria-item .value.zero { color: #ccc; font-weight: 400; }
-
         .cat-oficiales { border-left: 3px solid #1967D2; }
         .cat-ne { border-left: 3px solid #1E8E3E; }
         .cat-patrulleros { border-left: 3px solid #B06000; }
         .cat-pp { border-left: 3px solid #9C1B6A; }
         .cat-axp { border-left: 3px solid #7B1FA2; }
         .cat-nouni { border-left: 3px solid #5F6368; }
-
         .total-card {
             background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
             color: var(--blanco);
@@ -220,18 +208,14 @@
         }
         .total-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
         .total-value { font-size: 1.8rem; font-weight: 700; color: var(--amarillo-policia); }
-
-        /* ===== NOVEDADES ===== */
         .novedades-section { margin-top: 30px; }
         .novedades-section .section-title { color: var(--azul-oscuro); }
         .novedades-section .section-title::before { background: var(--rojo-suave); }
-
         .novedades-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
-
         .novedades-card {
             background: var(--blanco);
             border-radius: 12px;
@@ -239,7 +223,6 @@
             box-shadow: var(--sombra-card);
             border: 1px solid var(--borde);
         }
-
         .novedades-header {
             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
             color: var(--blanco);
@@ -257,9 +240,7 @@
             font-weight: 700;
             font-size: 0.7rem;
         }
-
         .novedades-body { padding: 14px; }
-
         .novedad-item {
             display: flex;
             justify-content: space-between;
@@ -273,7 +254,6 @@
         }
         .novedad-item:hover { background: #f0f7ff; transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .novedad-item:active { transform: translateX(2px) scale(0.99); }
-
         .novedad-nombre {
             font-size: 0.78rem;
             font-weight: 600;
@@ -283,7 +263,6 @@
             gap: 8px;
         }
         .novedad-icon { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-
         .nov-oficina { border-left-color: #1967D2; }
         .nov-oficina .novedad-icon { background: #1967D2; }
         .nov-vacaciones { border-left-color: #1E8E3E; }
@@ -312,7 +291,6 @@
         .nov-curso .novedad-icon { background: #0D47A1; }
         .nov-comision { border-left-color: #00695C; }
         .nov-comision .novedad-icon { background: #00695C; }
-
         .novedad-total {
             font-size: 1rem;
             font-weight: 700;
@@ -325,8 +303,6 @@
             flex-shrink: 0;
         }
         .novedad-total.zero { color: #bbb; background: #f5f5f5; font-weight: 400; }
-
-        /* Badge clickable hint */
         .novedad-item .click-hint {
             font-size: 0.6rem;
             color: var(--gris-texto);
@@ -335,7 +311,6 @@
             margin-left: 4px;
         }
         .novedad-item:hover .click-hint { opacity: 1; }
-
         .novedades-total-card {
             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
             color: var(--blanco);
@@ -349,19 +324,15 @@
         }
         .novedades-total-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .novedades-total-value { font-size: 1.5rem; font-weight: 700; color: var(--amarillo-policia); }
-
-        /* ===== USUARIOS REGISTRADOS ===== */
         .usuarios-section { margin-top: 30px; }
         .usuarios-section .section-title { color: var(--azul-oscuro); }
         .usuarios-section .section-title::before { background: var(--amarillo-policia); }
-
         .usuarios-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 16px;
             margin-bottom: 30px;
         }
-
         .usuario-card {
             background: var(--blanco);
             border-radius: 10px;
@@ -374,7 +345,6 @@
             transition: transform 0.2s ease;
         }
         .usuario-card:hover { transform: translateY(-2px); }
-
         .usuario-avatar {
             width: 42px;
             height: 42px;
@@ -388,12 +358,17 @@
         }
         .avatar-activo { background: #e8f5e9; color: #1E8E3E; border: 2px solid #1E8E3E; }
         .avatar-inactivo { background: #fff3e0; color: #E65100; border: 2px solid #E65100; }
-
         .usuario-info { flex: 1; min-width: 0; }
-        .usuario-nombre { font-size: 0.85rem; font-weight: 700; color: var(--gris-oscuro); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .usuario-nombre {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--gris-oscuro);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .usuario-rol { font-size: 0.7rem; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.5px; }
         .usuario-dep { font-size: 0.7rem; color: var(--azul-oscuro); font-weight: 600; margin-top: 2px; }
-
         .usuario-estado {
             display: flex;
             flex-direction: column;
@@ -411,11 +386,7 @@
         }
         .estado-activo { background: #e8f5e9; color: #1B5E20; }
         .estado-inactivo { background: #fff3e0; color: #BF360C; }
-        .estado-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
+        .estado-dot { width: 10px; height: 10px; border-radius: 50%; }
         .dot-activo { background: #1E8E3E; box-shadow: 0 0 6px rgba(30,142,62,0.5); animation: pulso 2s infinite; }
         .dot-inactivo { background: #E65100; }
         @keyframes pulso {
@@ -423,8 +394,6 @@
             50% { box-shadow: 0 0 10px rgba(30,142,62,0.8); }
         }
         .ultimo-acceso { font-size: 0.6rem; color: var(--gris-texto); }
-
-        /* ===== MODAL ===== */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -438,11 +407,7 @@
             transition: opacity 0.25s ease;
             backdrop-filter: blur(2px);
         }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
         .modal-content {
             background: var(--blanco);
             border-radius: 16px;
@@ -456,10 +421,7 @@
             display: flex;
             flex-direction: column;
         }
-        .modal-overlay.active .modal-content {
-            transform: scale(1) translateY(0);
-        }
-
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
         .modal-header {
             background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
             color: var(--blanco);
@@ -491,7 +453,6 @@
             flex-shrink: 0;
         }
         .modal-close:hover { background: rgba(255,255,255,0.3); }
-
         .modal-stats-bar {
             background: #f8f9fa;
             border-bottom: 1px solid var(--borde);
@@ -504,7 +465,6 @@
         .modal-stat { display: flex; flex-direction: column; align-items: center; }
         .modal-stat .ms-val { font-size: 1.2rem; font-weight: 700; color: var(--verde-policia); }
         .modal-stat .ms-label { font-size: 0.65rem; text-transform: uppercase; color: var(--gris-texto); }
-
         .modal-search {
             padding: 12px 20px;
             border-bottom: 1px solid var(--borde);
@@ -520,13 +480,7 @@
             transition: border-color 0.2s;
         }
         .modal-search input:focus { border-color: var(--verde-policia); }
-
-        .modal-body {
-            padding: 0;
-            overflow-y: auto;
-            flex: 1;
-        }
-
+        .modal-body { padding: 0; overflow-y: auto; flex: 1; }
         .modal-table {
             width: 100%;
             border-collapse: collapse;
@@ -555,7 +509,6 @@
         }
         .modal-table tr:nth-child(even) { background: #fafbfc; }
         .modal-table tr:hover { background: #f0f7ff; }
-
         .modal-badge {
             display: inline-block;
             padding: 2px 8px;
@@ -564,7 +517,6 @@
             font-weight: 700;
             text-transform: uppercase;
         }
-
         .modal-loading {
             text-align: center;
             padding: 50px 20px;
@@ -584,8 +536,6 @@
             color: var(--gris-texto);
         }
         .modal-empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
-
-        /* ===== CATEGORÍA BREAKDOWN EN MODAL ===== */
         .modal-cat-breakdown {
             display: flex;
             gap: 10px;
@@ -600,8 +550,6 @@
             background: #e3f2fd;
             color: #0D47A1;
         }
-
-        /* ===== LOADING ===== */
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -624,8 +572,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { color: var(--gris-texto); font-size: 1rem; font-weight: 500; }
-
-        /* ===== FOOTER ===== */
         .footer-institutional {
             text-align: center;
             padding: 20px;
@@ -633,9 +579,13 @@
             background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
         }
         .footer-institutional p { color: var(--blanco); font-size: 0.8rem; opacity: 0.8; }
-        .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1rem; margin-top: 6px; letter-spacing: 2px; }
-
-        /* ===== RESPONSIVE ===== */
+        .footer-institutional .motto {
+            color: var(--amarillo-policia);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 6px;
+            letter-spacing: 2px;
+        }
         @media (max-width: 1024px) {
             .turnos-grid, .novedades-grid { grid-template-columns: 1fr; }
             .categorias-grid { grid-template-columns: repeat(3, 1fr); }
@@ -647,8 +597,8 @@
         }
     </style>
 </head>
-<body>
 
+<body>
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
         <div class="loading-text">Cargando datos del sistema...</div>
@@ -676,8 +626,7 @@
     </div>
 
     <div class="main-content">
-
-        <h2 class="section-title">📊 Estado de Formación por Turnos</h2>
+        <h2 class="section-title">📊 Estado de Formación</h2>
         <div class="turnos-grid" id="turnosContainer">
             <div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">Cargando formación...</div>
         </div>
@@ -695,7 +644,6 @@
                 <div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">Cargando usuarios...</div>
             </div>
         </div>
-
     </div>
 
     <div class="footer-institutional">
@@ -703,7 +651,6 @@
         <p class="motto">★ DIOS Y PATRIA ★</p>
     </div>
 
-    <!-- MODAL DE FUNCIONARIOS -->
     <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalClick(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -732,26 +679,109 @@
         </div>
     </div>
 
-    <script>
-        /* =============================================
-           CONFIGURACIÓN
-        ============================================= */
+        <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbyCxYsXh8LmPImXEWCDCNeXPuzDqkmrFyK_0K8BRp46mmR0H68tTaExjudo-kvC84Wk/exec';
         let DEPENDENCY = localStorage.getItem('currentDependency') || 'ASJUR';
         let USUARIO_ACTUAL = null;
         let ROL_ACTUAL = 'Operador';
 
-        // Caches
         let allPersonnelData = [];
         let allAuditoriaData = [];
         let modalFuncionariosFull = [];
-
         let jsonpCallbackId = 0;
 
         /* =============================================
-           JSONP
+           MAPEO DE CELDAS - SEGÚN ESPECIFICACIONES
         ============================================= */
-        function apiFetchJSONP(action, params) {
+        const FORMACION_CELLS = {
+            A: {
+                total: 'I2',
+                oficiales: 'J2',
+                ne: 'K2',
+                patrulleros: 'L2',
+                pp: 'M2',
+                axp: 'N2',
+                nouni: 'O2'
+            },
+            B: {
+                total: 'P2',
+                oficiales: 'Q2',
+                ne: 'R2',
+                patrulleros: 'S2',
+                pp: 'T2',
+                axp: 'U2',
+                nouni: 'V2'
+            },
+            C: {
+                total: 'W2',
+                oficiales: 'X2',
+                ne: 'Y2',
+                patrulleros: 'Z2',
+                pp: 'AA2',
+                axp: 'AB2',
+                nouni: 'AC2'
+            }
+        };
+
+        const NOVEDADES_CELLS = {
+            A: {
+                'OFICINA': 'J8',
+                'VACACIONES': 'J9',
+                'SERVICIO': 'J10',
+                'ESTADO DE GRAVIDEZ': 'J11',
+                'EXCUSA TOTAL': 'J12',
+                'PERMISO': 'J13',
+                'CITA MEDICA': 'J14',
+                'LICENCIA DE MATERNIDAD': 'J15',
+                'EXCUSADO DEL SERVICIO': 'J16',
+                'OTRA NOVEDAD': 'J17',
+                'RETARDAD@': 'J18',
+                'EXCUSA PARCIAL': 'J19',
+                'CURSO DE ASCENSO': 'J20',
+                'COMISION': 'J21'
+            },
+            B: {
+                'OFICINA': 'Q8',
+                'VACACIONES': 'Q9',
+                'SERVICIO': 'Q10',
+                'ESTADO DE GRAVIDEZ': 'Q11',
+                'EXCUSA TOTAL': 'Q12',
+                'PERMISO': 'Q13',
+                'CITA MEDICA': 'Q14',
+                'LICENCIA DE MATERNIDAD': 'Q15',
+                'EXCUSADO DEL SERVICIO': 'Q16',
+                'OTRA NOVEDAD': 'Q17',
+                'RETARDAD@': 'Q18',
+                'EXCUSA PARCIAL': 'Q19',
+                'CURSO DE ASCENSO': 'Q20',
+                'COMISION': 'Q21'
+            },
+            C: {
+                'OFICINA': 'X8',
+                'VACACIONES': 'X9',
+                'SERVICIO': 'X10',
+                'ESTADO DE GRAVIDEZ': 'X11',
+                'EXCUSA TOTAL': 'X12',
+                'PERMISO': 'X13',
+                'CITA MEDICA': 'X14',
+                'LICENCIA DE MATERNIDAD': 'X15',
+                'EXCUSADO DEL SERVICIO': 'X16',
+                'OTRA NOVEDAD': 'X17',
+                'RETARDAD@': 'X18',
+                'EXCUSA PARCIAL': 'X19',
+                'CURSO DE ASCENSO': 'X20',
+                'COMISION': 'X21'
+            }
+        };
+
+        const NOVEDADES_ORDEN = [
+            'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
+            'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD',
+            'EXCUSADO DEL SERVICIO', 'OTRA NOVEDAD', 'RETARDAD@',
+            'EXCUSA PARCIAL', 'CURSO DE ASCENSO', 'COMISION'
+        ];
+
+                function apiFetchJSONP(action, params) {
             params = params || {};
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonpCb_' + (++jsonpCallbackId) + '_' + Date.now();
@@ -778,18 +808,12 @@
             });
         }
 
-        /* =============================================
-           FECHA
-        ============================================= */
         function updateDate() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
-        /* =============================================
-           SESIÓN
-        ============================================= */
         function checkSession() {
             const sessionStr = localStorage.getItem('policiaSession');
             if (!sessionStr) return false;
@@ -825,65 +849,66 @@
             location.reload();
         }
 
-        /* =============================================
-           CARGAR DATOS
-        ============================================= */
-        async function cargarDatos() {
+                async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
 
             try {
-                const [parteResponse, totalesResponse, novedadesA, novedadesB, novedadesC, dataResponse, auditoriaResponse, usuariosResponse] = await Promise.all([
-                    apiFetchJSONP('getDashboardData'),
-                    // getCells lee directamente I2, P2, W2 de la hoja — totales reales de la hoja
-                    apiFetchJSONP('getCells', { cells: 'I2,P2,W2' }),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'A' }),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'B' }),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'C' }),
+                const todasCeldas = [];
+                ['A','B','C'].forEach(turno => {
+                    Object.values(FORMACION_CELLS[turno]).forEach(c => todasCeldas.push(c));
+                    Object.values(NOVEDADES_CELLS[turno]).forEach(c => todasCeldas.push(c));
+                });
+                const cellsString = todasCeldas.join(',');
+
+                const [cellsResponse, dataResponse, auditoriaResponse, usuariosResponse] = await Promise.all([
+                    apiFetchJSONP('getCells', { cells: cellsString }),
                     apiFetchJSONP('getData'),
                     apiFetchJSONP('getAuditoria'),
                     apiFetchJSONP('getUsuarios')
                 ]);
 
-                // Cache personal
                 if (dataResponse.success && dataResponse.data) {
                     allPersonnelData = dataResponse.data;
                 }
-
-                // Cache auditoría
                 if (auditoriaResponse.success && auditoriaResponse.data) {
                     allAuditoriaData = auditoriaResponse.data;
                 }
 
-                // Totales directos de las celdas I2, P2, W2
-                const celdas = (totalesResponse.success && totalesResponse.values) ? totalesResponse.values : {};
-                const totalA = parseInt(celdas['I2']) || 0;
-                const totalB = parseInt(celdas['P2']) || 0;
-                const totalC = parseInt(celdas['W2']) || 0;
+                const celdas = (cellsResponse.success && cellsResponse.values) ? cellsResponse.values : {};
 
-                // Renderizar formación — inyectar total real de la celda
-                if (parteResponse.success && parteResponse.data) {
-                    const d = parteResponse.data;
-                    d.turnoA.total = totalA;
-                    d.turnoB.total = totalB;
-                    d.turnoC.total = totalC;
-                    document.getElementById('turnosContainer').innerHTML =
-                        renderizarParteTurno('A', d.turnoA) +
-                        renderizarParteTurno('B', d.turnoB) +
-                        renderizarParteTurno('C', d.turnoC);
-                } else {
-                    document.getElementById('turnosContainer').innerHTML =
-                        '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ No se pudieron cargar datos de formación</div>';
-                }
+                // Renderizar Formación
+                let formacionHTML = '';
+                ['A','B','C'].forEach(turno => {
+                    const map = FORMACION_CELLS[turno];
+                    const datos = {
+                        total: parseInt(celdas[map.total]) || 0,
+                        oficiales: parseInt(celdas[map.oficiales]) || 0,
+                        ne: parseInt(celdas[map.ne]) || 0,
+                        patrulleros: parseInt(celdas[map.patrulleros]) || 0,
+                        pp: parseInt(celdas[map.pp]) || 0,
+                        axp: parseInt(celdas[map.axp]) || 0,
+                        nouni: parseInt(celdas[map.nouni]) || 0
+                    };
+                    formacionHTML += renderizarParteTurno(turno, datos);
+                });
+                document.getElementById('turnosContainer').innerHTML = formacionHTML ||
+                    '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ No se pudieron cargar datos de formación</div>';
 
-                // Renderizar novedades
+                // Renderizar Novedades
                 let novedadesHTML = '';
-                if (novedadesA.success && novedadesA.novedades) novedadesHTML += renderizarNovedadesTurno('A', novedadesA.novedades);
-                if (novedadesB.success && novedadesB.novedades) novedadesHTML += renderizarNovedadesTurno('B', novedadesB.novedades);
-                if (novedadesC.success && novedadesC.novedades) novedadesHTML += renderizarNovedadesTurno('C', novedadesC.novedades);
+                ['A','B','C'].forEach(turno => {
+                    const novedades = [];
+                    NOVEDADES_ORDEN.forEach(nombre => {
+                        const cell = NOVEDADES_CELLS[turno][nombre];
+                        const total = parseInt(celdas[cell]) || 0;
+                        novedades.push({ nombre: nombre, total: total });
+                    });
+                    novedadesHTML += renderizarNovedadesTurno(turno, novedades);
+                });
                 document.getElementById('novedadesContainer').innerHTML = novedadesHTML ||
                     '<div class="novedades-card" style="grid-column:1/-1;"><div class="novedades-body" style="padding:40px;text-align:center;color:#999;">No hay novedades registradas</div></div>';
 
-                // Renderizar usuarios con estado activo/inactivo
+                // Renderizar usuarios
                 if (usuariosResponse.success && usuariosResponse.data) {
                     renderizarUsuarios(usuariosResponse.data);
                 } else {
@@ -900,19 +925,14 @@
             }
         }
 
-        /* =============================================
-           RENDERIZAR FORMACIÓN
-        ============================================= */
-        function renderizarParteTurno(turnoLetra, datos) {
+                function renderizarParteTurno(turnoLetra, datos) {
             const oficiales   = parseInt(datos.oficiales)   || 0;
             const ne          = parseInt(datos.ne)          || 0;
             const patrulleros = parseInt(datos.patrulleros) || 0;
             const pp          = parseInt(datos.pp)          || 0;
             const axp         = parseInt(datos.axp)         || 0;
             const nouni       = parseInt(datos.nouni)       || 0;
-            // Total leído directamente de la celda de la hoja: I2 (A), P2 (B), W2 (C)
-            const total = parseInt(datos.total) || 0;
-
+            const total       = parseInt(datos.total)       || 0;
             const emojis = { A: '🅰️', B: '🅱️', C: '🅾️' };
 
             return `
@@ -957,9 +977,6 @@
             </div>`;
         }
 
-        /* =============================================
-           RENDERIZAR NOVEDADES
-        ============================================= */
         const NOVEDADES_CSS = {
             'OFICINA': 'nov-oficina',
             'VACACIONES': 'nov-vacaciones',
@@ -1017,10 +1034,6 @@
             </div>`;
         }
 
-        /* =============================================
-           RENDERIZAR USUARIOS CON ESTADO ACTIVO/INACTIVO
-        ============================================= */
-        // Umbral: si actualizó en las últimas 8 horas = ACTIVO
         const UMBRAL_ACTIVO_MS = 8 * 60 * 60 * 1000;
 
         function renderizarUsuarios(usuarios) {
@@ -1030,7 +1043,6 @@
                 return;
             }
 
-            // Mapa: usuario -> último timestamp de auditoría
             const ultimaActividad = {};
             allAuditoriaData.forEach(reg => {
                 const user = (reg.usuario || '').trim();
@@ -1042,14 +1054,12 @@
             });
 
             const ahora = Date.now();
-
             let html = '';
             usuarios.forEach(u => {
                 const nombre = u.usuario || '?';
                 const rol = u.rol || 'Operador';
                 const dep = u.dependencia || '';
                 const iniciales = nombre.substring(0, 2).toUpperCase();
-
                 const lastTs = ultimaActividad[nombre];
                 const activo = lastTs && (ahora - lastTs < UMBRAL_ACTIVO_MS);
 
@@ -1083,10 +1093,7 @@
             document.getElementById('usuariosContainer').innerHTML = html;
         }
 
-        /* =============================================
-           MODAL DE FUNCIONARIOS
-        ============================================= */
-        function abrirModal(novedadNombre, turnoLetra) {
+                function abrirModal(novedadNombre, turnoLetra) {
             const overlay = document.getElementById('modalOverlay');
             document.getElementById('modalTitle').textContent = '👥 ' + novedadNombre;
             document.getElementById('modalSubtitle').textContent = 'Turno ' + turnoLetra + ' — ' + DEPENDENCY;
@@ -1102,7 +1109,6 @@
                     const novP   = (p.novedad || '').toString().trim();
                     return turnoP === turnoLetra && novP === novedadNombre;
                 });
-
                 modalFuncionariosFull = filtrados;
                 renderizarModal(filtrados, novedadNombre, turnoLetra);
             }, 280);
@@ -1110,7 +1116,6 @@
 
         function renderizarModal(funcionarios, novedadNombre, turnoLetra) {
             const body = document.getElementById('modalBody');
-
             if (funcionarios.length === 0) {
                 document.getElementById('modalStatsBar').style.display = 'none';
                 document.getElementById('modalSearchBar').style.display = 'none';
@@ -1124,12 +1129,10 @@
                 return;
             }
 
-            // Stats bar
             const statsBar = document.getElementById('modalStatsBar');
             statsBar.style.display = 'flex';
             document.getElementById('modalTotal').textContent = funcionarios.length;
 
-            // Breakdown por grado
             const gradoCount = {};
             funcionarios.forEach(f => {
                 const g = f.grado || 'N/D';
@@ -1140,10 +1143,7 @@
             ).join('');
             document.getElementById('modalCatBreakdown').innerHTML = chipsHTML;
 
-            // Buscador
             document.getElementById('modalSearchBar').style.display = 'block';
-
-            // Tabla
             body.innerHTML = construirTablaModal(funcionarios);
         }
 
@@ -1182,7 +1182,6 @@
                     (f.grado || '').toLowerCase().includes(q)
                   )
                 : modalFuncionariosFull;
-
             document.getElementById('modalTotal').textContent = filtrados.length;
             document.getElementById('modalBody').innerHTML = construirTablaModal(filtrados);
         }
@@ -1197,9 +1196,6 @@
 
         document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
 
-        /* =============================================
-           INICIALIZACIÓN
-        ============================================= */
         updateDate();
         initSession();
         cargarDatos();
