@@ -99,6 +99,18 @@
         }
         .btn-logout:hover { background: rgba(255,255,255,0.3); }
 
+        /* DEBUG BADGE */
+        .debug-dep {
+            background: rgba(255,200,0,0.25);
+            border: 1px solid var(--amarillo-policia);
+            color: var(--amarillo-policia);
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
         .main-content { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
 
         .section-title {
@@ -613,7 +625,7 @@
 
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
-        <div class="loading-text">Cargando datos del sistema...</div>
+        <div class="loading-text" id="loadingText">Cargando datos del sistema...</div>
     </div>
 
     <div class="header-institutional">
@@ -628,6 +640,8 @@
         </div>
         <div class="header-right">
             <span class="date-display" id="currentDate"></span>
+            <!-- Badge visible de dependencia activa (ayuda a verificar que no sea ASJUR por defecto) -->
+            <span class="debug-dep" id="depBadge" title="Dependencia activa">📍 ...</span>
             <div class="user-info" id="userInfo" style="display:none;">
                 <span id="userNameDisplay"></span>
                 <span class="user-badge" id="userRoleDisplay"></span>
@@ -697,29 +711,89 @@
         /* =============================================
            CONFIGURACIÓN
         ============================================= */
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyUPri9Mk8B_uSxOhfZfiTKFybqUN7NUi29hSftFOdOBCpnwjiYfGg_1eZzWENUlVlt/exec';
-        let DEPENDENCY = localStorage.getItem('currentDependency') || 'ASJUR';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyjAeZ9lGPPvYMeHDXTPSvGxNjnR-3_S518KgaSpJeY2X_LeFoABR0knE_ChmEaGMqM/exec';
+
+        // ─── NOMBRE EXACTO DE LA HOJA EN EL SPREADSHEET ───
+        const SHEET_REGISTRO = 'Registro_Cambios';
+
+        // DEPENDENCY se resuelve SIEMPRE desde la sesión guardada.
+        // Si no hay sesión, queda vacío y se avisa al usuario.
+        // NUNCA se usa 'ASJUR' como valor por defecto codificado.
+        let DEPENDENCY = '';
         let USUARIO_ACTUAL = null;
         let ROL_ACTUAL = 'Operador';
 
-        let allPersonnelData = [];
-        let allAuditoriaData = [];
+        let allPersonnelData  = [];
+        let allAuditoriaData  = [];
         let modalFuncionariosFull = [];
         let jsonpCallbackId = 0;
 
         /* =============================================
-           MAPEO DE CELDAS
+           MAPEO DE CELDAS  (hoja: Registro_Cambios)
+           Formación fila 2, Novedades filas 8-21
         ============================================= */
+
+        // EN FORMACION por turno
+        // A: Total=I2, OF=J2, NE=K2, PT=L2, PP=M2, AXP=N2, NO UNI=O2
+        // B: Total=P2, OF=Q2, NE=R2, PT=S2, PP=T2, AXP=U2, NO UNI=V2
+        // C: Total=W2, OF=X2, NE=Y2, PT=Z2, PP=AA2, AXP=AB2, NO UNI=AC2
         const FORMACION_CELLS = {
-            A: { total: 'I2', oficiales: 'J2', ne: 'K2', patrulleros: 'L2', pp: 'M2', axp: 'N2', nouni: 'O2' },
-            B: { total: 'P2', oficiales: 'Q2', ne: 'R2', patrulleros: 'S2', pp: 'T2', axp: 'U2', nouni: 'V2' },
-            C: { total: 'W2', oficiales: 'X2', ne: 'Y2', patrulleros: 'Z2', pp: 'AA2', axp: 'AB2', nouni: 'AC2' }
+            A: { total: 'I2',  oficiales: 'J2',  ne: 'K2',  patrulleros: 'L2',  pp: 'M2',  axp: 'N2',  nouni: 'O2'  },
+            B: { total: 'P2',  oficiales: 'Q2',  ne: 'R2',  patrulleros: 'S2',  pp: 'T2',  axp: 'U2',  nouni: 'V2'  },
+            C: { total: 'W2',  oficiales: 'X2',  ne: 'Y2',  patrulleros: 'Z2',  pp: 'AA2', axp: 'AB2', nouni: 'AC2' }
         };
 
+        // NOVEDADES por turno (filas 8–21)
+        // A: columna J | B: columna Q | C: columna X
         const NOVEDADES_CELLS = {
-            A: { 'OFICINA': 'J8', 'VACACIONES': 'J9', 'SERVICIO': 'J10', 'ESTADO DE GRAVIDEZ': 'J11', 'EXCUSA TOTAL': 'J12', 'PERMISO': 'J13', 'CITA MEDICA': 'J14', 'LICENCIA DE MATERNIDAD': 'J15', 'EXCUSADO DEL SERVICIO': 'J16', 'OTRA NOVEDAD': 'J17', 'RETARDAD@': 'J18', 'EXCUSA PARCIAL': 'J19', 'CURSO DE ASCENSO': 'J20', 'COMISION': 'J21' },
-            B: { 'OFICINA': 'Q8', 'VACACIONES': 'Q9', 'SERVICIO': 'Q10', 'ESTADO DE GRAVIDEZ': 'Q11', 'EXCUSA TOTAL': 'Q12', 'PERMISO': 'Q13', 'CITA MEDICA': 'Q14', 'LICENCIA DE MATERNIDAD': 'Q15', 'EXCUSADO DEL SERVICIO': 'Q16', 'OTRA NOVEDAD': 'Q17', 'RETARDAD@': 'Q18', 'EXCUSA PARCIAL': 'Q19', 'CURSO DE ASCENSO': 'Q20', 'COMISION': 'Q21' },
-            C: { 'OFICINA': 'X8', 'VACACIONES': 'X9', 'SERVICIO': 'X10', 'ESTADO DE GRAVIDEZ': 'X11', 'EXCUSA TOTAL': 'X12', 'PERMISO': 'X13', 'CITA MEDICA': 'X14', 'LICENCIA DE MATERNIDAD': 'X15', 'EXCUSADO DEL SERVICIO': 'X16', 'OTRA NOVEDAD': 'X17', 'RETARDAD@': 'X18', 'EXCUSA PARCIAL': 'X19', 'CURSO DE ASCENSO': 'X20', 'COMISION': 'X21' }
+            A: {
+                'OFICINA':                 'J8',
+                'VACACIONES':              'J9',
+                'SERVICIO':                'J10',
+                'ESTADO DE GRAVIDEZ':      'J11',
+                'EXCUSA TOTAL':            'J12',
+                'PERMISO':                 'J13',
+                'CITA MEDICA':             'J14',
+                'LICENCIA DE MATERNIDAD':  'J15',
+                'EXCUSADO DEL SERVICIO':   'J16',
+                'OTRA NOVEDAD':            'J17',
+                'RETARDAD@':               'J18',
+                'EXCUSA PARCIAL':          'J19',
+                'CURSO DE ASCENSO':        'J20',
+                'COMISION':                'J21'
+            },
+            B: {
+                'OFICINA':                 'Q8',
+                'VACACIONES':              'Q9',
+                'SERVICIO':                'Q10',
+                'ESTADO DE GRAVIDEZ':      'Q11',
+                'EXCUSA TOTAL':            'Q12',
+                'PERMISO':                 'Q13',
+                'CITA MEDICA':             'Q14',
+                'LICENCIA DE MATERNIDAD':  'Q15',
+                'EXCUSADO DEL SERVICIO':   'Q16',
+                'OTRA NOVEDAD':            'Q17',
+                'RETARDAD@':               'Q18',
+                'EXCUSA PARCIAL':          'Q19',
+                'CURSO DE ASCENSO':        'Q20',
+                'COMISION':                'Q21'
+            },
+            C: {
+                'OFICINA':                 'X8',
+                'VACACIONES':              'X9',
+                'SERVICIO':                'X10',
+                'ESTADO DE GRAVIDEZ':      'X11',
+                'EXCUSA TOTAL':            'X12',
+                'PERMISO':                 'X13',
+                'CITA MEDICA':             'X14',
+                'LICENCIA DE MATERNIDAD':  'X15',
+                'EXCUSADO DEL SERVICIO':   'X16',
+                'OTRA NOVEDAD':            'X17',
+                'RETARDAD@':               'X18',
+                'EXCUSA PARCIAL':          'X19',
+                'CURSO DE ASCENSO':        'X20',
+                'COMISION':                'X21'
+            }
         };
 
         const NOVEDADES_ORDEN = [
@@ -730,7 +804,7 @@
         ];
 
         /* =============================================
-           JSONP
+           JSONP  — siempre envía dependency Y sheet
         ============================================= */
         function apiFetchJSONP(action, params) {
             params = params || {};
@@ -738,14 +812,18 @@
                 const callbackName = 'jsonpCb_' + (++jsonpCallbackId) + '_' + Date.now();
                 const script = document.createElement('script');
                 const urlParams = new URLSearchParams();
-                urlParams.append('action', action);
-                urlParams.append('dependency', DEPENDENCY);
-                urlParams.append('callback', callbackName);
-                urlParams.append('usuario', USUARIO_ACTUAL || 'Sistema');
-                urlParams.append('rol', ROL_ACTUAL || 'Operador');
+
+                urlParams.append('action',     action);
+                urlParams.append('dependency', DEPENDENCY);   // dependencia real del usuario
+                urlParams.append('sheet',      SHEET_REGISTRO); // hoja Registro_Cambios
+                urlParams.append('callback',   callbackName);
+                urlParams.append('usuario',    USUARIO_ACTUAL || 'Sistema');
+                urlParams.append('rol',        ROL_ACTUAL     || 'Operador');
+
                 for (const [key, value] of Object.entries(params)) {
                     if (value !== undefined && value !== null) urlParams.append(key, value);
                 }
+
                 const url = API_URL + '?' + urlParams.toString();
                 const timeout = setTimeout(() => { cleanup(); reject(new Error('Timeout JSONP')); }, 18000);
                 window[callbackName] = function(data) { clearTimeout(timeout); cleanup(); resolve(data); };
@@ -770,34 +848,58 @@
 
         /* =============================================
            SESIÓN
+           La dependencia SOLO se toma de la sesión guardada.
+           Si no existe sesión se muestra aviso y NO se asume ninguna.
         ============================================= */
         function checkSession() {
             const sessionStr = localStorage.getItem('policiaSession');
-            if (!sessionStr) return false;
+            if (!sessionStr) return null;
             try {
                 const session = JSON.parse(sessionStr);
                 if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) {
                     localStorage.removeItem('policiaSession');
-                    return false;
+                    return null;
                 }
                 return session.usuario;
-            } catch(e) { return false; }
+            } catch(e) { return null; }
         }
 
         function initSession() {
             const usuario = checkSession();
+
             if (usuario) {
                 USUARIO_ACTUAL = usuario.username;
-                ROL_ACTUAL = usuario.rol || 'Operador';
+                ROL_ACTUAL     = usuario.rol        || 'Operador';
+
+                // Fuente de verdad: siempre la sesión, nunca localStorage suelto
                 if (usuario.dependencia) {
-                    DEPENDENCY = usuario.dependencia;
-                    localStorage.setItem('currentDependency', usuario.dependencia);
+                    DEPENDENCY = usuario.dependencia.trim();
+                } else {
+                    // Si la sesión no trae dependencia, intenta el key de respaldo
+                    DEPENDENCY = (localStorage.getItem('currentDependency') || '').trim();
                 }
+
+                // Sincroniza el key de respaldo con lo que hay en sesión
+                if (DEPENDENCY) localStorage.setItem('currentDependency', DEPENDENCY);
+
                 document.getElementById('userInfo').style.display = 'flex';
-                document.getElementById('userNameDisplay').textContent = usuario.username;
-                document.getElementById('userRoleDisplay').textContent = usuario.rol || 'Operador';
+                document.getElementById('userNameDisplay').textContent = USUARIO_ACTUAL;
+                document.getElementById('userRoleDisplay').textContent  = ROL_ACTUAL;
+
+            } else {
+                // Sin sesión: intenta el key de respaldo antes de quedar vacío
+                DEPENDENCY = (localStorage.getItem('currentDependency') || '').trim();
             }
-            document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades - ' + DEPENDENCY;
+
+            // Actualiza la UI con la dependencia resuelta
+            const depTexto = DEPENDENCY || 'SIN DEPENDENCIA';
+            document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades — ' + depTexto;
+            document.getElementById('depBadge').textContent    = '📍 ' + depTexto;
+
+            // Aviso visible si aún no hay dependencia
+            if (!DEPENDENCY) {
+                console.warn('[Dashboard] No hay dependencia definida en la sesión. Inicie sesión para ver datos correctos.');
+            }
         }
 
         function logout() {
@@ -811,64 +913,61 @@
         ============================================= */
         async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').textContent =
+                'Cargando datos' + (DEPENDENCY ? ' de ' + DEPENDENCY : '') + '...';
 
             try {
+                // Construir lista de celdas (todas las que necesitamos de Registro_Cambios)
                 const todasCeldas = [];
-                ['A','B','C'].forEach(turno => {
+                ['A', 'B', 'C'].forEach(turno => {
                     Object.values(FORMACION_CELLS[turno]).forEach(c => todasCeldas.push(c));
                     Object.values(NOVEDADES_CELLS[turno]).forEach(c => todasCeldas.push(c));
                 });
                 const cellsString = todasCeldas.join(',');
 
                 const [cellsResponse, dataResponse, auditoriaResponse, usuariosResponse] = await Promise.all([
-                    apiFetchJSONP('getCells', { cells: cellsString }),
+                    apiFetchJSONP('getCells',     { cells: cellsString }),
                     apiFetchJSONP('getData'),
                     apiFetchJSONP('getAuditoria'),
                     apiFetchJSONP('getUsuarios')
                 ]);
 
-                if (dataResponse.success && dataResponse.data) {
-                    allPersonnelData = dataResponse.data;
-                }
-                if (auditoriaResponse.success && auditoriaResponse.data) {
-                    allAuditoriaData = auditoriaResponse.data;
-                }
+                if (dataResponse.success && dataResponse.data)         allPersonnelData  = dataResponse.data;
+                if (auditoriaResponse.success && auditoriaResponse.data) allAuditoriaData = auditoriaResponse.data;
 
                 const celdas = (cellsResponse.success && cellsResponse.values) ? cellsResponse.values : {};
 
-                // Renderizar Formación
+                // ── Renderizar Formación ──────────────────────────
                 let formacionHTML = '';
-                ['A','B','C'].forEach(turno => {
+                ['A', 'B', 'C'].forEach(turno => {
                     const map = FORMACION_CELLS[turno];
                     const datos = {
-                        total: parseInt(celdas[map.total]) || 0,
-                        oficiales: parseInt(celdas[map.oficiales]) || 0,
-                        ne: parseInt(celdas[map.ne]) || 0,
+                        total:       parseInt(celdas[map.total])       || 0,
+                        oficiales:   parseInt(celdas[map.oficiales])   || 0,
+                        ne:          parseInt(celdas[map.ne])           || 0,
                         patrulleros: parseInt(celdas[map.patrulleros]) || 0,
-                        pp: parseInt(celdas[map.pp]) || 0,
-                        axp: parseInt(celdas[map.axp]) || 0,
-                        nouni: parseInt(celdas[map.nouni]) || 0
+                        pp:          parseInt(celdas[map.pp])          || 0,
+                        axp:         parseInt(celdas[map.axp])         || 0,
+                        nouni:       parseInt(celdas[map.nouni])       || 0
                     };
                     formacionHTML += renderizarParteTurno(turno, datos);
                 });
                 document.getElementById('turnosContainer').innerHTML = formacionHTML ||
                     '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ No se pudieron cargar datos de formación</div>';
 
-                // Renderizar Novedades
+                // ── Renderizar Novedades ──────────────────────────
                 let novedadesHTML = '';
-                ['A','B','C'].forEach(turno => {
-                    const novedades = [];
-                    NOVEDADES_ORDEN.forEach(nombre => {
-                        const cell = NOVEDADES_CELLS[turno][nombre];
-                        const total = parseInt(celdas[cell]) || 0;
-                        novedades.push({ nombre: nombre, total: total });
-                    });
+                ['A', 'B', 'C'].forEach(turno => {
+                    const novedades = NOVEDADES_ORDEN.map(nombre => ({
+                        nombre,
+                        total: parseInt(celdas[NOVEDADES_CELLS[turno][nombre]]) || 0
+                    }));
                     novedadesHTML += renderizarNovedadesTurno(turno, novedades);
                 });
                 document.getElementById('novedadesContainer').innerHTML = novedadesHTML ||
                     '<div class="novedades-card" style="grid-column:1/-1;"><div class="novedades-body" style="padding:40px;text-align:center;color:#999;">No hay novedades registradas</div></div>';
 
-                // Renderizar usuarios
+                // ── Renderizar Usuarios ───────────────────────────
                 if (usuariosResponse.success && usuariosResponse.data) {
                     renderizarUsuarios(usuariosResponse.data);
                 } else {
@@ -889,13 +988,13 @@
            RENDERIZAR FORMACIÓN
         ============================================= */
         function renderizarParteTurno(turnoLetra, datos) {
-            const oficiales   = parseInt(datos.oficiales)   || 0;
-            const ne          = parseInt(datos.ne)          || 0;
-            const patrulleros = parseInt(datos.patrulleros) || 0;
-            const pp          = parseInt(datos.pp)          || 0;
-            const axp         = parseInt(datos.axp)         || 0;
-            const nouni       = parseInt(datos.nouni)       || 0;
-            const total       = parseInt(datos.total)       || 0;
+            const oficiales   = datos.oficiales   || 0;
+            const ne          = datos.ne           || 0;
+            const patrulleros = datos.patrulleros  || 0;
+            const pp          = datos.pp           || 0;
+            const axp         = datos.axp          || 0;
+            const nouni       = datos.nouni        || 0;
+            const total       = datos.total        || 0;
             const emojis = { A: '🅰️', B: '🅱️', C: '🅾️' };
 
             return `
@@ -904,23 +1003,23 @@
                     <h2>${emojis[turnoLetra] || '🔵'} EN FORMACIÓN</h2>
                     <div class="turno-badge">TURNO ${turnoLetra}</div>
                 </div>
-                <div class="forman-subtitle"><h3>FORMAN</h3></div>
+                <div class="forman-subtitle">FORMAN</div>
                 <div class="turno-body">
                     <div class="categorias-grid">
                         <div class="categoria-item cat-oficiales">
-                            <div class="label">Oficiales</div>
+                            <div class="label">OF</div>
                             <div class="value ${oficiales===0?'zero':''}">${oficiales}</div>
                         </div>
                         <div class="categoria-item cat-ne">
-                            <div class="label">Nivel Ejecutivo</div>
+                            <div class="label">NE</div>
                             <div class="value ${ne===0?'zero':''}">${ne}</div>
                         </div>
                         <div class="categoria-item cat-patrulleros">
-                            <div class="label">Patrulleros</div>
+                            <div class="label">PT</div>
                             <div class="value ${patrulleros===0?'zero':''}">${patrulleros}</div>
                         </div>
                         <div class="categoria-item cat-pp">
-                            <div class="label">Patrulleros de Policía</div>
+                            <div class="label">PP</div>
                             <div class="value ${pp===0?'zero':''}">${pp}</div>
                         </div>
                         <div class="categoria-item cat-axp">
@@ -928,7 +1027,7 @@
                             <div class="value ${axp===0?'zero':''}">${axp}</div>
                         </div>
                         <div class="categoria-item cat-nouni">
-                            <div class="label">No Uniformados</div>
+                            <div class="label">NO UNI</div>
                             <div class="value ${nouni===0?'zero':''}">${nouni}</div>
                         </div>
                     </div>
@@ -944,12 +1043,20 @@
            RENDERIZAR NOVEDADES
         ============================================= */
         const NOVEDADES_CSS = {
-            'OFICINA': 'nov-oficina', 'VACACIONES': 'nov-vacaciones', 'SERVICIO': 'nov-servicio',
-            'ESTADO DE GRAVIDEZ': 'nov-gravidez', 'EXCUSA TOTAL': 'nov-excusa', 'PERMISO': 'nov-permiso',
-            'CITA MEDICA': 'nov-cita', 'LICENCIA DE MATERNIDAD': 'nov-maternidad',
-            'EXCUSADO DEL SERVICIO': 'nov-excusa-servicio', 'OTRA NOVEDAD': 'nov-otra',
-            'RETARDAD@': 'nov-retardado', 'EXCUSA PARCIAL': 'nov-excusa-parcial',
-            'CURSO DE ASCENSO': 'nov-curso', 'COMISION': 'nov-comision'
+            'OFICINA':                'nov-oficina',
+            'VACACIONES':             'nov-vacaciones',
+            'SERVICIO':               'nov-servicio',
+            'ESTADO DE GRAVIDEZ':     'nov-gravidez',
+            'EXCUSA TOTAL':           'nov-excusa',
+            'PERMISO':                'nov-permiso',
+            'CITA MEDICA':            'nov-cita',
+            'LICENCIA DE MATERNIDAD': 'nov-maternidad',
+            'EXCUSADO DEL SERVICIO':  'nov-excusa-servicio',
+            'OTRA NOVEDAD':           'nov-otra',
+            'RETARDAD@':              'nov-retardado',
+            'EXCUSA PARCIAL':         'nov-excusa-parcial',
+            'CURSO DE ASCENSO':       'nov-curso',
+            'COMISION':               'nov-comision'
         };
 
         function renderizarNovedadesTurno(turnoLetra, novedades) {
@@ -959,14 +1066,15 @@
             novedades.forEach(novedad => {
                 const total = parseInt(novedad.total) || 0;
                 totalNovedades += total;
-                const cssClass = NOVEDADES_CSS[novedad.nombre] || 'nov-otra';
+                const cssClass  = NOVEDADES_CSS[novedad.nombre] || 'nov-otra';
                 const clickable = total > 0 ? '' : 'style="opacity:0.6;cursor:default;"';
-                const onclick = total > 0
+                const onclick   = total > 0
                     ? `onclick="abrirModal('${novedad.nombre.replace(/'/g, "\\'")}', '${turnoLetra}')"`
                     : '';
 
                 itemsHTML += `
-                <div class="novedad-item ${cssClass}" ${onclick} ${clickable} title="${total > 0 ? 'Ver funcionarios con esta novedad' : 'Sin funcionarios'}">
+                <div class="novedad-item ${cssClass}" ${onclick} ${clickable}
+                     title="${total > 0 ? 'Ver funcionarios con esta novedad' : 'Sin funcionarios'}">
                     <div class="novedad-nombre">
                         <span class="novedad-icon"></span>
                         ${novedad.nombre}
@@ -1017,20 +1125,20 @@
             const ahora = Date.now();
             let html = '';
             usuarios.forEach(u => {
-                const nombre = u.usuario || '?';
-                const rol = u.rol || 'Operador';
-                const dep = u.dependencia || '';
+                const nombre  = u.usuario || '?';
+                const rol     = u.rol     || 'Operador';
+                const dep     = u.dependencia || '';
                 const iniciales = nombre.substring(0, 2).toUpperCase();
-                const lastTs = ultimaActividad[nombre];
-                const activo = lastTs && (ahora - lastTs < UMBRAL_ACTIVO_MS);
+                const lastTs  = ultimaActividad[nombre];
+                const activo  = lastTs && (ahora - lastTs < UMBRAL_ACTIVO_MS);
 
                 let ultimoTexto = 'Sin actividad registrada';
                 if (lastTs) {
                     const diff = ahora - lastTs;
-                    if (diff < 60000) ultimoTexto = 'Hace menos de 1 min';
-                    else if (diff < 3600000) ultimoTexto = 'Hace ' + Math.floor(diff/60000) + ' min';
+                    if (diff < 60000)      ultimoTexto = 'Hace menos de 1 min';
+                    else if (diff < 3600000)  ultimoTexto = 'Hace ' + Math.floor(diff/60000) + ' min';
                     else if (diff < 86400000) ultimoTexto = 'Hace ' + Math.floor(diff/3600000) + 'h ' + Math.floor((diff%3600000)/60000) + 'min';
-                    else ultimoTexto = 'Hace ' + Math.floor(diff/86400000) + ' día(s)';
+                    else                      ultimoTexto = 'Hace ' + Math.floor(diff/86400000) + ' día(s)';
                 }
 
                 html += `
@@ -1059,17 +1167,17 @@
         ============================================= */
         function abrirModal(novedadNombre, turnoLetra) {
             const overlay = document.getElementById('modalOverlay');
-            document.getElementById('modalTitle').textContent = '👥 ' + novedadNombre;
-            document.getElementById('modalSubtitle').textContent = 'Turno ' + turnoLetra + ' — ' + DEPENDENCY;
+            document.getElementById('modalTitle').textContent    = '👥 ' + novedadNombre;
+            document.getElementById('modalSubtitle').textContent = 'Turno ' + turnoLetra + ' — ' + (DEPENDENCY || 'Sin dependencia');
             document.getElementById('modalBody').innerHTML = '<div class="modal-loading"><div class="spinner-sm"></div><p>Buscando funcionarios...</p></div>';
-            document.getElementById('modalStatsBar').style.display = 'none';
+            document.getElementById('modalStatsBar').style.display  = 'none';
             document.getElementById('modalSearchBar').style.display = 'none';
             document.getElementById('modalSearchInput').value = '';
             overlay.classList.add('active');
 
             setTimeout(() => {
                 const filtrados = allPersonnelData.filter(p => {
-                    const turnoP = (p.turno || '').toString().trim().toUpperCase();
+                    const turnoP = (p.turno   || '').toString().trim().toUpperCase();
                     const novP   = (p.novedad || '').toString().trim();
                     return turnoP === turnoLetra && novP === novedadNombre;
                 });
@@ -1081,7 +1189,7 @@
         function renderizarModal(funcionarios, novedadNombre, turnoLetra) {
             const body = document.getElementById('modalBody');
             if (funcionarios.length === 0) {
-                document.getElementById('modalStatsBar').style.display = 'none';
+                document.getElementById('modalStatsBar').style.display  = 'none';
                 document.getElementById('modalSearchBar').style.display = 'none';
                 body.innerHTML = `
                 <div class="modal-empty">
@@ -1091,18 +1199,17 @@
                 </div>`;
                 return;
             }
-            const statsBar = document.getElementById('modalStatsBar');
-            statsBar.style.display = 'flex';
+            document.getElementById('modalStatsBar').style.display = 'flex';
             document.getElementById('modalTotal').textContent = funcionarios.length;
+
             const gradoCount = {};
             funcionarios.forEach(f => {
                 const g = f.grado || 'N/D';
                 gradoCount[g] = (gradoCount[g] || 0) + 1;
             });
-            const chipsHTML = Object.entries(gradoCount).map(([g, c]) =>
-                `<span class="cat-chip">${g}: ${c}</span>`
-            ).join('');
-            document.getElementById('modalCatBreakdown').innerHTML = chipsHTML;
+            document.getElementById('modalCatBreakdown').innerHTML =
+                Object.entries(gradoCount).map(([g, c]) => `<span class="cat-chip">${g}: ${c}</span>`).join('');
+
             document.getElementById('modalSearchBar').style.display = 'block';
             body.innerHTML = construirTablaModal(funcionarios);
         }
@@ -1137,7 +1244,7 @@
             const filtrados = q
                 ? modalFuncionariosFull.filter(f =>
                     (f.nombres || '').toLowerCase().includes(q) ||
-                    (f.grado || '').toLowerCase().includes(q)
+                    (f.grado   || '').toLowerCase().includes(q)
                   )
                 : modalFuncionariosFull;
             document.getElementById('modalTotal').textContent = filtrados.length;
@@ -1147,13 +1254,15 @@
         function cerrarModalClick(event) {
             if (event.target === document.getElementById('modalOverlay')) cerrarModal();
         }
-
         function cerrarModal() {
             document.getElementById('modalOverlay').classList.remove('active');
         }
 
         document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
 
+        /* =============================================
+           INICIO
+        ============================================= */
         updateDate();
         initSession();
         cargarDatos();
