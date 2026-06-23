@@ -69,28 +69,37 @@
         .btn-refresh:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         .btn-refresh:active { transform: translateY(0); }
 
-        .user-selector {
+        .user-info {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             background: rgba(255,255,255,0.15);
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 6px;
             border: 1px solid rgba(255,255,255,0.3);
-        }
-        .user-selector select {
-            background: transparent;
             color: var(--blanco);
-            border: none;
             font-size: 0.8rem;
-            font-family: inherit;
-            outline: none;
-            cursor: pointer;
         }
-        .user-selector select option {
-            background: var(--azul-oscuro);
+        .user-badge {
+            background: var(--amarillo-policia);
+            color: var(--azul-oscuro);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
             color: var(--blanco);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.3s ease;
         }
+        .btn-logout:hover { background: rgba(255,255,255,0.3); }
 
         .main-content { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
 
@@ -567,6 +576,28 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { color: var(--gris-texto); font-size: 1rem; font-weight: 500; }
 
+        .error-box {
+            background: #FDEDEC;
+            border: 1px solid var(--rojo-suave);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            color: var(--rojo-suave);
+            margin: 20px 0;
+        }
+        .error-box h3 { margin-bottom: 6px; font-size: 0.9rem; }
+        .retry-btn {
+            background: var(--rojo-suave);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
         .footer-institutional {
             text-align: center;
             padding: 20px;
@@ -593,7 +624,7 @@
             .auditoria-tabla { min-width: 600px; }
             .auditoria-filtros { width: 100%; }
             .auditoria-filtros select, .auditoria-filtros input { flex: 1; }
-            .user-selector { width: 100%; justify-content: center; }
+            .user-info { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -611,16 +642,15 @@
                  onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
             <div class="header-text">
                 <h1>POLICÍA NACIONAL DE COLOMBIA</h1>
-                <div class="subtitulo">Dashboard de Novedades - Resumen por Turno</div>
+                <div class="subtitulo" id="depSubtitle">Dashboard de Novedades - Resumen por Turno</div>
             </div>
         </div>
         <div class="header-right">
             <span class="date-display" id="currentDate"></span>
-            <div class="user-selector">
-                <span>👤</span>
-                <select id="userSelect" onchange="cambiarUsuario()">
-                    <option value="">Cargando usuarios...</option>
-                </select>
+            <div class="user-info" id="userInfo" style="display:none;">
+                <span id="userNameDisplay"></span>
+                <span class="user-badge" id="userRoleDisplay"></span>
+                <button class="btn-logout" onclick="logout()">Salir</button>
             </div>
             <button class="btn-refresh" onclick="cargarDatos()">🔄 Actualizar</button>
         </div>
@@ -629,11 +659,22 @@
     <div class="main-content">
         
         <h2 class="section-title">📊 Estado de Formación por Turnos</h2>
-        <div class="turnos-grid" id="turnosContainer"></div>
+        <div class="turnos-grid" id="turnosContainer">
+            <div class="error-box" style="grid-column: 1 / -1;">
+                <h3>⏳ Cargando datos...</h3>
+                <p>Espere mientras se cargan los datos del sistema.</p>
+            </div>
+        </div>
 
         <div class="novedades-section">
             <h2 class="section-title">📋 Novedades por Turno</h2>
-            <div class="novedades-grid" id="novedadesContainer"></div>
+            <div class="novedades-grid" id="novedadesContainer">
+                <div class="novedades-card" style="grid-column: 1 / -1;">
+                    <div class="novedades-body" style="padding:40px; text-align:center; color:#999;">
+                        ⏳ Cargando novedades...
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="auditoria-section" id="auditoriaSection">
@@ -710,10 +751,15 @@
 
     <script>
         // ========================================
-        // URL ACTUALIZADA DEL APPS SCRIPT
+        // CONFIGURACIÓN - AJUSTA ESTA URL
         // ========================================
+        // ✅ REEMPLAZA ESTA URL con la URL de tu Web App desplegada
         const API_URL = 'https://script.google.com/macros/s/AKfycbxN8Pmpfu6mdjZ4_8lglR-vIUl9eynmw0E1XYgeq0G7w39liKqtDBY2c4XcFe_7_VCz/exec';
-        const DEPENDENCY = 'ASJUR';
+        
+        // ✅ DEPENDENCIA se obtiene del usuario logueado, no hardcodeada
+        let DEPENDENCY = localStorage.getItem('currentDependency') || 'ASJUR';
+        let USUARIO_ACTUAL = null;
+        let ROL_ACTUAL = 'Operador';
 
         const DEPENDENCIAS = [
             'ASJUR', 'CEPOL', 'ARSEG', 'GRUES', 'COINT', 'ARGOP', 'GRUIS',
@@ -726,7 +772,6 @@
         let auditoriaDataGlobal = [];
         let auditoriaPaginaActual = 1;
         const AUDITORIA_POR_PAGINA = 15;
-        let usuariosLista = [];
 
         function updateDate() {
             const now = new Date();
@@ -734,7 +779,11 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
-        function apiFetchJSONP(action, params = {}) {
+        // ========================================
+        // JSONP FETCH CON USUARIO Y ROL
+        // ========================================
+        function apiFetchJSONP(action, params) {
+            params = params || {};
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonpCallback_' + (++jsonpCallbackId) + '_' + Date.now();
                 const script = document.createElement('script');
@@ -744,13 +793,9 @@
                 urlParams.append('dependency', DEPENDENCY);
                 urlParams.append('callback', callbackName);
                 
-                const select = document.getElementById('userSelect');
-                const usuarioSeleccionado = select && select.value ? select.value : 'Usuario Web';
-                const rolSeleccionado = select && select.selectedOptions[0] ? 
-                    select.selectedOptions[0].getAttribute('data-rol') || 'Operador' : 'Operador';
-                
-                urlParams.append('usuario', usuarioSeleccionado);
-                urlParams.append('rol', rolSeleccionado);
+                // ✅ ENVIAR USUARIO Y ROL para auditoría
+                urlParams.append('usuario', USUARIO_ACTUAL || 'Sistema');
+                urlParams.append('rol', ROL_ACTUAL || 'Operador');
                 
                 for (const [key, value] of Object.entries(params)) {
                     if (value !== undefined && value !== null) {
@@ -759,6 +804,7 @@
                 }
                 
                 const url = API_URL + '?' + urlParams.toString();
+                console.log('JSONP URL:', url);
                 
                 const timeout = setTimeout(() => {
                     cleanup();
@@ -788,46 +834,150 @@
         }
 
         // ========================================
-        // CARGAR USUARIOS - CORREGIDO
+        // SESIÓN DE USUARIO
         // ========================================
-        async function cargarUsuarios() {
+        function checkSession() {
+            const sessionStr = localStorage.getItem('policiaSession');
+            if (!sessionStr) return false;
             try {
-                const response = await apiFetchJSONP('getUsuarios');
-                console.log('Respuesta getUsuarios:', response);
-                
-                if (response.success && response.data && response.data.length > 0) {
-                    usuariosLista = response.data;
-                    const select = document.getElementById('userSelect');
-                    select.innerHTML = '<option value="">Seleccionar usuario...</option>';
-                    
-                    usuariosLista.forEach(u => {
-                        const option = document.createElement('option');
-                        option.value = u.usuario;
-                        option.textContent = u.usuario + ' (' + (u.rol || 'Sin rol') + ')';
-                        option.setAttribute('data-rol', u.rol || 'Operador');
-                        option.setAttribute('data-dependencia', u.dependencia || '');
-                        option.setAttribute('data-clave', u.claveDep || '');
-                        select.appendChild(option);
-                    });
-                    
-                    const guardado = localStorage.getItem('usuarioSeleccionado');
-                    if (guardado) {
-                        select.value = guardado;
-                    }
-                } else {
-                    console.error('API error:', response.error || 'Sin datos');
-                    document.getElementById('userSelect').innerHTML = '<option value="">⚠️ ' + (response.error || 'No hay usuarios') + '</option>';
+                const session = JSON.parse(sessionStr);
+                if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) {
+                    localStorage.removeItem('policiaSession');
+                    return false;
                 }
-            } catch (error) {
-                console.error('Error cargando usuarios:', error);
-                document.getElementById('userSelect').innerHTML = '<option value="">⚠️ Error de conexión</option>';
+                return session.usuario;
+            } catch (e) {
+                return false;
             }
         }
 
-        function cambiarUsuario() {
-            const select = document.getElementById('userSelect');
-            if (select && select.value) {
-                localStorage.setItem('usuarioSeleccionado', select.value);
+        function initSession() {
+            const usuario = checkSession();
+            if (usuario) {
+                USUARIO_ACTUAL = usuario.username;
+                ROL_ACTUAL = usuario.rol || 'Operador';
+                if (usuario.dependencia) {
+                    DEPENDENCY = usuario.dependencia;
+                    localStorage.setItem('currentDependency', usuario.dependencia);
+                }
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('userNameDisplay').textContent = usuario.username;
+                document.getElementById('userRoleDisplay').textContent = usuario.rol || 'Operador';
+                document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades - ' + DEPENDENCY;
+                return true;
+            }
+            // Si no hay sesión, mostrar info genérica
+            document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades - ' + DEPENDENCY;
+            return false;
+        }
+
+        function logout() {
+            localStorage.removeItem('policiaSession');
+            localStorage.removeItem('currentDependency');
+            USUARIO_ACTUAL = null;
+            ROL_ACTUAL = 'Operador';
+            location.reload();
+        }
+
+        // ========================================
+        // CARGAR DATOS PRINCIPALES
+        // ========================================
+        async function cargarDatos() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            try {
+                const [parteResponse, novedadesA, novedadesB, novedadesC, auditoriaResponse] = await Promise.all([
+                    apiFetchJSONP('getDashboardData'),
+                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'A' }),
+                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'B' }),
+                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'C' }),
+                    apiFetchJSONP('getAuditoria')
+                ]);
+
+                console.log('Dashboard:', parteResponse);
+                console.log('Novedades A:', novedadesA);
+                console.log('Novedades B:', novedadesB);
+                console.log('Novedades C:', novedadesC);
+                console.log('Auditoria:', auditoriaResponse);
+
+                // Renderizar parte de formación
+                if (parteResponse.success && parteResponse.data) {
+                    const datos = parteResponse.data;
+                    document.getElementById('turnosContainer').innerHTML = `
+                        ${renderizarParteTurno('turnoA', 'A', datos.turnoA)}
+                        ${renderizarParteTurno('turnoB', 'B', datos.turnoB)}
+                        ${renderizarParteTurno('turnoC', 'C', datos.turnoC)}
+                    `;
+                } else {
+                    document.getElementById('turnosContainer').innerHTML = `
+                        <div class="error-box" style="grid-column: 1 / -1;">
+                            <h3>⚠️ Error al cargar formación</h3>
+                            <p>${parteResponse.error || 'No se pudieron cargar los datos de formación'}</p>
+                        </div>
+                    `;
+                }
+
+                // Renderizar novedades
+                const novedadesContainer = document.getElementById('novedadesContainer');
+                let novedadesHTML = '';
+                let hayNovedades = false;
+                
+                if (novedadesA.success && novedadesA.novedades && novedadesA.novedades.length > 0) {
+                    novedadesHTML += renderizarNovedadesTurno('A', novedadesA.novedades);
+                    hayNovedades = true;
+                }
+                if (novedadesB.success && novedadesB.novedades && novedadesB.novedades.length > 0) {
+                    novedadesHTML += renderizarNovedadesTurno('B', novedadesB.novedades);
+                    hayNovedades = true;
+                }
+                if (novedadesC.success && novedadesC.novedades && novedadesC.novedades.length > 0) {
+                    novedadesHTML += renderizarNovedadesTurno('C', novedadesC.novedades);
+                    hayNovedades = true;
+                }
+                
+                if (!hayNovedades) {
+                    novedadesHTML = `
+                        <div class="novedades-card" style="grid-column: 1 / -1;">
+                            <div class="novedades-body" style="padding:40px; text-align:center; color:#999;">
+                                📋 No hay novedades registradas.<br>
+                                <small style="color:#bbb;">Las novedades aparecerán cuando se registren en la hoja.</small>
+                            </div>
+                        </div>
+                    `;
+                }
+                novedadesContainer.innerHTML = novedadesHTML;
+
+                // Renderizar auditoría
+                if (auditoriaResponse.success && auditoriaResponse.data && auditoriaResponse.data.length > 0) {
+                    auditoriaDataGlobal = auditoriaResponse.data;
+                    renderizarResumenAuditoria(auditoriaDataGlobal);
+                    renderizarTablaAuditoria(auditoriaDataGlobal, 1);
+                } else {
+                    auditoriaDataGlobal = [];
+                    renderizarResumenAuditoria([]);
+                    renderizarTablaAuditoria([], 1);
+                    console.log('ℹ️ No hay registros de auditoría');
+                }
+                
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                document.getElementById('turnosContainer').innerHTML = `
+                    <div class="error-box" style="grid-column: 1 / -1;">
+                        <h3>⚠️ Error de conexión</h3>
+                        <p>${error.message}</p>
+                        <button class="retry-btn" onclick="cargarDatos()">🔄 Reintentar</button>
+                    </div>
+                `;
+                document.getElementById('novedadesContainer').innerHTML = `
+                    <div class="novedades-card" style="grid-column: 1 / -1;">
+                        <div class="novedades-body" style="padding:40px; text-align:center; color:#D93025;">
+                            ⚠️ Error de conexión. Verifica tu conexión e intenta de nuevo.<br>
+                            <button class="retry-btn" onclick="cargarDatos()" style="margin-top:15px;">🔄 Reintentar</button>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                setTimeout(() => { document.getElementById('loadingOverlay').classList.add('hidden'); }, 500);
             }
         }
 
@@ -942,9 +1092,6 @@
             return textos[estado] || 'Desconocido';
         }
 
-        // ========================================
-        // RENDERIZAR RESUMEN - CORREGIDO PARA USUARIOS
-        // ========================================
         function renderizarResumenAuditoria(datosAuditoria) {
             const container = document.getElementById('auditoriaResumen');
             const dependenciasMap = {};
@@ -989,7 +1136,7 @@
             container.innerHTML = html;
         }
 
-        function renderizarTablaAuditoria(datos, pagina = 1) {
+        function renderizarTablaAuditoria(datos, pagina) {
             const tbody = document.getElementById('auditoriaTablaBody');
             const inicio = (pagina - 1) * AUDITORIA_POR_PAGINA;
             const fin = inicio + AUDITORIA_POR_PAGINA;
@@ -1082,96 +1229,15 @@
         }
 
         // ========================================
-        // CARGAR DATOS - CORREGIDO
+        // INICIALIZACIÓN
         // ========================================
-        async function cargarDatos() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            try {
-                const [parteResponse, novedadesA, novedadesB, novedadesC, auditoriaResponse] = await Promise.all([
-                    apiFetchJSONP('getDashboardData'),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'A' }),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'B' }),
-                    apiFetchJSONP('getNovedadesPorTurno', { turno: 'C' }),
-                    apiFetchJSONP('getAuditoria')
-                ]);
-
-                if (parteResponse.success && parteResponse.data) {
-                    const datos = parteResponse.data;
-                    document.getElementById('turnosContainer').innerHTML = `
-                        ${renderizarParteTurno('turnoA', 'A', datos.turnoA)}
-                        ${renderizarParteTurno('turnoB', 'B', datos.turnoB)}
-                        ${renderizarParteTurno('turnoC', 'C', datos.turnoC)}
-                    `;
-                }
-
-                const novedadesContainer = document.getElementById('novedadesContainer');
-                let novedadesHTML = '';
-                if (novedadesA.success && novedadesA.novedades) novedadesHTML += renderizarNovedadesTurno('A', novedadesA.novedades);
-                if (novedadesB.success && novedadesB.novedades) novedadesHTML += renderizarNovedadesTurno('B', novedadesB.novedades);
-                if (novedadesC.success && novedadesC.novedades) novedadesHTML += renderizarNovedadesTurno('C', novedadesC.novedades);
-                novedadesContainer.innerHTML = novedadesHTML || '<div class="novedades-card" style="grid-column: 1 / -1;"><div class="novedades-body" style="padding:40px; text-align:center; color:#999;">No se pudieron cargar las novedades. Intenta recargar la página.</div></div>';
-
-                if (auditoriaResponse.success && auditoriaResponse.data) {
-                    auditoriaDataGlobal = auditoriaResponse.data;
-                    renderizarResumenAuditoria(auditoriaDataGlobal);
-                    renderizarTablaAuditoria(auditoriaDataGlobal, 1);
-                } else {
-                    // NO usar datos demo - mostrar mensaje real
-                    auditoriaDataGlobal = [];
-                    renderizarResumenAuditoria([]);
-                    renderizarTablaAuditoria([], 1);
-                    console.log('ℹ️ No hay usuarios registrados en la hoja USUARIOS');
-                }
-            } catch (error) {
-                console.error('Error cargando datos:', error);
-                // NO usar datos demo - mostrar mensaje real
-                auditoriaDataGlobal = [];
-                renderizarResumenAuditoria([]);
-                renderizarTablaAuditoria([], 1);
-                try {
-                    await cargarDatosFallback();
-                } catch (fallbackError) {
-                    console.error('Fallback error:', fallbackError);
-                    document.getElementById('novedadesContainer').innerHTML = '<div class="novedades-card" style="grid-column: 1 / -1;"><div class="novedades-body" style="padding:40px; text-align:center; color:#D93025;">⚠️ Error de conexión. Verifica tu conexión e intenta de nuevo.</div></div>';
-                }
-            } finally {
-                setTimeout(() => { document.getElementById('loadingOverlay').classList.add('hidden'); }, 500);
-            }
-        }
-
-        // ========================================
-        // ELIMINADO: usarDatosDemoAuditoria()
-        // Ahora solo muestra mensaje de "No hay registros"
-        // ========================================
-
-        async function cargarDatosFallback() {
-            const celdas = 'J2,K2,L2,M2,N2,O2,Q2,R2,S2,T2,U2,V2,X2,Y2,Z2,AA2,AB2,AC2';
-            const response = await apiFetchJSONP('getCells', { cells: celdas });
-            if (response.success && response.values) {
-                const v = response.values;
-                document.getElementById('turnosContainer').innerHTML = `
-                    ${renderizarParteTurno('turnoA', 'A', {
-                        oficiales: v['J2'] || 0, ne: v['K2'] || 0, patrulleros: v['L2'] || 0,
-                        pp: v['M2'] || 0, axp: v['N2'] || 0, nouni: v['O2'] || 0
-                    })}
-                    ${renderizarParteTurno('turnoB', 'B', {
-                        oficiales: v['Q2'] || 0, ne: v['R2'] || 0, patrulleros: v['S2'] || 0,
-                        pp: v['T2'] || 0, axp: v['U2'] || 0, nouni: v['V2'] || 0
-                    })}
-                    ${renderizarParteTurno('turnoC', 'C', {
-                        oficiales: v['X2'] || 0, ne: v['Y2'] || 0, patrulleros: v['Z2'] || 0,
-                        pp: v['AA2'] || 0, axp: v['AB2'] || 0, nouni: v['AC2'] || 0
-                    })}
-                `;
-                document.getElementById('novedadesContainer').innerHTML = '<div class="novedades-card" style="grid-column: 1 / -1;"><div class="novedades-body" style="padding:40px; text-align:center; color:#999;">📋 Novedades detalladas no disponibles en modo fallback.<br><button onclick="cargarDatos()" style="margin-top:10px; padding:8px 16px; background:var(--verde-policia); color:white; border:none; border-radius:4px; cursor:pointer;">Reintentar</button></div></div>';
-            }
-        }
-
         updateDate();
         poblarFiltroDependencias();
-        cargarUsuarios().then(() => {
-            cargarDatos();
-        });
+        initSession();
+        cargarDatos();
+        
+        // Actualizar fecha cada minuto
+        setInterval(updateDate, 60000);
     </script>
 </body>
 </html>
