@@ -738,7 +738,7 @@
         let tempUsuario = null;
 
         const NOVEDADES = [
-            'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
+            'S/N', 'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
             'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD',
             'EXCUSADO DEL SERVICIO', 'OTRA NOVEDAD', 'RETARDAD@', 'EXCUSA PARCIAL',
             'CURSO DE ASCENSO', 'COMISION'
@@ -1259,7 +1259,7 @@
                 const badge = document.getElementById('badge-' + row);
                 if (badge) {
                     badge.className = 'col-novedad ' + getNovedadClass(novedad);
-                    badge.textContent = novedad || 'SIN NOVEDAD';
+                    badge.textContent = novedad || 'Seleccione Novedad';
                 }
                 
                 setTimeout(function() { status.classList.remove('show'); }, 3000);
@@ -1307,13 +1307,13 @@
         }
 
         function createNovedadSelect(currentValue, row) {
-            let options = '<option value="">SIN NOVEDAD</option>';
+            let options = '<option value="" selected>Seleccione Novedad</option>';
             NOVEDADES.forEach(function(n) {
                 const selected = (currentValue === n) ? 'selected' : '';
                 options += '<option value="' + n + '" ' + selected + '>' + n + '</option>';
             });
 
-            return '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><select class="novedad-select" onchange="saveNovedad(this, ' + row + ')">' + options + '</select><span class="col-novedad ' + getNovedadClass(currentValue) + '" id="badge-' + row + '">' + (currentValue || 'SIN NOVEDAD') + '</span><span class="status-msg" id="status-novedad-' + row + '">✓ Guardado</span></div>';
+            return '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><select class="novedad-select" onchange="saveNovedad(this, ' + row + ')">' + options + '</select><span class="col-novedad ' + getNovedadClass(currentValue) + '" id="badge-' + row + '">' + (currentValue || 'Seleccione Novedad') + '</span><span class="status-msg" id="status-novedad-' + row + '">✓ Guardado</span></div>';
         }
 
         function renderTable(data) {
