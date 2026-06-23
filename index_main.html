@@ -67,7 +67,6 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         .btn-refresh:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .btn-refresh:active { transform: translateY(0); }
 
         .user-info {
             display: flex;
@@ -97,7 +96,6 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.7rem;
-            transition: all 0.3s ease;
         }
         .btn-logout:hover { background: rgba(255,255,255,0.3); }
 
@@ -123,6 +121,7 @@
             border-radius: 2px;
         }
 
+        /* ===== TURNOS FORMACIÓN ===== */
         .turnos-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -222,6 +221,7 @@
         .total-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
         .total-value { font-size: 1.8rem; font-weight: 700; color: var(--amarillo-policia); }
 
+        /* ===== NOVEDADES ===== */
         .novedades-section { margin-top: 30px; }
         .novedades-section .section-title { color: var(--azul-oscuro); }
         .novedades-section .section-title::before { background: var(--rojo-suave); }
@@ -269,8 +269,10 @@
             border-radius: 6px;
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
+            cursor: pointer;
         }
-        .novedad-item:hover { background: #f8f9fa; transform: translateX(4px); }
+        .novedad-item:hover { background: #f0f7ff; transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .novedad-item:active { transform: translateX(2px) scale(0.99); }
 
         .novedad-nombre {
             font-size: 0.78rem;
@@ -280,7 +282,7 @@
             align-items: center;
             gap: 8px;
         }
-        .novedad-icon { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .novedad-icon { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 
         .nov-oficina { border-left-color: #1967D2; }
         .nov-oficina .novedad-icon { background: #1967D2; }
@@ -320,8 +322,19 @@
             border-radius: 12px;
             min-width: 28px;
             text-align: center;
+            flex-shrink: 0;
         }
         .novedad-total.zero { color: #bbb; background: #f5f5f5; font-weight: 400; }
+
+        /* Badge clickable hint */
+        .novedad-item .click-hint {
+            font-size: 0.6rem;
+            color: var(--gris-texto);
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-left: 4px;
+        }
+        .novedad-item:hover .click-hint { opacity: 1; }
 
         .novedades-total-card {
             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
@@ -337,226 +350,262 @@
         .novedades-total-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .novedades-total-value { font-size: 1.5rem; font-weight: 700; color: var(--amarillo-policia); }
 
-        /* ===== AUDITORÍA ===== */
-        .auditoria-section { margin-top: 30px; }
-        .auditoria-section .section-title { color: var(--azul-oscuro); }
-        .auditoria-section .section-title::before { background: linear-gradient(180deg, #6B4C9A 0%, #9C27B0 100%); }
+        /* ===== USUARIOS REGISTRADOS ===== */
+        .usuarios-section { margin-top: 30px; }
+        .usuarios-section .section-title { color: var(--azul-oscuro); }
+        .usuarios-section .section-title::before { background: var(--amarillo-policia); }
 
-        .auditoria-resumen {
+        .usuarios-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 12px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
         }
 
-        .dependencia-estado-card {
+        .usuario-card {
             background: var(--blanco);
             border-radius: 10px;
-            padding: 14px 10px;
-            text-align: center;
-            box-shadow: var(--sombra-suave);
-            border: 2px solid var(--borde);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        .dependencia-estado-card:hover { transform: translateY(-3px); box-shadow: var(--sombra-card); }
-        .dependencia-estado-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-        }
-        .dependencia-estado-card.actualizado { border-color: var(--verde-exito); }
-        .dependencia-estado-card.actualizado::before { background: var(--verde-exito); }
-        .dependencia-estado-card.pendiente { border-color: var(--naranja-advertencia); }
-        .dependencia-estado-card.pendiente::before { background: var(--naranja-advertencia); }
-
-        .dependencia-nombre {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--gris-oscuro);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-        .dependencia-estado-texto {
-            font-size: 0.65rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-        .dependencia-estado-card.actualizado .dependencia-estado-texto { color: var(--verde-exito); }
-        .dependencia-estado-card.pendiente .dependencia-estado-texto { color: var(--naranja-advertencia); }
-
-        .dependencia-hora { font-size: 0.7rem; color: var(--gris-texto); font-weight: 500; }
-        .dependencia-usuario { font-size: 0.65rem; color: var(--gris-texto); margin-top: 2px; font-style: italic; }
-        .dependencia-icono { font-size: 1.4rem; margin-bottom: 6px; }
-
-        .auditoria-tabla-container {
-            background: var(--blanco);
-            border-radius: 12px;
+            padding: 14px 16px;
             box-shadow: var(--sombra-card);
             border: 1px solid var(--borde);
-            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: transform 0.2s ease;
+        }
+        .usuario-card:hover { transform: translateY(-2px); }
+
+        .usuario-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .avatar-activo { background: #e8f5e9; color: #1E8E3E; border: 2px solid #1E8E3E; }
+        .avatar-inactivo { background: #fff3e0; color: #E65100; border: 2px solid #E65100; }
+
+        .usuario-info { flex: 1; min-width: 0; }
+        .usuario-nombre { font-size: 0.85rem; font-weight: 700; color: var(--gris-oscuro); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .usuario-rol { font-size: 0.7rem; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.5px; }
+        .usuario-dep { font-size: 0.7rem; color: var(--azul-oscuro); font-weight: 600; margin-top: 2px; }
+
+        .usuario-estado {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .estado-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .estado-activo { background: #e8f5e9; color: #1B5E20; }
+        .estado-inactivo { background: #fff3e0; color: #BF360C; }
+        .estado-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .dot-activo { background: #1E8E3E; box-shadow: 0 0 6px rgba(30,142,62,0.5); animation: pulso 2s infinite; }
+        .dot-inactivo { background: #E65100; }
+        @keyframes pulso {
+            0%, 100% { box-shadow: 0 0 4px rgba(30,142,62,0.5); }
+            50% { box-shadow: 0 0 10px rgba(30,142,62,0.8); }
+        }
+        .ultimo-acceso { font-size: 0.6rem; color: var(--gris-texto); }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.65);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            backdrop-filter: blur(2px);
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
         }
 
-        .auditoria-tabla-header {
-            background: linear-gradient(135deg, var(--azul-oscuro) 0%, #2c5282 100%);
+        .modal-content {
+            background: var(--blanco);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 620px;
+            max-height: 82vh;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
             color: var(--blanco);
-            padding: 14px 20px;
+            padding: 16px 20px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            align-items: flex-start;
+            flex-shrink: 0;
         }
-        .auditoria-tabla-header h3 { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-
-        .auditoria-filtros { display: flex; gap: 8px; flex-wrap: wrap; }
-        .auditoria-filtros select, .auditoria-filtros input {
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.15);
-            color: var(--blanco);
+        .modal-header-left h3 { font-size: 1.05rem; font-weight: 700; }
+        .modal-header-left .modal-subtitle {
             font-size: 0.75rem;
-            font-family: inherit;
-            outline: none;
+            opacity: 0.8;
+            margin-top: 3px;
         }
-        .auditoria-filtros select option { background: var(--azul-oscuro); color: var(--blanco); }
-        .auditoria-filtros input::placeholder { color: rgba(255,255,255,0.7); }
+        .modal-close {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: var(--blanco);
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.3); }
 
-        .auditoria-tabla { width: 100%; border-collapse: collapse; }
-        .auditoria-tabla thead { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); }
-        .auditoria-tabla th {
-            padding: 12px 16px;
+        .modal-stats-bar {
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--borde);
+            padding: 10px 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .modal-stat { display: flex; flex-direction: column; align-items: center; }
+        .modal-stat .ms-val { font-size: 1.2rem; font-weight: 700; color: var(--verde-policia); }
+        .modal-stat .ms-label { font-size: 0.65rem; text-transform: uppercase; color: var(--gris-texto); }
+
+        .modal-search {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--borde);
+            flex-shrink: 0;
+        }
+        .modal-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--borde);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal-search input:focus { border-color: var(--verde-policia); }
+
+        .modal-body {
+            padding: 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .modal-table thead {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .modal-table th {
+            padding: 10px 16px;
             text-align: left;
-            font-size: 0.7rem;
             font-weight: 700;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--gris-oscuro);
             border-bottom: 2px solid var(--borde);
-            white-space: nowrap;
         }
-        .auditoria-tabla td {
+        .modal-table td {
             padding: 10px 16px;
-            font-size: 0.8rem;
             border-bottom: 1px solid var(--gris-suave);
-            color: var(--gris-oscuro);
+            vertical-align: middle;
         }
-        .auditoria-tabla tbody tr { transition: background 0.2s ease; }
-        .auditoria-tabla tbody tr:hover { background: #f8f9fa; }
-        .auditoria-tabla tbody tr:nth-child(even) { background: #fafbfc; }
-        .auditoria-tabla tbody tr:nth-child(even):hover { background: #f0f2f5; }
+        .modal-table tr:nth-child(even) { background: #fafbfc; }
+        .modal-table tr:hover { background: #f0f7ff; }
 
-        .badge-estado {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            border-radius: 12px;
+        .modal-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
             font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .badge-actualizado { background: #e8f5e9; color: var(--verde-exito); }
-        .badge-pendiente { background: #fff8e1; color: #F57F17; }
-
-        .usuario-cell { display: flex; align-items: center; gap: 8px; }
-        .usuario-avatar {
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
-            color: var(--blanco);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-        .usuario-info { display: flex; flex-direction: column; }
-        .usuario-nombre { font-weight: 600; font-size: 0.8rem; }
-        .usuario-rol { font-size: 0.65rem; color: var(--gris-texto); }
-
-        .dependencia-tag {
-            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
-            color: var(--blanco);
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            display: inline-block;
         }
 
-        .timestamp-cell { font-family: 'Courier New', monospace; font-size: 0.75rem; color: var(--gris-texto); white-space: nowrap; }
-
-        .auditoria-tabla-footer {
-            padding: 12px 20px;
-            background: #f8f9fa;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
+        .modal-loading {
+            text-align: center;
+            padding: 50px 20px;
             color: var(--gris-texto);
+        }
+        .modal-loading .spinner-sm {
+            width: 36px; height: 36px;
+            border: 3px solid var(--gris-suave);
+            border-top-color: var(--amarillo-policia);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        .modal-empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--gris-texto);
+        }
+        .modal-empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+        /* ===== CATEGORÍA BREAKDOWN EN MODAL ===== */
+        .modal-cat-breakdown {
+            display: flex;
+            gap: 10px;
             flex-wrap: wrap;
-            gap: 8px;
-        }
-        .auditoria-paginacion { display: flex; gap: 4px; }
-        .auditoria-paginacion button {
-            padding: 4px 10px;
-            border: 1px solid var(--borde);
-            background: var(--blanco);
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        .auditoria-paginacion button:hover { background: var(--gris-suave); }
-        .auditoria-paginacion button.active { background: var(--verde-policia); color: var(--blanco); border-color: var(--verde-policia); }
-        .auditoria-paginacion button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .auditoria-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
-            background: var(--blanco);
-            border-radius: 10px;
-            padding: 16px;
-            box-shadow: var(--sombra-suave);
-            border: 1px solid var(--borde);
-            display: flex;
             align-items: center;
-            gap: 12px;
         }
-        .stat-icon {
-            width: 40px; height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
+        .cat-chip {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            background: #e3f2fd;
+            color: #0D47A1;
         }
-        .stat-icon.verde { background: #e8f5e9; }
-        .stat-icon.amarillo { background: #fff8e1; }
-        .stat-icon.azul { background: #e3f2fd; }
-        .stat-info h4 { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gris-texto); margin-bottom: 2px; }
-        .stat-info .stat-valor { font-size: 1.4rem; font-weight: 700; color: var(--gris-oscuro); }
 
+        /* ===== LOADING ===== */
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.96);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -576,28 +625,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { color: var(--gris-texto); font-size: 1rem; font-weight: 500; }
 
-        .error-box {
-            background: #FDEDEC;
-            border: 1px solid var(--rojo-suave);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            color: var(--rojo-suave);
-            margin: 20px 0;
-        }
-        .error-box h3 { margin-bottom: 6px; font-size: 0.9rem; }
-        .retry-btn {
-            background: var(--rojo-suave);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 10px;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-
+        /* ===== FOOTER ===== */
         .footer-institutional {
             text-align: center;
             padding: 20px;
@@ -607,24 +635,15 @@
         .footer-institutional p { color: var(--blanco); font-size: 0.8rem; opacity: 0.8; }
         .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1rem; margin-top: 6px; letter-spacing: 2px; }
 
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
             .turnos-grid, .novedades-grid { grid-template-columns: 1fr; }
             .categorias-grid { grid-template-columns: repeat(3, 1fr); }
-            .auditoria-resumen { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-            .auditoria-stats { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 768px) {
             .header-institutional { flex-direction: column; gap: 10px; padding: 10px 16px; }
-            .header-left img { width: 36px; }
-            .header-text h1 { font-size: 0.95rem; }
             .categorias-grid { grid-template-columns: repeat(2, 1fr); }
-            .section-title { font-size: 1.1rem; }
-            .auditoria-stats { grid-template-columns: 1fr; }
-            .auditoria-tabla-container { overflow-x: auto; }
-            .auditoria-tabla { min-width: 600px; }
-            .auditoria-filtros { width: 100%; }
-            .auditoria-filtros select, .auditoria-filtros input { flex: 1; }
-            .user-info { width: 100%; justify-content: center; }
+            .modal-content { width: 96%; max-height: 90vh; }
         }
     </style>
 </head>
@@ -637,12 +656,12 @@
 
     <div class="header-institutional">
         <div class="header-left">
-            <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
-                 alt="Escudo Policía Nacional" 
+            <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png"
+                 alt="Escudo Policía Nacional"
                  onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
             <div class="header-text">
                 <h1>POLICÍA NACIONAL DE COLOMBIA</h1>
-                <div class="subtitulo" id="depSubtitle">Dashboard de Novedades - Resumen por Turno</div>
+                <div class="subtitulo" id="depSubtitle">Dashboard de Novedades - Cargando...</div>
             </div>
         </div>
         <div class="header-right">
@@ -657,88 +676,23 @@
     </div>
 
     <div class="main-content">
-        
+
         <h2 class="section-title">📊 Estado de Formación por Turnos</h2>
         <div class="turnos-grid" id="turnosContainer">
-            <div class="error-box" style="grid-column: 1 / -1;">
-                <h3>⏳ Cargando datos...</h3>
-                <p>Espere mientras se cargan los datos del sistema.</p>
-            </div>
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">Cargando formación...</div>
         </div>
 
         <div class="novedades-section">
             <h2 class="section-title">📋 Novedades por Turno</h2>
             <div class="novedades-grid" id="novedadesContainer">
-                <div class="novedades-card" style="grid-column: 1 / -1;">
-                    <div class="novedades-body" style="padding:40px; text-align:center; color:#999;">
-                        ⏳ Cargando novedades...
-                    </div>
-                </div>
+                <div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">Cargando novedades...</div>
             </div>
         </div>
 
-        <div class="auditoria-section" id="auditoriaSection">
-            <h2 class="section-title">🔍 Usuarios Registrados</h2>
-            
-            <div class="auditoria-stats" id="auditoriaStats">
-                <div class="stat-card">
-                    <div class="stat-icon verde">✅</div>
-                    <div class="stat-info">
-                        <h4>Usuarios Activos</h4>
-                        <div class="stat-valor" id="statActualizados">0</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon amarillo">⏳</div>
-                    <div class="stat-info">
-                        <h4>Total Dependencias</h4>
-                        <div class="stat-valor" id="statPendientes">0</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon azul">📊</div>
-                    <div class="stat-info">
-                        <h4>Total Usuarios</h4>
-                        <div class="stat-valor" id="statTotal">0</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="auditoria-resumen" id="auditoriaResumen"></div>
-
-            <div class="auditoria-tabla-container">
-                <div class="auditoria-tabla-header">
-                    <h3>📋 Usuarios del Sistema</h3>
-                    <div class="auditoria-filtros">
-                        <select id="filtroDependencia" onchange="filtrarAuditoria()">
-                            <option value="">Todas las dependencias</option>
-                        </select>
-                        <select id="filtroEstado" onchange="filtrarAuditoria()">
-                            <option value="">Todos los estados</option>
-                            <option value="actualizado">✅ Activo</option>
-                            <option value="pendiente">⏳ Inactivo</option>
-                        </select>
-                        <input type="text" id="filtroUsuario" placeholder="Buscar usuario..." oninput="filtrarAuditoria()">
-                    </div>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="auditoria-tabla" id="auditoriaTabla">
-                        <thead>
-                            <tr>
-                                <th>🕐 Fecha/Hora</th>
-                                <th>👤 Usuario</th>
-                                <th>🏢 Dependencia</th>
-                                <th>📄 Detalle</th>
-                                <th>📊 Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="auditoriaTablaBody"></tbody>
-                    </table>
-                </div>
-                <div class="auditoria-tabla-footer">
-                    <span id="auditoriaContador">Mostrando 0 registros</span>
-                    <div class="auditoria-paginacion" id="auditoriaPaginacion"></div>
-                </div>
+        <div class="usuarios-section">
+            <h2 class="section-title">👥 Usuarios Registrados</h2>
+            <div class="usuarios-grid" id="usuariosContainer">
+                <div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">Cargando usuarios...</div>
             </div>
         </div>
 
@@ -749,93 +703,93 @@
         <p class="motto">★ DIOS Y PATRIA ★</p>
     </div>
 
+    <!-- MODAL DE FUNCIONARIOS -->
+    <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalClick(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <h3 id="modalTitle">👥 Funcionarios</h3>
+                    <div class="modal-subtitle" id="modalSubtitle"></div>
+                </div>
+                <button class="modal-close" onclick="cerrarModal()" aria-label="Cerrar">✕</button>
+            </div>
+            <div class="modal-stats-bar" id="modalStatsBar" style="display:none;">
+                <div class="modal-stat">
+                    <span class="ms-val" id="modalTotal">0</span>
+                    <span class="ms-label">Total</span>
+                </div>
+                <div class="modal-cat-breakdown" id="modalCatBreakdown"></div>
+            </div>
+            <div class="modal-search" id="modalSearchBar" style="display:none;">
+                <input type="text" id="modalSearchInput" placeholder="🔍 Buscar por nombre o grado..." oninput="filtrarModalTabla()">
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="modal-loading">
+                    <div class="spinner-sm"></div>
+                    <p>Buscando funcionarios...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ========================================
-        // CONFIGURACIÓN - AJUSTA ESTA URL
-        // ========================================
-        // ✅ REEMPLAZA ESTA URL con la URL de tu Web App desplegada
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwL-JztZK71eHG8CNwQLtbiPOjD5cAXT0Fc6iOf10MpKsUnQeCVXF1SGhO4JlfdB8fL/exec';
-        
-        // ✅ DEPENDENCIA se obtiene del usuario logueado, no hardcodeada
+        /* =============================================
+           CONFIGURACIÓN
+        ============================================= */
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyCxYsXh8LmPImXEWCDCNeXPuzDqkmrFyK_0K8BRp46mmR0H68tTaExjudo-kvC84Wk/exec';
         let DEPENDENCY = localStorage.getItem('currentDependency') || 'ASJUR';
         let USUARIO_ACTUAL = null;
         let ROL_ACTUAL = 'Operador';
 
-        const DEPENDENCIAS = [
-            'ASJUR', 'CEPOL', 'ARSEG', 'GRUES', 'COINT', 'ARGOP', 'GRUIS',
-            'GUCOE', 'GUDEH', 'GUFAC', 'GUGEC', 'GUGED', 'GUGET', 'GULOG',
-            'GURIN', 'GUSEP', 'GUTAH', 'GUTIC', 'GUVIP', 'COVAR', 'OAC',
-            'PLAN DEMOCRACIA', 'PLANE', 'SEPRI', 'SUMEC', 'SUSEP'
-        ];
+        // Caches
+        let allPersonnelData = [];
+        let allAuditoriaData = [];
+        let modalFuncionariosFull = [];
 
         let jsonpCallbackId = 0;
-        let auditoriaDataGlobal = [];
-        let auditoriaPaginaActual = 1;
-        const AUDITORIA_POR_PAGINA = 15;
 
+        /* =============================================
+           JSONP
+        ============================================= */
+        function apiFetchJSONP(action, params) {
+            params = params || {};
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonpCb_' + (++jsonpCallbackId) + '_' + Date.now();
+                const script = document.createElement('script');
+                const urlParams = new URLSearchParams();
+                urlParams.append('action', action);
+                urlParams.append('dependency', DEPENDENCY);
+                urlParams.append('callback', callbackName);
+                urlParams.append('usuario', USUARIO_ACTUAL || 'Sistema');
+                urlParams.append('rol', ROL_ACTUAL || 'Operador');
+                for (const [key, value] of Object.entries(params)) {
+                    if (value !== undefined && value !== null) urlParams.append(key, value);
+                }
+                const url = API_URL + '?' + urlParams.toString();
+                const timeout = setTimeout(() => { cleanup(); reject(new Error('Timeout JSONP')); }, 18000);
+                window[callbackName] = function(data) { clearTimeout(timeout); cleanup(); resolve(data); };
+                function cleanup() {
+                    delete window[callbackName];
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+                script.onerror = function() { clearTimeout(timeout); cleanup(); reject(new Error('Error JSONP')); };
+                script.src = url;
+                document.head.appendChild(script);
+            });
+        }
+
+        /* =============================================
+           FECHA
+        ============================================= */
         function updateDate() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
-        // ========================================
-        // JSONP FETCH CON USUARIO Y ROL
-        // ========================================
-        function apiFetchJSONP(action, params) {
-            params = params || {};
-            return new Promise((resolve, reject) => {
-                const callbackName = 'jsonpCallback_' + (++jsonpCallbackId) + '_' + Date.now();
-                const script = document.createElement('script');
-                
-                const urlParams = new URLSearchParams();
-                urlParams.append('action', action);
-                urlParams.append('dependency', DEPENDENCY);
-                urlParams.append('callback', callbackName);
-                
-                // ✅ ENVIAR USUARIO Y ROL para auditoría
-                urlParams.append('usuario', USUARIO_ACTUAL || 'Sistema');
-                urlParams.append('rol', ROL_ACTUAL || 'Operador');
-                
-                for (const [key, value] of Object.entries(params)) {
-                    if (value !== undefined && value !== null) {
-                        urlParams.append(key, value);
-                    }
-                }
-                
-                const url = API_URL + '?' + urlParams.toString();
-                console.log('JSONP URL:', url);
-                
-                const timeout = setTimeout(() => {
-                    cleanup();
-                    reject(new Error('Timeout JSONP'));
-                }, 15000);
-                
-                window[callbackName] = function(data) {
-                    clearTimeout(timeout);
-                    cleanup();
-                    resolve(data);
-                };
-                
-                function cleanup() {
-                    delete window[callbackName];
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                }
-                
-                script.onerror = function() {
-                    clearTimeout(timeout);
-                    cleanup();
-                    reject(new Error('Error JSONP'));
-                };
-                
-                script.src = url;
-                document.head.appendChild(script);
-            });
-        }
-
-        // ========================================
-        // SESIÓN DE USUARIO
-        // ========================================
+        /* =============================================
+           SESIÓN
+        ============================================= */
         function checkSession() {
             const sessionStr = localStorage.getItem('policiaSession');
             if (!sessionStr) return false;
@@ -846,9 +800,7 @@
                     return false;
                 }
                 return session.usuario;
-            } catch (e) {
-                return false;
-            }
+            } catch(e) { return false; }
         }
 
         function initSession() {
@@ -863,380 +815,383 @@
                 document.getElementById('userInfo').style.display = 'flex';
                 document.getElementById('userNameDisplay').textContent = usuario.username;
                 document.getElementById('userRoleDisplay').textContent = usuario.rol || 'Operador';
-                document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades - ' + DEPENDENCY;
-                return true;
             }
-            // Si no hay sesión, mostrar info genérica
             document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades - ' + DEPENDENCY;
-            return false;
         }
 
         function logout() {
             localStorage.removeItem('policiaSession');
             localStorage.removeItem('currentDependency');
-            USUARIO_ACTUAL = null;
-            ROL_ACTUAL = 'Operador';
             location.reload();
         }
 
-        // ========================================
-        // CARGAR DATOS PRINCIPALES
-        // ========================================
+        /* =============================================
+           CARGAR DATOS
+        ============================================= */
         async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            
+
             try {
-                const [parteResponse, novedadesA, novedadesB, novedadesC, auditoriaResponse] = await Promise.all([
+                const [parteResponse, novedadesA, novedadesB, novedadesC, dataResponse, auditoriaResponse, usuariosResponse] = await Promise.all([
                     apiFetchJSONP('getDashboardData'),
                     apiFetchJSONP('getNovedadesPorTurno', { turno: 'A' }),
                     apiFetchJSONP('getNovedadesPorTurno', { turno: 'B' }),
                     apiFetchJSONP('getNovedadesPorTurno', { turno: 'C' }),
-                    apiFetchJSONP('getAuditoria')
+                    apiFetchJSONP('getData'),
+                    apiFetchJSONP('getAuditoria'),
+                    apiFetchJSONP('getUsuarios')
                 ]);
 
-                console.log('Dashboard:', parteResponse);
-                console.log('Novedades A:', novedadesA);
-                console.log('Novedades B:', novedadesB);
-                console.log('Novedades C:', novedadesC);
-                console.log('Auditoria:', auditoriaResponse);
+                // Cache personal
+                if (dataResponse.success && dataResponse.data) {
+                    allPersonnelData = dataResponse.data;
+                }
 
-                // Renderizar parte de formación
+                // Cache auditoría
+                if (auditoriaResponse.success && auditoriaResponse.data) {
+                    allAuditoriaData = auditoriaResponse.data;
+                }
+
+                // Renderizar formación
                 if (parteResponse.success && parteResponse.data) {
-                    const datos = parteResponse.data;
-                    document.getElementById('turnosContainer').innerHTML = `
-                        ${renderizarParteTurno('turnoA', 'A', datos.turnoA)}
-                        ${renderizarParteTurno('turnoB', 'B', datos.turnoB)}
-                        ${renderizarParteTurno('turnoC', 'C', datos.turnoC)}
-                    `;
+                    const d = parteResponse.data;
+                    document.getElementById('turnosContainer').innerHTML =
+                        renderizarParteTurno('A', d.turnoA) +
+                        renderizarParteTurno('B', d.turnoB) +
+                        renderizarParteTurno('C', d.turnoC);
                 } else {
-                    document.getElementById('turnosContainer').innerHTML = `
-                        <div class="error-box" style="grid-column: 1 / -1;">
-                            <h3>⚠️ Error al cargar formación</h3>
-                            <p>${parteResponse.error || 'No se pudieron cargar los datos de formación'}</p>
-                        </div>
-                    `;
+                    document.getElementById('turnosContainer').innerHTML =
+                        '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ No se pudieron cargar datos de formación</div>';
                 }
 
                 // Renderizar novedades
-                const novedadesContainer = document.getElementById('novedadesContainer');
                 let novedadesHTML = '';
-                let hayNovedades = false;
-                
-                if (novedadesA.success && novedadesA.novedades && novedadesA.novedades.length > 0) {
-                    novedadesHTML += renderizarNovedadesTurno('A', novedadesA.novedades);
-                    hayNovedades = true;
-                }
-                if (novedadesB.success && novedadesB.novedades && novedadesB.novedades.length > 0) {
-                    novedadesHTML += renderizarNovedadesTurno('B', novedadesB.novedades);
-                    hayNovedades = true;
-                }
-                if (novedadesC.success && novedadesC.novedades && novedadesC.novedades.length > 0) {
-                    novedadesHTML += renderizarNovedadesTurno('C', novedadesC.novedades);
-                    hayNovedades = true;
-                }
-                
-                if (!hayNovedades) {
-                    novedadesHTML = `
-                        <div class="novedades-card" style="grid-column: 1 / -1;">
-                            <div class="novedades-body" style="padding:40px; text-align:center; color:#999;">
-                                📋 No hay novedades registradas.<br>
-                                <small style="color:#bbb;">Las novedades aparecerán cuando se registren en la hoja.</small>
-                            </div>
-                        </div>
-                    `;
-                }
-                novedadesContainer.innerHTML = novedadesHTML;
+                if (novedadesA.success && novedadesA.novedades) novedadesHTML += renderizarNovedadesTurno('A', novedadesA.novedades);
+                if (novedadesB.success && novedadesB.novedades) novedadesHTML += renderizarNovedadesTurno('B', novedadesB.novedades);
+                if (novedadesC.success && novedadesC.novedades) novedadesHTML += renderizarNovedadesTurno('C', novedadesC.novedades);
+                document.getElementById('novedadesContainer').innerHTML = novedadesHTML ||
+                    '<div class="novedades-card" style="grid-column:1/-1;"><div class="novedades-body" style="padding:40px;text-align:center;color:#999;">No hay novedades registradas</div></div>';
 
-                // Renderizar auditoría
-                if (auditoriaResponse.success && auditoriaResponse.data && auditoriaResponse.data.length > 0) {
-                    auditoriaDataGlobal = auditoriaResponse.data;
-                    renderizarResumenAuditoria(auditoriaDataGlobal);
-                    renderizarTablaAuditoria(auditoriaDataGlobal, 1);
+                // Renderizar usuarios con estado activo/inactivo
+                if (usuariosResponse.success && usuariosResponse.data) {
+                    renderizarUsuarios(usuariosResponse.data);
                 } else {
-                    auditoriaDataGlobal = [];
-                    renderizarResumenAuditoria([]);
-                    renderizarTablaAuditoria([], 1);
-                    console.log('ℹ️ No hay registros de auditoría');
+                    document.getElementById('usuariosContainer').innerHTML =
+                        '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#D93025;">⚠️ No se pudieron cargar los usuarios</div>';
                 }
-                
+
             } catch (error) {
                 console.error('Error cargando datos:', error);
-                document.getElementById('turnosContainer').innerHTML = `
-                    <div class="error-box" style="grid-column: 1 / -1;">
-                        <h3>⚠️ Error de conexión</h3>
-                        <p>${error.message}</p>
-                        <button class="retry-btn" onclick="cargarDatos()">🔄 Reintentar</button>
-                    </div>
-                `;
-                document.getElementById('novedadesContainer').innerHTML = `
-                    <div class="novedades-card" style="grid-column: 1 / -1;">
-                        <div class="novedades-body" style="padding:40px; text-align:center; color:#D93025;">
-                            ⚠️ Error de conexión. Verifica tu conexión e intenta de nuevo.<br>
-                            <button class="retry-btn" onclick="cargarDatos()" style="margin-top:15px;">🔄 Reintentar</button>
-                        </div>
-                    </div>
-                `;
+                document.getElementById('turnosContainer').innerHTML =
+                    '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ Error de conexión. Verifique la red.</div>';
             } finally {
-                setTimeout(() => { document.getElementById('loadingOverlay').classList.add('hidden'); }, 500);
+                setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 500);
             }
         }
 
-        const NOVEDADES_CSS = {
-            'OFICINA': 'nov-oficina', 'VACACIONES': 'nov-vacaciones', 'SERVICIO': 'nov-servicio',
-            'ESTADO DE GRAVIDEZ': 'nov-gravidez', 'EXCUSA TOTAL': 'nov-excusa', 'PERMISO': 'nov-permiso',
-            'CITA MEDICA': 'nov-cita', 'LICENCIA DE MATERNIDAD': 'nov-maternidad',
-            'EXCUSADO DEL SERVICIO': 'nov-excusa-servicio', 'OTRA NOVEDAD': 'nov-otra',
-            'RETARDAD@': 'nov-retardado', 'EXCUSA PARCIAL': 'nov-excusa-parcial',
-            'CURSO DE ASCENSO': 'nov-curso', 'COMISION': 'nov-comision'
-        };
-
-        function renderizarParteTurno(turnoId, turnoLetra, datos) {
-            const oficiales = parseInt(datos.oficiales) || 0;
-            const ne = parseInt(datos.ne) || 0;
+        /* =============================================
+           RENDERIZAR FORMACIÓN
+        ============================================= */
+        function renderizarParteTurno(turnoLetra, datos) {
+            const oficiales   = parseInt(datos.oficiales)   || 0;
+            const ne          = parseInt(datos.ne)          || 0;
             const patrulleros = parseInt(datos.patrulleros) || 0;
-            const pp = parseInt(datos.pp) || 0;
-            const axp = parseInt(datos.axp) || 0;
-            const nouni = parseInt(datos.nouni) || 0;
-            const total = oficiales + ne + patrulleros + pp + axp + nouni;
+            const pp          = parseInt(datos.pp)          || 0;
+            const axp         = parseInt(datos.axp)         || 0;
+            const nouni       = parseInt(datos.nouni)       || 0;
+            // Total leído directamente de la celda de la hoja: I2 (A), P2 (B), W2 (C)
+            const total = parseInt(datos.total) || 0;
+
+            const emojis = { A: '🅰️', B: '🅱️', C: '🅾️' };
 
             return `
-                <div class="turno-card">
-                    <div class="turno-header">
-                        <h2>🅰️ EN FORMACIÓN</h2>
-                        <div class="turno-badge">TURNO ${turnoLetra}</div>
+            <div class="turno-card">
+                <div class="turno-header">
+                    <h2>${emojis[turnoLetra] || '🔵'} EN FORMACIÓN</h2>
+                    <div class="turno-badge">TURNO ${turnoLetra}</div>
+                </div>
+                <div class="forman-subtitle"><h3>FORMAN</h3></div>
+                <div class="turno-body">
+                    <div class="categorias-grid">
+                        <div class="categoria-item cat-oficiales">
+                            <div class="label">Oficiales</div>
+                            <div class="value ${oficiales===0?'zero':''}">${oficiales}</div>
+                        </div>
+                        <div class="categoria-item cat-ne">
+                            <div class="label">Nivel Ejecutivo</div>
+                            <div class="value ${ne===0?'zero':''}">${ne}</div>
+                        </div>
+                        <div class="categoria-item cat-patrulleros">
+                            <div class="label">Patrulleros</div>
+                            <div class="value ${patrulleros===0?'zero':''}">${patrulleros}</div>
+                        </div>
+                        <div class="categoria-item cat-pp">
+                            <div class="label">Patrulleros de Policía</div>
+                            <div class="value ${pp===0?'zero':''}">${pp}</div>
+                        </div>
+                        <div class="categoria-item cat-axp">
+                            <div class="label">AXP</div>
+                            <div class="value ${axp===0?'zero':''}">${axp}</div>
+                        </div>
+                        <div class="categoria-item cat-nouni">
+                            <div class="label">No Uniformados</div>
+                            <div class="value ${nouni===0?'zero':''}">${nouni}</div>
+                        </div>
                     </div>
-                    <div class="forman-subtitle"><h3>FORMAN</h3></div>
-                    <div class="turno-body">
-                        <div class="categorias-grid">
-                            <div class="categoria-item cat-oficiales">
-                                <div class="label">Oficiales</div>
-                                <div class="value ${oficiales === 0 ? 'zero' : ''}">${oficiales}</div>
-                            </div>
-                            <div class="categoria-item cat-ne">
-                                <div class="label">Nivel Ejecutivo</div>
-                                <div class="value ${ne === 0 ? 'zero' : ''}">${ne}</div>
-                            </div>
-                            <div class="categoria-item cat-patrulleros">
-                                <div class="label">Patrulleros</div>
-                                <div class="value ${patrulleros === 0 ? 'zero' : ''}">${patrulleros}</div>
-                            </div>
-                            <div class="categoria-item cat-pp">
-                                <div class="label">Patrulleros de Policía</div>
-                                <div class="value ${pp === 0 ? 'zero' : ''}">${pp}</div>
-                            </div>
-                            <div class="categoria-item cat-axp">
-                                <div class="label">AXP</div>
-                                <div class="value ${axp === 0 ? 'zero' : ''}">${axp}</div>
-                            </div>
-                            <div class="categoria-item cat-nouni">
-                                <div class="label">No Uniformados</div>
-                                <div class="value ${nouni === 0 ? 'zero' : ''}">${nouni}</div>
-                            </div>
-                        </div>
-                        <div class="total-card">
-                            <div class="total-label">Total Turno ${turnoLetra}</div>
-                            <div class="total-value">${total}</div>
-                        </div>
+                    <div class="total-card">
+                        <div class="total-label">Total En Formación Turno ${turnoLetra}</div>
+                        <div class="total-value">${total}</div>
                     </div>
                 </div>
-            `;
+            </div>`;
         }
+
+        /* =============================================
+           RENDERIZAR NOVEDADES
+        ============================================= */
+        const NOVEDADES_CSS = {
+            'OFICINA': 'nov-oficina',
+            'VACACIONES': 'nov-vacaciones',
+            'SERVICIO': 'nov-servicio',
+            'ESTADO DE GRAVIDEZ': 'nov-gravidez',
+            'EXCUSA TOTAL': 'nov-excusa',
+            'PERMISO': 'nov-permiso',
+            'CITA MEDICA': 'nov-cita',
+            'LICENCIA DE MATERNIDAD': 'nov-maternidad',
+            'EXCUSADO DEL SERVICIO': 'nov-excusa-servicio',
+            'OTRA NOVEDAD': 'nov-otra',
+            'RETARDAD@': 'nov-retardado',
+            'EXCUSA PARCIAL': 'nov-excusa-parcial',
+            'CURSO DE ASCENSO': 'nov-curso',
+            'COMISION': 'nov-comision'
+        };
 
         function renderizarNovedadesTurno(turnoLetra, novedades) {
             let itemsHTML = '';
             let totalNovedades = 0;
-            novedades.forEach((novedad) => {
+
+            novedades.forEach(novedad => {
                 const total = parseInt(novedad.total) || 0;
                 totalNovedades += total;
                 const cssClass = NOVEDADES_CSS[novedad.nombre] || 'nov-otra';
+                const clickable = total > 0 ? '' : 'style="opacity:0.6;cursor:default;"';
+                const onclick = total > 0
+                    ? `onclick="abrirModal('${novedad.nombre.replace(/'/g, "\\'")}', '${turnoLetra}')"`
+                    : '';
+
                 itemsHTML += `
-                    <div class="novedad-item ${cssClass}">
-                        <div class="novedad-nombre"><span class="novedad-icon"></span>${novedad.nombre}</div>
-                        <div class="novedad-total ${total === 0 ? 'zero' : ''}">${total}</div>
+                <div class="novedad-item ${cssClass}" ${onclick} ${clickable} title="${total > 0 ? 'Ver funcionarios con esta novedad' : 'Sin funcionarios'}">
+                    <div class="novedad-nombre">
+                        <span class="novedad-icon"></span>
+                        ${novedad.nombre}
+                        ${total > 0 ? '<span class="click-hint">👁 Ver</span>' : ''}
                     </div>
-                `;
+                    <div class="novedad-total ${total===0?'zero':''}">${total}</div>
+                </div>`;
             });
+
             return `
-                <div class="novedades-card">
-                    <div class="novedades-header">
-                        <h3>📋 NOVEDADES</h3>
-                        <div class="novedades-badge">TURNO ${turnoLetra}</div>
-                    </div>
-                    <div class="novedades-body">
-                        ${itemsHTML}
-                        <div class="novedades-total-card">
-                            <div class="novedades-total-label">Total Novedades</div>
-                            <div class="novedades-total-value">${totalNovedades}</div>
-                        </div>
+            <div class="novedades-card">
+                <div class="novedades-header">
+                    <h3>📋 NOVEDADES</h3>
+                    <div class="novedades-badge">TURNO ${turnoLetra}</div>
+                </div>
+                <div class="novedades-body">
+                    ${itemsHTML}
+                    <div class="novedades-total-card">
+                        <div class="novedades-total-label">Total Novedades</div>
+                        <div class="novedades-total-value">${totalNovedades}</div>
                     </div>
                 </div>
-            `;
+            </div>`;
         }
 
-        function calcularEstado(fechaUltimaActualizacion) {
-            if (!fechaUltimaActualizacion) return 'pendiente';
-            const ahora = new Date();
-            const ultima = new Date(fechaUltimaActualizacion);
-            const diffHoras = (ahora - ultima) / (1000 * 60 * 60);
-            if (diffHoras < 2) return 'actualizado';
-            return 'pendiente';
-        }
+        /* =============================================
+           RENDERIZAR USUARIOS CON ESTADO ACTIVO/INACTIVO
+        ============================================= */
+        // Umbral: si actualizó en las últimas 8 horas = ACTIVO
+        const UMBRAL_ACTIVO_MS = 8 * 60 * 60 * 1000;
 
-        function getIconoEstado(estado) {
-            const iconos = { 'actualizado': '✅', 'pendiente': '⏳' };
-            return iconos[estado] || '❓';
-        }
-
-        function getTextoEstado(estado) {
-            const textos = { 'actualizado': 'Activo', 'pendiente': 'Inactivo' };
-            return textos[estado] || 'Desconocido';
-        }
-
-        function renderizarResumenAuditoria(datosAuditoria) {
-            const container = document.getElementById('auditoriaResumen');
-            const dependenciasMap = {};
-            DEPENDENCIAS.forEach(dep => {
-                dependenciasMap[dep] = { nombre: dep, estado: 'pendiente', ultimaActualizacion: null, usuario: null };
-            });
-            
-            datosAuditoria.forEach(reg => {
-                const dep = reg.dependencia;
-                if (dependenciasMap[dep]) {
-                    dependenciasMap[dep].ultimaActualizacion = reg.fechaHora;
-                    dependenciasMap[dep].usuario = reg.usuario;
-                    dependenciasMap[dep].estado = 'actualizado';
-                }
-            });
-            
-            let actualizados = 0, pendientes = 0;
-            Object.values(dependenciasMap).forEach(dep => {
-                if (dep.estado === 'actualizado') actualizados++;
-                else pendientes++;
-            });
-            
-            document.getElementById('statActualizados').textContent = actualizados;
-            document.getElementById('statPendientes').textContent = pendientes;
-            document.getElementById('statTotal').textContent = datosAuditoria.length;
-            
-            let html = '';
-            Object.values(dependenciasMap).forEach(dep => {
-                const estado = dep.estado;
-                const horaTexto = dep.ultimaActualizacion ?
-                    new Date(dep.ultimaActualizacion).toLocaleString('es-CO', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : 'Sin usuarios';
-                html += `
-                    <div class="dependencia-estado-card ${estado}" onclick="filtrarPorDependencia('${dep.nombre}')">
-                        <div class="dependencia-icono">${getIconoEstado(estado)}</div>
-                        <div class="dependencia-nombre">${dep.nombre}</div>
-                        <div class="dependencia-estado-texto">${getTextoEstado(estado)}</div>
-                        <div class="dependencia-hora">${horaTexto}</div>
-                        ${dep.usuario ? `<div class="dependencia-usuario">${dep.usuario}</div>` : ''}
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        function renderizarTablaAuditoria(datos, pagina) {
-            const tbody = document.getElementById('auditoriaTablaBody');
-            const inicio = (pagina - 1) * AUDITORIA_POR_PAGINA;
-            const fin = inicio + AUDITORIA_POR_PAGINA;
-            const paginados = datos.slice(inicio, fin);
-            let html = '';
-            paginados.forEach(reg => {
-                const estado = calcularEstado(reg.fechaHora);
-                const badgeClass = estado === 'actualizado' ? 'badge-actualizado' : 'badge-pendiente';
-                const fechaFormateada = new Date(reg.fechaHora).toLocaleString('es-CO', {
-                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
-                });
-                const iniciales = reg.usuario ? reg.usuario.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
-                html += `
-                    <tr>
-                        <td class="timestamp-cell">${fechaFormateada}</td>
-                        <td>
-                            <div class="usuario-cell">
-                                <div class="usuario-avatar">${iniciales}</div>
-                                <div class="usuario-info">
-                                    <span class="usuario-nombre">${reg.usuario || 'Desconocido'}</span>
-                                    <span class="usuario-rol">${reg.rol || 'Usuario'}</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="dependencia-tag">${reg.dependencia}</span></td>
-                        <td>${reg.detalle || '-'}</td>
-                        <td><span class="badge-estado ${badgeClass}">${getIconoEstado(estado)} ${getTextoEstado(estado)}</span></td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">No hay usuarios registrados en el sistema</td></tr>';
-            document.getElementById('auditoriaContador').textContent = `Mostrando ${inicio + 1}-${Math.min(fin, datos.length)} de ${datos.length} registros`;
-            renderizarPaginacion(datos.length, pagina);
-        }
-
-        function renderizarPaginacion(total, paginaActual) {
-            const totalPaginas = Math.ceil(total / AUDITORIA_POR_PAGINA);
-            const container = document.getElementById('auditoriaPaginacion');
-            if (totalPaginas <= 1) { container.innerHTML = ''; return; }
-            let html = `<button onclick="cambiarPaginaAuditoria(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}>◀</button>`;
-            for (let i = 1; i <= totalPaginas; i++) {
-                if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
-                    html += `<button class="${i === paginaActual ? 'active' : ''}" onclick="cambiarPaginaAuditoria(${i})">${i}</button>`;
-                } else if (i === paginaActual - 2 || i === paginaActual + 2) {
-                    html += '<span style="padding: 4px;">...</span>';
-                }
+        function renderizarUsuarios(usuarios) {
+            if (!usuarios || usuarios.length === 0) {
+                document.getElementById('usuariosContainer').innerHTML =
+                    '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">No hay usuarios registrados</div>';
+                return;
             }
-            html += `<button onclick="cambiarPaginaAuditoria(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''}>▶</button>`;
-            container.innerHTML = html;
-        }
 
-        function cambiarPaginaAuditoria(pagina) {
-            auditoriaPaginaActual = pagina;
-            const filtrados = filtrarDatosAuditoria();
-            renderizarTablaAuditoria(filtrados, pagina);
-        }
-
-        function filtrarDatosAuditoria() {
-            const depFiltro = document.getElementById('filtroDependencia').value;
-            const estadoFiltro = document.getElementById('filtroEstado').value;
-            const usuarioFiltro = document.getElementById('filtroUsuario').value.toLowerCase();
-            return auditoriaDataGlobal.filter(reg => {
-                const matchDep = !depFiltro || reg.dependencia === depFiltro;
-                const matchEstado = !estadoFiltro || calcularEstado(reg.fechaHora) === estadoFiltro;
-                const matchUsuario = !usuarioFiltro || (reg.usuario && reg.usuario.toLowerCase().includes(usuarioFiltro));
-                return matchDep && matchEstado && matchUsuario;
+            // Mapa: usuario -> último timestamp de auditoría
+            const ultimaActividad = {};
+            allAuditoriaData.forEach(reg => {
+                const user = (reg.usuario || '').trim();
+                if (!user) return;
+                const ts = new Date(reg.fechaHora).getTime();
+                if (!ultimaActividad[user] || ts > ultimaActividad[user]) {
+                    ultimaActividad[user] = ts;
+                }
             });
-        }
 
-        function filtrarAuditoria() {
-            auditoriaPaginaActual = 1;
-            const filtrados = filtrarDatosAuditoria();
-            renderizarTablaAuditoria(filtrados, 1);
-        }
+            const ahora = Date.now();
 
-        function filtrarPorDependencia(dependencia) {
-            document.getElementById('filtroDependencia').value = dependencia;
-            filtrarAuditoria();
-            document.getElementById('auditoriaSection').scrollIntoView({ behavior: 'smooth' });
-        }
+            let html = '';
+            usuarios.forEach(u => {
+                const nombre = u.usuario || '?';
+                const rol = u.rol || 'Operador';
+                const dep = u.dependencia || '';
+                const iniciales = nombre.substring(0, 2).toUpperCase();
 
-        function poblarFiltroDependencias() {
-            const select = document.getElementById('filtroDependencia');
-            DEPENDENCIAS.forEach(dep => {
-                const option = document.createElement('option');
-                option.value = dep;
-                option.textContent = dep;
-                select.appendChild(option);
+                const lastTs = ultimaActividad[nombre];
+                const activo = lastTs && (ahora - lastTs < UMBRAL_ACTIVO_MS);
+
+                let ultimoTexto = 'Sin actividad registrada';
+                if (lastTs) {
+                    const diff = ahora - lastTs;
+                    if (diff < 60000) ultimoTexto = 'Hace menos de 1 min';
+                    else if (diff < 3600000) ultimoTexto = 'Hace ' + Math.floor(diff/60000) + ' min';
+                    else if (diff < 86400000) ultimoTexto = 'Hace ' + Math.floor(diff/3600000) + 'h ' + Math.floor((diff%3600000)/60000) + 'min';
+                    else ultimoTexto = 'Hace ' + Math.floor(diff/86400000) + ' día(s)';
+                }
+
+                html += `
+                <div class="usuario-card">
+                    <div class="usuario-avatar ${activo ? 'avatar-activo' : 'avatar-inactivo'}">${iniciales}</div>
+                    <div class="usuario-info">
+                        <div class="usuario-nombre">${nombre}</div>
+                        <div class="usuario-rol">${rol}</div>
+                        ${dep ? `<div class="usuario-dep">${dep}</div>` : ''}
+                        <div class="ultimo-acceso">⏱ ${ultimoTexto}</div>
+                    </div>
+                    <div class="usuario-estado">
+                        <div class="estado-dot ${activo ? 'dot-activo' : 'dot-inactivo'}"></div>
+                        <span class="estado-badge ${activo ? 'estado-activo' : 'estado-inactivo'}">
+                            ${activo ? '✓ ACTIVO' : '○ INACTIVO'}
+                        </span>
+                    </div>
+                </div>`;
             });
+
+            document.getElementById('usuariosContainer').innerHTML = html;
         }
 
-        // ========================================
-        // INICIALIZACIÓN
-        // ========================================
+        /* =============================================
+           MODAL DE FUNCIONARIOS
+        ============================================= */
+        function abrirModal(novedadNombre, turnoLetra) {
+            const overlay = document.getElementById('modalOverlay');
+            document.getElementById('modalTitle').textContent = '👥 ' + novedadNombre;
+            document.getElementById('modalSubtitle').textContent = 'Turno ' + turnoLetra + ' — ' + DEPENDENCY;
+            document.getElementById('modalBody').innerHTML = '<div class="modal-loading"><div class="spinner-sm"></div><p>Buscando funcionarios...</p></div>';
+            document.getElementById('modalStatsBar').style.display = 'none';
+            document.getElementById('modalSearchBar').style.display = 'none';
+            document.getElementById('modalSearchInput').value = '';
+            overlay.classList.add('active');
+
+            setTimeout(() => {
+                const filtrados = allPersonnelData.filter(p => {
+                    const turnoP = (p.turno || '').toString().trim().toUpperCase();
+                    const novP   = (p.novedad || '').toString().trim();
+                    return turnoP === turnoLetra && novP === novedadNombre;
+                });
+
+                modalFuncionariosFull = filtrados;
+                renderizarModal(filtrados, novedadNombre, turnoLetra);
+            }, 280);
+        }
+
+        function renderizarModal(funcionarios, novedadNombre, turnoLetra) {
+            const body = document.getElementById('modalBody');
+
+            if (funcionarios.length === 0) {
+                document.getElementById('modalStatsBar').style.display = 'none';
+                document.getElementById('modalSearchBar').style.display = 'none';
+                body.innerHTML = `
+                <div class="modal-empty">
+                    <div class="empty-icon">📭</div>
+                    <p style="font-weight:600;margin-bottom:8px;">Sin funcionarios registrados</p>
+                    <p style="font-size:0.8rem;">No hay funcionarios con <strong>${novedadNombre}</strong> en Turno ${turnoLetra}.</p>
+                    <p style="font-size:0.75rem;color:#aaa;margin-top:8px;">Los datos se actualizan al recargar el dashboard.</p>
+                </div>`;
+                return;
+            }
+
+            // Stats bar
+            const statsBar = document.getElementById('modalStatsBar');
+            statsBar.style.display = 'flex';
+            document.getElementById('modalTotal').textContent = funcionarios.length;
+
+            // Breakdown por grado
+            const gradoCount = {};
+            funcionarios.forEach(f => {
+                const g = f.grado || 'N/D';
+                gradoCount[g] = (gradoCount[g] || 0) + 1;
+            });
+            const chipsHTML = Object.entries(gradoCount).map(([g, c]) =>
+                `<span class="cat-chip">${g}: ${c}</span>`
+            ).join('');
+            document.getElementById('modalCatBreakdown').innerHTML = chipsHTML;
+
+            // Buscador
+            document.getElementById('modalSearchBar').style.display = 'block';
+
+            // Tabla
+            body.innerHTML = construirTablaModal(funcionarios);
+        }
+
+        function construirTablaModal(funcionarios) {
+            let html = `
+            <table class="modal-table" id="modalTable">
+                <thead>
+                    <tr>
+                        <th style="width:36px;">#</th>
+                        <th style="width:120px;">Grado</th>
+                        <th>Apellidos y Nombres</th>
+                        <th style="width:70px;">Turno</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            funcionarios.forEach((f, idx) => {
+                html += `
+                <tr>
+                    <td style="color:var(--gris-texto);font-size:0.75rem;">${idx + 1}</td>
+                    <td><span class="modal-badge" style="background:var(--amarillo-policia);color:var(--azul-oscuro);">${f.grado || '-'}</span></td>
+                    <td><strong>${f.nombres || '-'}</strong></td>
+                    <td><span class="modal-badge" style="background:#e3f2fd;color:#0D47A1;">${f.turno || '-'}</span></td>
+                </tr>`;
+            });
+
+            html += `</tbody></table>`;
+            return html;
+        }
+
+        function filtrarModalTabla() {
+            const q = document.getElementById('modalSearchInput').value.toLowerCase().trim();
+            const filtrados = q
+                ? modalFuncionariosFull.filter(f =>
+                    (f.nombres || '').toLowerCase().includes(q) ||
+                    (f.grado || '').toLowerCase().includes(q)
+                  )
+                : modalFuncionariosFull;
+
+            document.getElementById('modalTotal').textContent = filtrados.length;
+            document.getElementById('modalBody').innerHTML = construirTablaModal(filtrados);
+        }
+
+        function cerrarModalClick(event) {
+            if (event.target === document.getElementById('modalOverlay')) cerrarModal();
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+
+        /* =============================================
+           INICIALIZACIÓN
+        ============================================= */
         updateDate();
-        poblarFiltroDependencias();
         initSession();
         cargarDatos();
-        
-        // Actualizar fecha cada minuto
         setInterval(updateDate, 60000);
     </script>
 </body>
