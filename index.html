@@ -119,10 +119,10 @@
         .motto { color: #C9A227; margin-top: 10px; }
         .debug-panel {
             position: fixed; bottom: 10px; left: 10px; right: 10px;
-            background: rgba(0,0,0,0.85); color: #0f0; padding: 10px;
+            background: rgba(0,0,0,0.9); color: #0f0; padding: 10px;
             border-radius: 8px; font-family: monospace; font-size: 12px;
-            max-height: 150px; overflow-y: auto; z-index: 99999;
-            display: none;
+            max-height: 200px; overflow-y: auto; z-index: 99999;
+            display: none; border: 1px solid #0f0;
         }
         .debug-panel.show { display: block; }
         .debug-toggle {
@@ -208,7 +208,7 @@
         const API_URL = 'https://script.google.com/macros/s/AKfycbyfVnpq7OYc0ovy8nDQvyyK6PnQ2h1MhodiXxT99evNY9IYLfR2m3gn4cw2Mf4IcJPw/exec';
         
         let tempUsuario = null;
-        let jsonpId = 0;
+        let requestId = 0;
 
         // ============================================================
         // DEBUG LOGGER
@@ -216,7 +216,7 @@
         function log(msg, type = 'info') {
             const panel = document.getElementById('debugPanel');
             const time = new Date().toLocaleTimeString('es-CO');
-            const color = type === 'error' ? '#ff4444' : type === 'success' ? '#44ff44' : '#0f0';
+            const color = type === 'error' ? '#ff4444' : type === 'success' ? '#44ff44' : type === 'warn' ? '#ffaa00' : '#0f0';
             panel.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
             panel.scrollTop = panel.scrollHeight;
             console.log(`[${type.toUpperCase()}] ${msg}`);
@@ -227,92 +227,108 @@
         }
 
         // ============================================================
-        // JSONP FETCH CON IFRAME (más confiable para GAS)
+        // API FETCH CON FORMULARIO POST OCULTO (funciona con GAS)
         // ============================================================
-        function apiFetchJSONP(action, params = {}) {
+        function apiFetch(action, params = {}) {
             return new Promise((resolve, reject) => {
-                const id = ++jsonpId;
-                const cbName = 'cb_' + id + '_' + Date.now();
+                const id = ++requestId;
+                const cbName = 'apiCallback_' + id + '_' + Date.now();
                 
-                log(`JSONP #${id} → action=${action}`);
+                log(`API #${id} → action=${action}`);
                 
-                // Construir URL
-                const url = new URL(API_URL);
-                url.searchParams.append('action', action);
-                url.searchParams.append('callback', cbName);
+                // Crear iframe oculto
+                const iframe = document.createElement('iframe');
+                iframe.name = 'apiFrame_' + id;
+                iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;';
+                document.body.appendChild(iframe);
                 
+                // Crear formulario POST oculto
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = API_URL;
+                form.target = iframe.name;
+                form.style.display = 'none';
+                
+                // Agregar action
+                const actionInput = document.createElement('input');
+                actionInput.name = 'action';
+                actionInput.value = action;
+                form.appendChild(actionInput);
+                
+                // Agregar callback
+                const cbInput = document.createElement('input');
+                cbInput.name = 'callback';
+                cbInput.value = cbName;
+                form.appendChild(cbInput);
+                
+                // Agregar parámetros
                 for (const [key, value] of Object.entries(params)) {
                     if (value !== undefined && value !== null) {
-                        url.searchParams.append(key, value);
+                        const input = document.createElement('input');
+                        input.name = key;
+                        input.value = value;
+                        form.appendChild(input);
                     }
                 }
                 
-                const urlStr = url.toString();
-                log(`URL: ${urlStr.substring(0, 120)}...`);
+                document.body.appendChild(form);
                 
-                // Crear iframe oculto para evitar problemas de CORS/redirect
-                const iframe = document.createElement('iframe');
-                iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
-                document.body.appendChild(iframe);
-                
-                const iframeDoc = iframe.contentWindow.document;
-                
-                // Función callback global
+                // Función callback
                 window[cbName] = function(data) {
-                    log(`JSONP #${id} ← Respuesta recibida`);
-                    log(`JSONP #${id} ← Data: ${JSON.stringify(data).substring(0, 200)}`);
+                    log(`API #${id} ← Respuesta OK`, 'success');
+                    log(`API #${id} ← Data: ${JSON.stringify(data).substring(0, 300)}`);
                     cleanup();
                     resolve(data);
                 };
                 
                 function cleanup() {
                     delete window[cbName];
+                    if (form.parentNode) form.parentNode.removeChild(form);
                     if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
                 }
                 
                 // Timeout
                 const timeout = setTimeout(() => {
-                    log(`JSONP #${id} ← TIMEOUT (15s)`, 'error');
+                    log(`API #${id} ← TIMEOUT`, 'error');
                     cleanup();
-                    reject(new Error('Timeout JSONP'));
-                }, 15000);
+                    reject(new Error('Timeout'));
+                }, 20000);
                 
-                // Escribir script en el iframe
+                // Enviar
                 try {
-                    iframeDoc.open();
-                    iframeDoc.write(`
-                        <!DOCTYPE html>
-                        <html>
-                        <head><meta charset="UTF-8"></head>
-                        <body>
-                            <script>
-                                window.onerror = function(msg) {
-                                    parent.postMessage({jsonpError: msg, id: ${id}}, '*');
-                                };
-                            <\/script>
-                            <script src="${urlStr}"><\/script>
-                        </body>
-                        </html>
-                    `);
-                    iframeDoc.close();
+                    form.submit();
+                    log(`API #${id} → Formulario POST enviado`);
                 } catch(e) {
-                    log(`JSONP #${id} ← Error creando iframe: ${e.message}`, 'error');
+                    log(`API #${id} ← Error enviando: ${e.message}`, 'error');
                     cleanup();
                     reject(e);
                 }
                 
-                // Escuchar mensajes del iframe (fallback)
-                const msgHandler = function(e) {
-                    if (e.data && e.data.jsonpError && e.data.id === id) {
-                        log(`JSONP #${id} ← Error desde iframe: ${e.data.jsonpError}`, 'error');
+                // Fallback: leer respuesta del iframe después de un tiempo
+                iframe.onload = function() {
+                    try {
+                        const doc = iframe.contentDocument || iframe.contentWindow.document;
+                        const body = doc.body.innerText;
+                        log(`API #${id} ← iframe body: ${body.substring(0, 200)}`);
+                        
+                        // Intentar parsear JSON
+                        try {
+                            const data = JSON.parse(body);
+                            log(`API #${id} ← JSON parseado directamente`, 'success');
+                            cleanup();
+                            resolve(data);
+                        } catch(e) {
+                            // No es JSON directo, esperar callback
+                        }
+                    } catch(e) {
+                        // Cross-origin, no podemos leer
                     }
                 };
-                window.addEventListener('message', msgHandler, {once: true});
             });
         }
 
         // ============================================================
-        // LOGIN (Paso 1: Validar usuario)
+        // LOGIN
         // ============================================================
         async function handleLogin() {
             const username = document.getElementById('username').value.trim();
@@ -334,12 +350,12 @@
             log(`Usuario: ${username}`);
             
             try {
-                const response = await apiFetchJSONP('login', {
+                const response = await apiFetch('login', {
                     username: username,
                     password: password
                 });
                 
-                log(`Respuesta login: ${JSON.stringify(response)}`);
+                log(`Respuesta: ${JSON.stringify(response)}`);
                 
                 if (response.success && response.usuario) {
                     tempUsuario = response.usuario;
@@ -358,7 +374,7 @@
                     btn.textContent = 'Ingresar';
                 }
             } catch (error) {
-                log(`Error login: ${error.message}`, 'error');
+                log(`Error: ${error.message}`, 'error');
                 errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
                 errorDiv.classList.add('show');
                 btn.disabled = false;
@@ -367,11 +383,11 @@
         }
 
         // ============================================================
-        // MOSTRAR PROMPT DE CLAVE DE DEPENDENCIA
+        // MOSTRAR PROMPT CLAVE DEP
         // ============================================================
         function showDepKeyPrompt(usuario) {
-            log('=== MOSTRANDO PROMPT CLAVE DEP ===');
-            log(`Dependencia a verificar: ${usuario.dependencia}`);
+            log('=== PROMPT CLAVE DEP ===');
+            log(`Dependencia: ${usuario.dependencia}`);
             
             const loginCard = document.getElementById('loginCard');
             
@@ -428,9 +444,9 @@
             }
             
             if (!tempUsuario) {
-                errorDiv.textContent = 'Error: Sesión perdida. Vuelva a iniciar sesión.';
+                errorDiv.textContent = 'Error: Sesión perdida.';
                 errorDiv.classList.add('show');
-                log('ERROR: tempUsuario es null', 'error');
+                log('ERROR: tempUsuario null', 'error');
                 return;
             }
             
@@ -438,32 +454,30 @@
             btn.innerHTML = 'Verificando... <span class="spinner"></span>';
             errorDiv.classList.remove('show');
             
-            log('=== VERIFICAR CLAVE DEP ===');
-            log(`Username: ${tempUsuario.username}`);
-            log(`Dependencia: ${tempUsuario.dependencia}`);
-            log(`Clave ingresada: ${depKey}`);
+            log('=== VERIFICAR CLAVE ===');
+            log(`Dep: ${tempUsuario.dependencia}, Clave: ${depKey}`);
             
             try {
-                const response = await apiFetchJSONP('verifyDepKey', {
+                const response = await apiFetch('verifyDepKey', {
                     username: tempUsuario.username,
                     depKey: depKey,
                     dependencia: tempUsuario.dependencia
                 });
                 
-                log(`Respuesta verifyDepKey: ${JSON.stringify(response)}`);
+                log(`Respuesta: ${JSON.stringify(response)}`);
                 
                 if (response.success) {
-                    log('Clave CORRECTA - Accediendo...', 'success');
+                    log('✅ CLAVE CORRECTA', 'success');
                     completeLogin(tempUsuario);
                 } else {
-                    log(`Clave FALLIDA: ${response.error || 'desconocido'}`, 'error');
+                    log(`❌ ${response.error || 'Clave incorrecta'}`, 'error');
                     errorDiv.textContent = response.error || 'Clave de dependencia incorrecta';
                     errorDiv.classList.add('show');
                     btn.disabled = false;
                     btn.textContent = 'Verificar Clave';
                 }
             } catch (error) {
-                log(`Error verifyDepKey: ${error.message}`, 'error');
+                log(`Error: ${error.message}`, 'error');
                 errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
                 errorDiv.classList.add('show');
                 btn.disabled = false;
@@ -471,17 +485,11 @@
             }
         }
 
-        // ============================================================
-        // VOLVER AL LOGIN
-        // ============================================================
         function backToLogin() {
             tempUsuario = null;
             location.reload();
         }
 
-        // ============================================================
-        // COMPLETAR LOGIN
-        // ============================================================
         function completeLogin(usuario) {
             log('=== LOGIN COMPLETADO ===', 'success');
             const session = {
@@ -493,9 +501,6 @@
             showDashboard(usuario);
         }
 
-        // ============================================================
-        // MOSTRAR DASHBOARD
-        // ============================================================
         function showDashboard(usuario) {
             document.getElementById('loginOverlay').classList.add('hidden');
             document.getElementById('userInfo').style.display = 'flex';
@@ -506,15 +511,12 @@
             if (usuario.rol === 'administrador') {
                 welcomeText.textContent = 'Administrador - Acceso a todas las dependencias';
             } else {
-                welcomeText.textContent = 'Operador - Dependencia asignada: ' + usuario.dependencia;
+                welcomeText.textContent = 'Operador - Dependencia: ' + usuario.dependencia;
             }
             
             generateButtons(usuario);
         }
 
-        // ============================================================
-        // GENERAR BOTONES
-        // ============================================================
         function generateButtons(usuario) {
             const dependencies = [
                 'ASJUR', 'CEPOL', 'ARSEG', 'GRUES', 'COINT', 'ARGOP', 'GRUIS',
@@ -555,9 +557,6 @@
             });
         }
 
-        // ============================================================
-        // LOGOUT
-        // ============================================================
         function logout() {
             localStorage.removeItem('policiaSession');
             localStorage.removeItem('currentDependency');
@@ -565,9 +564,6 @@
             location.reload();
         }
 
-        // ============================================================
-        // VERIFICAR SESIÓN
-        // ============================================================
         function checkSession() {
             const sessionStr = localStorage.getItem('policiaSession');
             if (!sessionStr) return false;
@@ -581,19 +577,16 @@
             } catch (e) { return false; }
         }
 
-        // ============================================================
-        // INICIALIZACIÓN
-        // ============================================================
         function init() {
             log('=== PÁGINA CARGADA ===');
-            log(`API_URL: ${API_URL.substring(0, 60)}...`);
+            log(`API: ${API_URL.substring(0, 50)}...`);
             
             const usuario = checkSession();
             if (usuario) {
-                log('Sesión existente encontrada', 'success');
+                log('Sesión existente', 'success');
                 showDashboard(usuario);
             } else {
-                log('No hay sesión activa');
+                log('Sin sesión');
                 document.getElementById('loginOverlay').classList.remove('hidden');
             }
             updateDate();
@@ -607,18 +600,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            if (usernameInput) {
-                usernameInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') passwordInput.focus();
-                });
-            }
-            if (passwordInput) {
-                passwordInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') handleLogin();
-                });
-            }
+            const u = document.getElementById('username');
+            const p = document.getElementById('password');
+            if (u) u.addEventListener('keypress', function(e) { if (e.key === 'Enter') p.focus(); });
+            if (p) p.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
         });
 
         init();
