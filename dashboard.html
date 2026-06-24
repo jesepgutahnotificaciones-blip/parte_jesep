@@ -1213,7 +1213,7 @@
             let html = '<table><thead><tr><th>GRADO</th><th>APELLIDOS Y NOMBRES</th><th>TURNO</th><th>NOVEDAD</th><th>OBSERVACIONES</th></tr></thead><tbody>';
 
             data.forEach(function(person) {
-                html += '<tr><td><span class="col-grado">' + (person.grado || '-') + '</span></td><td>' + (person.nombres || '-') + '</td><td>' + (person.turno || '-') + '</td><td>' + createNovedadSelect(person.novedad, person.row) + '</td><td><div class="obs-container"><textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ' + person.row + ')">' + (person.observacion || '') + '</textarea><div class="obs-actions"><button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ' + person.row + ')">💾 Guardar</button><span class="status-msg" id="status-' + person.row + '">✓ Guardado</span></div></div></td></tr>';
+                html += '<tr><td><span class="col-grado">' + (person.colD || person.grado || '-') + '</span></td><td>' + (person.nombres || '-') + '</td><td>' + (person.turno || '-') + '</td><td>' + createNovedadSelect(person.novedad, person.row) + '</td><td><div class="obs-container"><textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ' + person.row + ')">' + (person.observacion || '') + '</textarea><div class="obs-actions"><button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ' + person.row + ')">💾 Guardar</button><span class="status-msg" id="status-' + person.row + '">✓ Guardado</span></div></div></td></tr>';
             });
 
             html += '</tbody></table>';
