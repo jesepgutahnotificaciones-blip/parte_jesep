@@ -446,365 +446,425 @@
     </div>
 
     <script>
-        // ============================================================
-        // CONFIGURACIÓN API
-        // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwtFfeiHJ0nz3dDV5MqMjZ_Kcq-_-fl9-B1eiqGD9T-_MX0WObyWTDmyWyCG7J_CYga/exec';
-        
-        let jsonpCallbackId = 0;
-        let tempUsuario = null;
+       
+//============================================================
+// CONFIG API
+//============================================================
 
-        // ============================================================
-        // JSONP FETCH
-        // ============================================================
-        function apiFetchJSONP(action, params = {}) {
-            return new Promise((resolve, reject) => {
-                const callbackName = 'jsonpCallback_' + (++jsonpCallbackId) + '_' + Date.now();
-                const script = document.createElement('script');
-                
-                const urlParams = new URLSearchParams();
-                urlParams.append('action', action);
-                urlParams.append('callback', callbackName);
-                
-                for (const [key, value] of Object.entries(params)) {
-                    if (value !== undefined && value !== null) {
-                        urlParams.append(key, value);
-                    }
-                }
-                
-                const url = API_URL + '?' + urlParams.toString();
-                
-                const timeout = setTimeout(() => {
-                    cleanup();
-                    reject(new Error('Timeout JSONP'));
-                }, 15000);
-                
-                window[callbackName] = function(data) {
-                    clearTimeout(timeout);
-                    cleanup();
-                    resolve(data);
-                };
-                
-                function cleanup() {
-                    delete window[callbackName];
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                }
-                
-                script.onerror = function() {
-                    clearTimeout(timeout);
-                    cleanup();
-                    reject(new Error('Error JSONP'));
-                };
-                
-                script.src = url;
-                document.head.appendChild(script);
-            });
-        }
+const API_URL='https://script.google.com/macros/s/AKfycbwtFfeiHJ0nz3dDV5MqMjZ_Kcq-_-fl9-B1eiqGD9T-_MX0WObyWTDmyWyCG7J_CYga/exec';
 
-        // ============================================================
-        // LOGIN (Paso 1: Validar usuario)
-        // ============================================================
-        async function handleLogin() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('btnLogin');
-            const errorDiv = document.getElementById('loginError');
-            
-            if (!username || !password) {
-                errorDiv.textContent = 'Ingrese usuario y contraseña';
-                errorDiv.classList.add('show');
-                return;
-            }
-            
-            btn.disabled = true;
-            btn.innerHTML = 'Verificando... <span class="spinner"></span>';
-            errorDiv.classList.remove('show');
-            
-            try {
-                const response = await apiFetchJSONP('login', {
-                    username: username,
-                    password: password
-                });
-                
-                if (response.success && response.usuario) {
-                    tempUsuario = response.usuario;
-                    
-                    // Si es administrador, ir directo al dashboard
-                    if (response.usuario.rol === 'administrador') {
-                        completeLogin(response.usuario);
-                    } else {
-                        // Si es operador, pedir clave de dependencia
-                        showDepKeyPrompt(response.usuario);
-                    }
-                } else {
-                    errorDiv.textContent = response.error || 'Usuario o contraseña incorrectos';
-                    errorDiv.classList.add('show');
-                    btn.disabled = false;
-                    btn.textContent = 'Ingresar';
-                }
-            } catch (error) {
-                console.error('Error login:', error);
-                errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
-                errorDiv.classList.add('show');
-                btn.disabled = false;
-                btn.textContent = 'Ingresar';
-            }
-        }
+let jsonpCallbackId=0;
+let usuarioActual=null;
 
-        // ============================================================
-        // MOSTRAR PROMPT DE CLAVE DE DEPENDENCIA (Paso 2)
-        // ============================================================
-        function showDepKeyPrompt(usuario) {
-            const loginCard = document.getElementById('loginCard');
-            
-            loginCard.innerHTML = `
-                <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
-                     alt="Escudo Policía Nacional"
-                     onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
-                <h2>Verificación de Dependencia</h2>
-                <p class="subtitle">Dependencia: <span class="dep-name">${usuario.dependencia}</span></p>
-                <p style="font-size: 0.85rem; color: var(--gris-texto); margin-bottom: 20px;">
-                    Ingrese la clave de acceso asignada a su dependencia
-                </p>
-                
-                <form class="login-form" onsubmit="return false;">
-                    <div class="input-group">
-                        <input type="password" id="depKeyInput" placeholder=" " required autocomplete="off">
-                        <label for="depKeyInput">Clave de Dependencia</label>
-                    </div>
-                    <button type="submit" class="btn-login" id="btnDepKey" onclick="verifyDepKey()">
-                        Verificar Clave
-                    </button>
-                    <button type="button" class="btn-login-secondary" onclick="backToLogin()">
-                        ← Volver al Login
-                    </button>
-                    <div class="login-error" id="depKeyError"></div>
-                </form>
-            `;
-            
-            // Focus automático
-            setTimeout(() => {
-                const input = document.getElementById('depKeyInput');
-                if (input) input.focus();
-            }, 100);
-            
-            // Enter key
-            const depInput = document.getElementById('depKeyInput');
-            if (depInput) {
-                depInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') verifyDepKey();
-                });
-            }
-        }
 
-        // ============================================================
-        // VERIFICAR CLAVE DE DEPENDENCIA
-        // ============================================================
-        async function verifyDepKey() {
-            const depKey = document.getElementById('depKeyInput').value.trim();
-            const btn = document.getElementById('btnDepKey');
-            const errorDiv = document.getElementById('depKeyError');
-            
-            if (!depKey) {
-                errorDiv.textContent = 'Ingrese la clave de dependencia';
-                errorDiv.classList.add('show');
-                return;
-            }
-            
-            btn.disabled = true;
-            btn.innerHTML = 'Verificando... <span class="spinner"></span>';
-            errorDiv.classList.remove('show');
-            
-            try {
-                const response = await apiFetchJSONP('verifyDepKey', {
-                    username: tempUsuario.username,
-                    depKey: depKey,
-                    dependencia: tempUsuario.dependencia
-                });
-                
-                if (response.success) {
-                    completeLogin(tempUsuario);
-                } else {
-                    errorDiv.textContent = response.error || 'Clave de dependencia incorrecta';
-                    errorDiv.classList.add('show');
-                    btn.disabled = false;
-                    btn.textContent = 'Verificar Clave';
-                }
-            } catch (error) {
-                console.error('Error verifyDepKey:', error);
-                errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
-                errorDiv.classList.add('show');
-                btn.disabled = false;
-                btn.textContent = 'Verificar Clave';
-            }
-        }
+//============================================================
+// FECHA
+//============================================================
 
-        // ============================================================
-        // VOLVER AL LOGIN
-        // ============================================================
-        function backToLogin() {
-            tempUsuario = null;
-            location.reload();
-        }
+document.getElementById("currentDate").innerHTML=
+new Date().toLocaleDateString(
+'es-CO',
+{
+weekday:'long',
+year:'numeric',
+month:'long',
+day:'numeric'
+}
+);
 
-        // ============================================================
-        // COMPLETAR LOGIN (guardar sesión y mostrar dashboard)
-        // ============================================================
-        function completeLogin(usuario) {
-            const session = {
-                usuario: usuario,
-                token: usuario.token || Date.now().toString(),
-                timestamp: Date.now()
-            };
-            localStorage.setItem('policiaSession', JSON.stringify(session));
-            showDashboard(usuario);
-        }
 
-        // ============================================================
-        // MOSTRAR DASHBOARD
-        // ============================================================
-        function showDashboard(usuario) {
-            document.getElementById('loginOverlay').classList.add('hidden');
-            
-            document.getElementById('userInfo').style.display = 'flex';
-            document.getElementById('userName').textContent = usuario.username;
-            document.getElementById('userRole').textContent = usuario.rol;
-            
-            const welcomeText = document.getElementById('welcomeText');
-            if (usuario.rol === 'administrador') {
-                welcomeText.textContent = 'Administrador - Acceso a todas las dependencias';
-            } else {
-                welcomeText.textContent = 'Operador - Dependencia asignada: ' + usuario.dependencia;
-            }
-            
-            generateButtons(usuario);
-        }
+//============================================================
+// JSONP
+//============================================================
 
-        // ============================================================
-        // GENERAR BOTONES (filtrado por rol)
-        // ============================================================
-        function generateButtons(usuario) {
-            const dependencies = [
-                'ASJUR', 'CEPOL', 'ARSEG', 'GRUES', 'COINT', 'ARGOP', 'GRUIS',
-                'GUCOE', 'GUDEH', 'GUFAC', 'GUGEC', 'GUGED', 'GUGET', 'GULOG',
-                'GURIN', 'GUSEP', 'GUTAH', 'GUTIC', 'GUVIP', 'COVAR', 'OAC',
-                'PLAN DEMOCRACIA', 'PLANE', 'SEPRI', 'SUMEC', 'SUSEP', 'PARTE FINAL'
-            ];
+function apiFetchJSONP(action,params={}){
 
-            const container = document.getElementById('buttonsContainer');
-            container.innerHTML = '';
+return new Promise((resolve,reject)=>{
 
-            dependencies.forEach(dep => {
-                if (usuario.rol === 'operador' && usuario.dependencia !== 'TODAS') {
-                    if (dep !== usuario.dependencia && dep !== 'PARTE FINAL') {
-                        return;
-                    }
-                }
+const callbackName=
+'callback_'+(++jsonpCallbackId);
 
-                const btn = document.createElement('button');
-                btn.className = 'btn-dependency';
-                
-                const isUserDep = dep === usuario.dependencia;
-                if (isUserDep) {
-                    btn.style.borderColor = '#C9A227';
-                    btn.style.background = 'rgba(255,255,255,1)';
-                }
+window[callbackName]=function(data){
 
-                btn.innerHTML = `
-                    <span class="icon">🛡️</span>
-                    <span class="name">${dep}</span>
-                    <span class="type">${isUserDep ? 'Tu dependencia' : 'Dependencia'}</span>
-                `;
+delete window[callbackName];
 
-                btn.onclick = () => {
-                    localStorage.setItem('currentDependency', dep);
-                    
-                    if (dep === "PARTE FINAL") {
-                        window.location.href = 'https://jesepgutahnotificaciones-blip.github.io/parte_jesep/index_main.html';
-                    } else {
-                        window.location.href = 'dashboard.html';
-                    }
-                };
+if(script.parentNode){
+script.parentNode.removeChild(script);
+}
 
-                container.appendChild(btn);
-            });
-        }
+resolve(data);
 
-        // ============================================================
-        // LOGOUT
-        // ============================================================
-        function logout() {
-            localStorage.removeItem('policiaSession');
-            localStorage.removeItem('currentDependency');
-            tempUsuario = null;
-            location.reload();
-        }
+};
 
-        // ============================================================
-        // VERIFICAR SESIÓN AL CARGAR
-        // ============================================================
-        function checkSession() {
-            const sessionStr = localStorage.getItem('policiaSession');
-            if (!sessionStr) return false;
-            
-            try {
-                const session = JSON.parse(sessionStr);
-                if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) {
-                    localStorage.removeItem('policiaSession');
-                    return false;
-                }
-                return session.usuario;
-            } catch (e) {
-                return false;
-            }
-        }
+const script=document.createElement("script");
 
-        // ============================================================
-        // INICIALIZACIÓN
-        // ============================================================
-        function init() {
-            const usuario = checkSession();
-            if (usuario) {
-                showDashboard(usuario);
-            } else {
-                document.getElementById('loginOverlay').classList.remove('hidden');
-            }
-            
-            updateDate();
-        }
+let url=
+API_URL+
+'?action='+
+encodeURIComponent(action)+
+'&callback='+
+callbackName;
 
-        function updateDate() {
-            const now = new Date();
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
-        }
+Object.keys(params).forEach(key=>{
 
-        // Enter en inputs del login inicial
-        document.addEventListener('DOMContentLoaded', function() {
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            
-            if (usernameInput) {
-                usernameInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') passwordInput.focus();
-                });
-            }
-            if (passwordInput) {
-                passwordInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') handleLogin();
-                });
-            }
-        });
+if(
+params[key]!==undefined &&
+params[key]!==null
+){
 
-        // Iniciar
-        init();
+url +=
+'&'+
+encodeURIComponent(key)+
+'='+
+encodeURIComponent(params[key]);
+
+}
+
+});
+
+script.src=url;
+
+script.onerror=function(){
+
+delete window[callbackName];
+
+reject(
+new Error(
+'Error de conexión Apps Script'
+)
+);
+
+};
+
+document.body.appendChild(script);
+
+});
+
+}
+
+
+//============================================================
+// LOGIN
+//============================================================
+
+async function handleLogin(){
+
+const user=
+document.getElementById(
+'username'
+).value.trim();
+
+const pass=
+document.getElementById(
+'password'
+).value.trim();
+
+const btn=
+document.getElementById(
+'btnLogin'
+);
+
+const error=
+document.getElementById(
+'loginError'
+);
+
+
+error.classList.remove(
+'show'
+);
+
+error.innerText='';
+
+
+if(!user || !pass){
+
+mostrarError(
+'Ingrese usuario y contraseña'
+);
+
+return;
+
+}
+
+try{
+
+btn.disabled=true;
+
+btn.innerHTML=
+'Validando... <span class="spinner"></span>';
+
+const response=
+await apiFetchJSONP(
+'login',
+{
+username:user,
+password:pass
+}
+);
+
+console.log(
+'Respuesta login:',
+response
+);
+
+if(
+response &&
+response.success &&
+response.usuario
+){
+
+usuarioActual=
+response.usuario;
+
+guardarSesion();
+
+mostrarSistema();
+
+}
+else{
+
+mostrarError(
+response.error ||
+'Usuario o contraseña incorrectos'
+);
+
+}
+
+}
+catch(err){
+
+console.error(err);
+
+mostrarError(
+'Error de conexión'
+);
+
+}
+finally{
+
+btn.disabled=false;
+btn.innerHTML='Ingresar';
+
+}
+
+}
+
+
+//============================================================
+// MOSTRAR SISTEMA
+//============================================================
+
+function mostrarSistema(){
+
+document
+.getElementById(
+'loginOverlay'
+)
+.classList.add(
+'hidden'
+);
+
+document
+.getElementById(
+'userInfo'
+)
+.style.display='flex';
+
+
+document
+.getElementById(
+'userName'
+)
+innerHTML=
+usuarioActual.username;
+
+
+document
+.getElementById(
+'userRole'
+)
+innerHTML=
+usuarioActual.rol;
+
+
+document
+.getElementById(
+'welcomeText'
+)
+innerHTML=
+'Dependencia asignada: <strong>'+
+usuarioActual.dependencia+
+'</strong>';
+
+crearBotonDependencia();
+
+}
+
+
+//============================================================
+// BOTÓN DEPENDENCIA
+//============================================================
+
+function crearBotonDependencia(){
+
+const container=
+document.getElementById(
+'buttonsContainer'
+);
+
+container.innerHTML='';
+
+const btn=
+document.createElement(
+'button'
+);
+
+btn.className=
+'btn-dependency';
+
+btn.innerHTML=
+`
+<span class="icon">🏛️</span>
+<span class="name">${usuarioActual.dependencia}</span>
+<span class="type">${usuarioActual.rol}</span>
+`;
+
+btn.onclick=function(){
+
+window.location.href=
+'panel.html?dependency='+
+encodeURIComponent(
+usuarioActual.dependencia
+);
+
+};
+
+container.appendChild(
+btn
+);
+
+}
+
+
+//============================================================
+// GUARDAR SESION
+//============================================================
+
+function guardarSesion(){
+
+localStorage.setItem(
+'usuarioSistema',
+JSON.stringify(
+usuarioActual
+)
+);
+
+}
+
+
+//============================================================
+// CARGAR SESION
+//============================================================
+
+function cargarSesion(){
+
+const data=
+localStorage.getItem(
+'usuarioSistema'
+);
+
+if(!data)return;
+
+try{
+
+usuarioActual=
+JSON.parse(data);
+
+mostrarSistema();
+
+}
+catch(e){
+
+localStorage.removeItem(
+'usuarioSistema'
+);
+
+}
+
+}
+
+
+//============================================================
+// LOGOUT
+//============================================================
+
+function logout(){
+
+localStorage.removeItem(
+'usuarioSistema'
+);
+
+location.reload();
+
+}
+
+
+//============================================================
+// ERROR LOGIN
+//============================================================
+
+function mostrarError(msg){
+
+const error=
+document.getElementById(
+'loginError'
+);
+
+error.innerHTML=msg;
+
+error.classList.add(
+'show'
+);
+
+}
+
+
+//============================================================
+// ENTER LOGIN
+//============================================================
+
+document
+.getElementById(
+'password'
+)
+.addEventListener(
+'keypress',
+function(e){
+
+if(
+e.key==="Enter"
+){
+
+handleLogin();
+
+}
+
+}
+);
+
+
+//============================================================
+// INICIO
+//============================================================
+
+window.onload=function(){
+
+cargarSesion();
+
+};
+
+
     </script>
 </body>
 </html>
