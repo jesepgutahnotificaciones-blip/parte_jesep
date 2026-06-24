@@ -224,9 +224,9 @@
 
     <script>
         // ============================================================
-        // CONFIGURACIÓN API - Lee de localStorage o usa default
+        // CONFIGURACIÓN API
         // ============================================================
-        const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbx5LmFZWTWnT-N6NnCvceGvDq5Oq2NJTx7bndmE0pviDC-QdKu6ZQ8DIPx3b8IXeFRM/exec';
+        const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyJ90fc2ynpmaqgKwfwztW0nfCKkf3-Z5MTWh416nnKHQJZHvTJGEfXJIXSfqmcoOhF/exec';
         
         function getApiUrl() {
             return localStorage.getItem('policiaApiUrl') || DEFAULT_API_URL;
@@ -237,7 +237,7 @@
         function guardarUrl() {
             const url = document.getElementById('apiUrlInput').value.trim();
             if (!url || !url.includes('/exec')) {
-                document.getElementById('urlStatus').innerHTML = '<span style="color:red">❌ URL inválida. Debe terminar en /exec</span>';
+                document.getElementById('urlStatus').innerHTML = '<span style="color:red">❌ URL inválida</span>';
                 return;
             }
             localStorage.setItem('policiaApiUrl', url);
@@ -246,16 +246,13 @@
             log('URL actualizada: ' + url.substring(0, 60) + '...');
         }
         
-        // Cargar URL guardada en el input
         document.addEventListener('DOMContentLoaded', function() {
             const saved = localStorage.getItem('policiaApiUrl');
-            if (saved) {
-                document.getElementById('apiUrlInput').value = saved;
-            }
+            if (saved) document.getElementById('apiUrlInput').value = saved;
         });
 
         let tempUsuario = null;
-        let requestId = 0;
+        let cbCounter = 0;
 
         // ============================================================
         // DEBUG LOGGER
@@ -274,86 +271,63 @@
         }
 
         // ============================================================
-        // API FETCH - Técnica: POST con formulario oculto en iframe
+        // API FETCH - JSONP VIA SCRIPT TAG (GET, no POST)
         // ============================================================
         function apiFetch(action, params = {}) {
             return new Promise((resolve, reject) => {
-                const id = ++requestId;
-                const cbName = 'apiCB_' + id + '_' + Date.now();
+                const id = ++cbCounter;
+                const cbName = 'cb_' + id + '_' + Date.now();
                 
-                log(`API #${id} → ${action}`);
+                log(`API #${id} → ${action} (GET JSONP)`);
                 
-                // 1. Crear iframe oculto
-                const iframe = document.createElement('iframe');
-                iframe.name = 'apiFrame_' + id;
-                iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;border:none;';
-                document.body.appendChild(iframe);
-                
-                // 2. Crear formulario POST oculto
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = API_URL;
-                form.target = iframe.name;
-                form.style.display = 'none';
-                
-                // Agregar campos
-                const addField = (name, value) => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = name;
-                    input.value = value || '';
-                    form.appendChild(input);
-                };
-                
-                addField('action', action);
-                addField('callback', cbName);
+                // Construir URL con parámetros GET
+                const url = new URL(API_URL);
+                url.searchParams.append('action', action);
+                url.searchParams.append('callback', cbName);
                 
                 for (const [key, value] of Object.entries(params)) {
                     if (value !== undefined && value !== null) {
-                        addField(key, value);
+                        url.searchParams.append(key, value);
                     }
                 }
                 
-                document.body.appendChild(form);
+                const urlStr = url.toString();
+                log(`API #${id} → URL: ${urlStr.substring(0, 150)}...`);
                 
-                // 3. Función callback global
-                let resolved = false;
+                // Crear script tag para JSONP
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                
+                // Timeout
+                const timeout = setTimeout(() => {
+                    log(`API #${id} ← TIMEOUT (15s)`, 'error');
+                    cleanup();
+                    reject(new Error('Timeout - Verifica la URL del Web App'));
+                }, 15000);
+                
+                // Callback global
                 window[cbName] = function(data) {
-                    if (resolved) return;
-                    resolved = true;
-                    log(`API #${id} ← OK callback`, 'success');
-                    log(`API #${id} ← ${JSON.stringify(data).substring(0, 300)}`);
+                    clearTimeout(timeout);
+                    log(`API #${id} ← Respuesta OK`, 'success');
+                    log(`API #${id} ← Data: ${JSON.stringify(data).substring(0, 300)}`);
                     cleanup();
                     resolve(data);
                 };
                 
-                // 4. Cleanup
                 function cleanup() {
                     delete window[cbName];
-                    if (form.parentNode) form.parentNode.removeChild(form);
-                    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+                    if (script.parentNode) script.parentNode.removeChild(script);
                 }
                 
-                // 5. Timeout
-                const timeout = setTimeout(() => {
-                    if (resolved) return;
-                    resolved = true;
-                    log(`API #${id} ← TIMEOUT`, 'error');
+                script.onerror = function() {
+                    clearTimeout(timeout);
+                    log(`API #${id} ← Error cargando script`, 'error');
                     cleanup();
-                    reject(new Error('Timeout - El servidor no respondió. Verifica la URL del Web App.'));
-                }, 20000);
+                    reject(new Error('Error cargando script - La URL puede estar mal o el servidor no responde'));
+                };
                 
-                // 6. Enviar
-                try {
-                    log(`API #${id} → Enviando POST a ${API_URL.substring(0, 60)}...`);
-                    form.submit();
-                } catch(e) {
-                    if (resolved) return;
-                    resolved = true;
-                    log(`API #${id} ← Error enviando: ${e.message}`, 'error');
-                    cleanup();
-                    reject(e);
-                }
+                script.src = urlStr;
+                document.head.appendChild(script);
             });
         }
 
@@ -390,7 +364,7 @@
                 
                 if (response.success && response.usuario) {
                     tempUsuario = response.usuario;
-                    log(`✅ Login OK - ${tempUsuario.rol}`, 'success');
+                    log(`✅ Login OK - Rol: ${tempUsuario.rol}`, 'success');
                     
                     if (tempUsuario.rol === 'administrador') {
                         completeLogin(tempUsuario);
@@ -406,7 +380,7 @@
                 }
             } catch (error) {
                 log(`❌ Error: ${error.message}`, 'error');
-                errorDiv.textContent = 'Error de conexión. Verifica la URL del Web App en Configuración.';
+                errorDiv.textContent = 'Error de conexión. Verifica la URL del Web App.';
                 errorDiv.classList.add('show');
                 btn.disabled = false;
                 btn.textContent = 'Ingresar';
@@ -609,14 +583,14 @@
 
         function init() {
             log('=== PÁGINA CARGADA ===');
-            log(`URL configurada: ${API_URL.substring(0, 60)}...`);
+            log(`URL: ${API_URL.substring(0, 60)}...`);
             
             const usuario = checkSession();
             if (usuario) {
                 log('Sesión existente', 'success');
                 showDashboard(usuario);
             } else {
-                log('Sin sesión activa');
+                log('Sin sesión');
                 document.getElementById('loginOverlay').classList.remove('hidden');
             }
             updateDate();
