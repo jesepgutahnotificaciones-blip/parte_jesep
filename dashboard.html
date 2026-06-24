@@ -798,42 +798,31 @@
             }
         }
 
-        async function loadRealData(turno) {
-            try {
-                const summarySection = document.getElementById('summarySection');
-                
-                if (turno && turno !== 'ALL') {
-                    summarySection.classList.remove('hidden');
-                    document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen de ' + currentDependency + '...</p></div>';
-                } else {
-                    summarySection.classList.add('hidden');
-                }
-                
-                document.getElementById('tableContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando personal de ' + currentDependency + '...</p></div>';
+        async function filterByTurno(turno) {
+    currentFilter = turno;
 
-                if (turno && turno !== 'ALL') {
-                    const summaryData = await apiFetch('getSummary', { turno: turno });
-                    console.log('Summary data:', summaryData); // DEBUG
-                    if (summaryData.success) renderSummary(summaryData.summary);
-                }
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
 
-                const data = await apiFetch('getData');
-                console.log('Table data:', data); // DEBUG
-                
-                if (data.success) {
-                    allTableData = data.data || [];
-                    if (!turno) {
-                        filterByTurno('ALL');
-                    }
-                } else {
-                    throw new Error(data.error || 'Error al cargar datos');
-                }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showError(error.message);
-            }
-        }
+    if (turno === 'A') document.getElementById('btn-turno-a').classList.add('active');
+    else if (turno === 'B') document.getElementById('btn-turno-b').classList.add('active');
+    else if (turno === 'C') document.getElementById('btn-turno-c').classList.add('active');
+    else document.getElementById('btn-turno-all').classList.add('active');
+
+    let filteredData = allTableData;
+
+    if (turno !== 'ALL') {
+        filteredData = allTableData.filter(p =>
+            (p.turno || '').toString().trim().toUpperCase() === turno
+        );
+    }
+
+    document.getElementById('filterInfo').textContent =
+        turno === 'ALL'
+            ? `Mostrando todos los registros (${filteredData.length})`
+            : `Filtrado: Turno ${turno} (${filteredData.length})`;
+
+    renderTable(filteredData);
+}
 
         async function saveData(row, novedad, observation) {
             console.log('saveData called - row:', row, 'novedad:', novedad, 'observation:', observation); // DEBUG
