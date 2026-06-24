@@ -131,6 +131,18 @@
             padding: 5px 10px; border-radius: 4px; cursor: pointer;
             font-family: monospace; font-size: 11px;
         }
+        .config-panel {
+            background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px;
+            padding: 15px; margin-bottom: 15px; text-align: left; font-size: 0.85rem;
+        }
+        .config-panel input {
+            width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px;
+            font-family: monospace; font-size: 0.8rem;
+        }
+        .config-panel button {
+            background: var(--verde-policia); color: white; border: none;
+            padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 5px;
+        }
         @media(max-width:768px) {
             .buttons-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
             .login-card { padding: 30px 20px; margin: 20px; }
@@ -147,6 +159,15 @@
                  onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
             <h2>Policía Nacional de Colombia</h2>
             <p class="subtitle">Sistema de Gestión de Novedades</p>
+            
+            <!-- CONFIGURACIÓN DE URL -->
+            <div class="config-panel" id="configPanel">
+                <strong>⚙️ Configurar URL del Web App</strong><br>
+                <small>Pega aquí la URL de tu Apps Script Web App (termina en /exec)</small>
+                <input type="text" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+                <button onclick="guardarUrl()">💾 Guardar URL</button>
+                <div id="urlStatus" style="margin-top:5px;color:#666;"></div>
+            </div>
             
             <form class="login-form" id="loginForm" onsubmit="return false;">
                 <div class="input-group">
@@ -203,10 +224,36 @@
 
     <script>
         // ============================================================
-        // CONFIGURACIÓN API
+        // CONFIGURACIÓN API - Lee de localStorage o usa default
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyfVnpq7OYc0ovy8nDQvyyK6PnQ2h1MhodiXxT99evNY9IYLfR2m3gn4cw2Mf4IcJPw/exec';
+        const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbx5LmFZWTWnT-N6NnCvceGvDq5Oq2NJTx7bndmE0pviDC-QdKu6ZQ8DIPx3b8IXeFRM/exec';
         
+        function getApiUrl() {
+            return localStorage.getItem('policiaApiUrl') || DEFAULT_API_URL;
+        }
+        
+        let API_URL = getApiUrl();
+        
+        function guardarUrl() {
+            const url = document.getElementById('apiUrlInput').value.trim();
+            if (!url || !url.includes('/exec')) {
+                document.getElementById('urlStatus').innerHTML = '<span style="color:red">❌ URL inválida. Debe terminar en /exec</span>';
+                return;
+            }
+            localStorage.setItem('policiaApiUrl', url);
+            API_URL = url;
+            document.getElementById('urlStatus').innerHTML = '<span style="color:green">✅ URL guardada</span>';
+            log('URL actualizada: ' + url.substring(0, 60) + '...');
+        }
+        
+        // Cargar URL guardada en el input
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('policiaApiUrl');
+            if (saved) {
+                document.getElementById('apiUrlInput').value = saved;
+            }
+        });
+
         let tempUsuario = null;
         let requestId = 0;
 
@@ -227,103 +274,86 @@
         }
 
         // ============================================================
-        // API FETCH CON FORMULARIO POST OCULTO (funciona con GAS)
+        // API FETCH - Técnica: POST con formulario oculto en iframe
         // ============================================================
         function apiFetch(action, params = {}) {
             return new Promise((resolve, reject) => {
                 const id = ++requestId;
-                const cbName = 'apiCallback_' + id + '_' + Date.now();
+                const cbName = 'apiCB_' + id + '_' + Date.now();
                 
-                log(`API #${id} → action=${action}`);
+                log(`API #${id} → ${action}`);
                 
-                // Crear iframe oculto
+                // 1. Crear iframe oculto
                 const iframe = document.createElement('iframe');
                 iframe.name = 'apiFrame_' + id;
-                iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;';
+                iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;border:none;';
                 document.body.appendChild(iframe);
                 
-                // Crear formulario POST oculto
+                // 2. Crear formulario POST oculto
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = API_URL;
                 form.target = iframe.name;
                 form.style.display = 'none';
                 
-                // Agregar action
-                const actionInput = document.createElement('input');
-                actionInput.name = 'action';
-                actionInput.value = action;
-                form.appendChild(actionInput);
+                // Agregar campos
+                const addField = (name, value) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = value || '';
+                    form.appendChild(input);
+                };
                 
-                // Agregar callback
-                const cbInput = document.createElement('input');
-                cbInput.name = 'callback';
-                cbInput.value = cbName;
-                form.appendChild(cbInput);
+                addField('action', action);
+                addField('callback', cbName);
                 
-                // Agregar parámetros
                 for (const [key, value] of Object.entries(params)) {
                     if (value !== undefined && value !== null) {
-                        const input = document.createElement('input');
-                        input.name = key;
-                        input.value = value;
-                        form.appendChild(input);
+                        addField(key, value);
                     }
                 }
                 
                 document.body.appendChild(form);
                 
-                // Función callback
+                // 3. Función callback global
+                let resolved = false;
                 window[cbName] = function(data) {
-                    log(`API #${id} ← Respuesta OK`, 'success');
-                    log(`API #${id} ← Data: ${JSON.stringify(data).substring(0, 300)}`);
+                    if (resolved) return;
+                    resolved = true;
+                    log(`API #${id} ← OK callback`, 'success');
+                    log(`API #${id} ← ${JSON.stringify(data).substring(0, 300)}`);
                     cleanup();
                     resolve(data);
                 };
                 
+                // 4. Cleanup
                 function cleanup() {
                     delete window[cbName];
                     if (form.parentNode) form.parentNode.removeChild(form);
                     if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
                 }
                 
-                // Timeout
+                // 5. Timeout
                 const timeout = setTimeout(() => {
+                    if (resolved) return;
+                    resolved = true;
                     log(`API #${id} ← TIMEOUT`, 'error');
                     cleanup();
-                    reject(new Error('Timeout'));
+                    reject(new Error('Timeout - El servidor no respondió. Verifica la URL del Web App.'));
                 }, 20000);
                 
-                // Enviar
+                // 6. Enviar
                 try {
+                    log(`API #${id} → Enviando POST a ${API_URL.substring(0, 60)}...`);
                     form.submit();
-                    log(`API #${id} → Formulario POST enviado`);
                 } catch(e) {
+                    if (resolved) return;
+                    resolved = true;
                     log(`API #${id} ← Error enviando: ${e.message}`, 'error');
                     cleanup();
                     reject(e);
                 }
-                
-                // Fallback: leer respuesta del iframe después de un tiempo
-                iframe.onload = function() {
-                    try {
-                        const doc = iframe.contentDocument || iframe.contentWindow.document;
-                        const body = doc.body.innerText;
-                        log(`API #${id} ← iframe body: ${body.substring(0, 200)}`);
-                        
-                        // Intentar parsear JSON
-                        try {
-                            const data = JSON.parse(body);
-                            log(`API #${id} ← JSON parseado directamente`, 'success');
-                            cleanup();
-                            resolve(data);
-                        } catch(e) {
-                            // No es JSON directo, esperar callback
-                        }
-                    } catch(e) {
-                        // Cross-origin, no podemos leer
-                    }
-                };
             });
         }
 
@@ -346,8 +376,9 @@
             btn.innerHTML = 'Verificando... <span class="spinner"></span>';
             errorDiv.classList.remove('show');
             
-            log('=== LOGIN INICIADO ===');
+            log('=== LOGIN ===');
             log(`Usuario: ${username}`);
+            log(`URL: ${API_URL.substring(0, 60)}...`);
             
             try {
                 const response = await apiFetch('login', {
@@ -359,7 +390,7 @@
                 
                 if (response.success && response.usuario) {
                     tempUsuario = response.usuario;
-                    log(`Login OK - Rol: ${tempUsuario.rol}, Dep: ${tempUsuario.dependencia}`, 'success');
+                    log(`✅ Login OK - ${tempUsuario.rol}`, 'success');
                     
                     if (tempUsuario.rol === 'administrador') {
                         completeLogin(tempUsuario);
@@ -367,15 +398,15 @@
                         showDepKeyPrompt(tempUsuario);
                     }
                 } else {
-                    log(`Login FALLIDO: ${response.error || 'desconocido'}`, 'error');
+                    log(`❌ Login fallido: ${response.error || 'desconocido'}`, 'error');
                     errorDiv.textContent = response.error || 'Usuario o contraseña incorrectos';
                     errorDiv.classList.add('show');
                     btn.disabled = false;
                     btn.textContent = 'Ingresar';
                 }
             } catch (error) {
-                log(`Error: ${error.message}`, 'error');
-                errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
+                log(`❌ Error: ${error.message}`, 'error');
+                errorDiv.textContent = 'Error de conexión. Verifica la URL del Web App en Configuración.';
                 errorDiv.classList.add('show');
                 btn.disabled = false;
                 btn.textContent = 'Ingresar';
@@ -383,10 +414,10 @@
         }
 
         // ============================================================
-        // MOSTRAR PROMPT CLAVE DEP
+        // PROMPT CLAVE DEP
         // ============================================================
         function showDepKeyPrompt(usuario) {
-            log('=== PROMPT CLAVE DEP ===');
+            log('=== CLAVE DEP ===');
             log(`Dependencia: ${usuario.dependencia}`);
             
             const loginCard = document.getElementById('loginCard');
@@ -430,7 +461,7 @@
         }
 
         // ============================================================
-        // VERIFICAR CLAVE DE DEPENDENCIA
+        // VERIFICAR CLAVE
         // ============================================================
         async function verifyDepKey() {
             const depKey = document.getElementById('depKeyInput').value.trim();
@@ -446,7 +477,6 @@
             if (!tempUsuario) {
                 errorDiv.textContent = 'Error: Sesión perdida.';
                 errorDiv.classList.add('show');
-                log('ERROR: tempUsuario null', 'error');
                 return;
             }
             
@@ -477,7 +507,7 @@
                     btn.textContent = 'Verificar Clave';
                 }
             } catch (error) {
-                log(`Error: ${error.message}`, 'error');
+                log(`❌ Error: ${error.message}`, 'error');
                 errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
                 errorDiv.classList.add('show');
                 btn.disabled = false;
@@ -579,14 +609,14 @@
 
         function init() {
             log('=== PÁGINA CARGADA ===');
-            log(`API: ${API_URL.substring(0, 50)}...`);
+            log(`URL configurada: ${API_URL.substring(0, 60)}...`);
             
             const usuario = checkSession();
             if (usuario) {
                 log('Sesión existente', 'success');
                 showDashboard(usuario);
             } else {
-                log('Sin sesión');
+                log('Sin sesión activa');
                 document.getElementById('loginOverlay').classList.remove('hidden');
             }
             updateDate();
