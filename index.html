@@ -6,382 +6,134 @@
     <title>Sistema de Novedades - Policía Nacional de Colombia</title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --verde-policia: #01592F;
-            --azul-oscuro: #173E56;
-            --amarillo-policia: #C9A227;
-            --blanco: #FFFFFF;
-            --gris-fondo: #F0F2F5;
-            --gris-suave: #E8EAED;
-            --gris-texto: #5F6368;
-            --gris-oscuro: #3C4043;
-            --borde: #DADCE0;
-            --rojo-error: #D93025;
+            --verde-policia: #01592F; --azul-oscuro: #173E56; --amarillo-policia: #C9A227;
+            --blanco: #FFFFFF; --gris-fondo: #F0F2F5; --gris-texto: #5F6368;
+            --gris-oscuro: #3C4043; --borde: #DADCE0; --rojo-error: #D93025;
         }
-
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh;
             color: var(--gris-oscuro);
             background-image: url('https://raw.githubusercontent.com/jesepgutahnotificaciones-blip/RADICADOS_JESEP/main/1-fescol-policia-abuso-cilives-1.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            background-color: var(--gris-fondo);
+            background-size: cover; background-position: center; background-attachment: fixed;
+            background-repeat: no-repeat; background-color: var(--gris-fondo);
         }
-
         body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                135deg,
-                rgba(1,89,47,0.85) 0%,
-                rgba(23,62,86,0.85) 100%
-            );
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(1,89,47,0.85) 0%, rgba(23,62,86,0.85) 100%);
             z-index: -1;
         }
-
-        /* ===== LOGIN SCREEN ===== */
         .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                135deg,
-                rgba(1,89,47,0.95) 0%,
-                rgba(23,62,86,0.95) 100%
-            );
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(1,89,47,0.95) 0%, rgba(23,62,86,0.95) 100%);
+            display: flex; justify-content: center; align-items: center; z-index: 10000;
             transition: opacity 0.5s ease;
         }
-
-        .login-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
+        .login-overlay.hidden { opacity: 0; pointer-events: none; }
         .login-card {
-            background: var(--blanco);
-            padding: 40px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
+            background: var(--blanco); padding: 40px; border-radius: 16px;
+            width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;
         }
-
-        .login-card img {
-            width: 80px;
-            margin-bottom: 20px;
-        }
-
-        .login-card h2 {
-            color: var(--verde-policia);
-            font-size: 1.5rem;
-            margin-bottom: 8px;
-        }
-
-        .login-card .subtitle {
-            color: var(--gris-texto);
-            font-size: 0.9rem;
-            margin-bottom: 30px;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .input-group {
-            position: relative;
-        }
-
+        .login-card img { width: 80px; margin-bottom: 20px; }
+        .login-card h2 { color: var(--verde-policia); font-size: 1.5rem; margin-bottom: 8px; }
+        .login-card .subtitle { color: var(--gris-texto); font-size: 0.9rem; margin-bottom: 30px; }
+        .login-form { display: flex; flex-direction: column; gap: 16px; }
+        .input-group { position: relative; }
         .input-group input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--borde);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            font-family: inherit;
+            width: 100%; padding: 14px 16px; border: 2px solid var(--borde); border-radius: 8px;
+            font-size: 1rem; transition: all 0.3s ease; font-family: inherit;
         }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--verde-policia);
-        }
-
+        .input-group input:focus { outline: none; border-color: var(--verde-policia); }
         .input-group label {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gris-texto);
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            pointer-events: none;
-            background: var(--blanco);
-            padding: 0 4px;
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--gris-texto); font-size: 0.9rem; transition: all 0.3s ease;
+            pointer-events: none; background: var(--blanco); padding: 0 4px;
         }
-
         .input-group input:focus + label,
         .input-group input:not(:placeholder-shown) + label {
-            top: 0;
-            font-size: 0.75rem;
-            color: var(--verde-policia);
+            top: 0; font-size: 0.75rem; color: var(--verde-policia);
         }
-
         .btn-login {
             background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
-            color: var(--blanco);
-            border: none;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: var(--blanco); border: none; padding: 16px; border-radius: 8px;
+            font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease;
+            text-transform: uppercase; letter-spacing: 1px;
         }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(1,89,47,0.3);
-        }
-
-        .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(1,89,47,0.3); }
+        .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .btn-login-secondary {
-            background: var(--gris-texto);
-            color: var(--blanco);
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
+            background: var(--gris-texto); color: var(--blanco); border: none; padding: 14px;
+            border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; margin-top: 10px;
         }
-
-        .btn-login-secondary:hover {
-            background: var(--gris-oscuro);
-        }
-
-        .login-error {
-            color: var(--rojo-error);
-            font-size: 0.85rem;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .login-error.show {
-            display: block;
-        }
-
+        .btn-login-secondary:hover { background: var(--gris-oscuro); }
+        .login-error { color: var(--rojo-error); font-size: 0.85rem; margin-top: 10px; display: none; }
+        .login-error.show { display: block; }
         .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: var(--blanco);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-            vertical-align: middle;
+            display: inline-block; width: 20px; height: 20px;
+            border: 3px solid rgba(255,255,255,0.3); border-top-color: var(--blanco);
+            border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; vertical-align: middle;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .dep-name {
-            color: var(--verde-policia);
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        /* ===== HEADER CON USUARIO ===== */
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--blanco);
-            font-size: 0.85rem;
-        }
-
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .dep-name { color: var(--verde-policia); font-weight: 700; font-size: 1.1rem; }
+        .user-info { display: flex; align-items: center; gap: 12px; color: var(--blanco); font-size: 0.85rem; }
         .user-badge {
-            background: var(--amarillo-policia);
-            color: var(--azul-oscuro);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            text-transform: uppercase;
+            background: var(--amarillo-policia); color: var(--azul-oscuro); padding: 4px 12px;
+            border-radius: 20px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase;
         }
-
         .btn-logout {
-            background: rgba(255,255,255,0.2);
-            color: var(--blanco);
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 6px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.2); color: var(--blanco); border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease;
         }
-
-        .btn-logout:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        /* ===== RESTO DE ESTILOS ===== */
+        .btn-logout:hover { background: rgba(255,255,255,0.3); }
         .header-institutional {
-            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%); color: white;
+            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .header-left img {
-            width: 50px;
-        }
-
-        .header-text h1 {
-            font-size: 1.2rem;
-        }
-
-        .subtitle {
-            color: #C9A227;
-            font-size: .85rem;
-        }
-
-        .main-content {
-            max-width: 1400px;
-            margin: 25px auto;
-            padding: 0 25px;
-        }
-
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-left img { width: 50px; }
+        .header-text h1 { font-size: 1.2rem; }
+        .subtitle { color: #C9A227; font-size: .85rem; }
+        .main-content { max-width: 1400px; margin: 25px auto; padding: 0 25px; }
         .welcome-section {
-            background: rgba(255,255,255,.95);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            text-align: center;
+            background: rgba(255,255,255,.95); padding: 25px; border-radius: 12px;
+            margin-bottom: 25px; text-align: center;
         }
-
-        .welcome-section h2 {
-            color: #01592F;
-            margin-bottom: 10px;
-        }
-
-        .buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 15px;
-        }
-
+        .welcome-section h2 { color: #01592F; margin-bottom: 10px; }
+        .buttons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
         .btn-dependency {
-            background: rgba(255,255,255,.95);
-            border: 2px solid #DADCE0;
-            padding: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: .3s;
-            font-weight: 600;
-            position: relative;
+            background: rgba(255,255,255,.95); border: 2px solid #DADCE0; padding: 18px;
+            border-radius: 8px; cursor: pointer; transition: .3s; font-weight: 600; position: relative;
         }
-
-        .btn-dependency:hover {
-            transform: translateY(-3px);
-            border-color: #01592F;
+        .btn-dependency:hover { transform: translateY(-3px); border-color: #01592F; }
+        .btn-dependency:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-dependency.hidden { display: none; }
+        .icon { display: block; font-size: 1.5rem; margin-bottom: 8px; }
+        .name { display: block; color: #01592F; font-weight: bold; }
+        .type { display: block; font-size: .75rem; color: #5F6368; margin-top: 5px; }
+        .footer-institutional {
+            text-align: center; padding: 20px; margin-top: 30px;
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%); color: white;
         }
-
-        .btn-dependency:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-dependency.hidden {
+        .motto { color: #C9A227; margin-top: 10px; }
+        .debug-panel {
+            position: fixed; bottom: 10px; left: 10px; right: 10px;
+            background: rgba(0,0,0,0.85); color: #0f0; padding: 10px;
+            border-radius: 8px; font-family: monospace; font-size: 12px;
+            max-height: 150px; overflow-y: auto; z-index: 99999;
             display: none;
         }
-
-        .icon {
-            display: block;
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+        .debug-panel.show { display: block; }
+        .debug-toggle {
+            position: fixed; bottom: 10px; right: 10px; z-index: 99999;
+            background: #333; color: #0f0; border: 1px solid #0f0;
+            padding: 5px 10px; border-radius: 4px; cursor: pointer;
+            font-family: monospace; font-size: 11px;
         }
-
-        .name {
-            display: block;
-            color: #01592F;
-            font-weight: bold;
-        }
-
-        .type {
-            display: block;
-            font-size: .75rem;
-            color: #5F6368;
-            margin-top: 5px;
-        }
-
-        .footer-institutional {
-            text-align: center;
-            padding: 20px;
-            margin-top: 30px;
-            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
-            color: white;
-        }
-
-        .motto {
-            color: #C9A227;
-            margin-top: 10px;
-        }
-
         @media(max-width:768px) {
-            .buttons-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            }
-            .login-card {
-                padding: 30px 20px;
-                margin: 20px;
-            }
+            .buttons-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+            .login-card { padding: 30px 20px; margin: 20px; }
         }
     </style>
 </head>
@@ -445,59 +197,117 @@
         <p class="motto">★ DIOS Y PATRIA ★</p>
     </div>
 
+    <!-- DEBUG PANEL -->
+    <div class="debug-panel" id="debugPanel"></div>
+    <button class="debug-toggle" onclick="toggleDebug()">🐛 DEBUG</button>
+
     <script>
         // ============================================================
         // CONFIGURACIÓN API
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzTtGxOrt1pBLUibj0DJBSdMSEwfWB73CfjHTxcC85yBXpUIXMEL16Ie70YaslJpmqD/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyfVnpq7OYc0ovy8nDQvyyK6PnQ2h1MhodiXxT99evNY9IYLfR2m3gn4cw2Mf4IcJPw/exec';
         
-        let jsonpCallbackId = 0;
         let tempUsuario = null;
+        let jsonpId = 0;
 
         // ============================================================
-        // JSONP FETCH
+        // DEBUG LOGGER
+        // ============================================================
+        function log(msg, type = 'info') {
+            const panel = document.getElementById('debugPanel');
+            const time = new Date().toLocaleTimeString('es-CO');
+            const color = type === 'error' ? '#ff4444' : type === 'success' ? '#44ff44' : '#0f0';
+            panel.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
+            panel.scrollTop = panel.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${msg}`);
+        }
+
+        function toggleDebug() {
+            document.getElementById('debugPanel').classList.toggle('show');
+        }
+
+        // ============================================================
+        // JSONP FETCH CON IFRAME (más confiable para GAS)
         // ============================================================
         function apiFetchJSONP(action, params = {}) {
             return new Promise((resolve, reject) => {
-                const callbackName = 'jsonpCallback_' + (++jsonpCallbackId) + '_' + Date.now();
-                const script = document.createElement('script');
+                const id = ++jsonpId;
+                const cbName = 'cb_' + id + '_' + Date.now();
                 
-                const urlParams = new URLSearchParams();
-                urlParams.append('action', action);
-                urlParams.append('callback', callbackName);
+                log(`JSONP #${id} → action=${action}`);
+                
+                // Construir URL
+                const url = new URL(API_URL);
+                url.searchParams.append('action', action);
+                url.searchParams.append('callback', cbName);
                 
                 for (const [key, value] of Object.entries(params)) {
                     if (value !== undefined && value !== null) {
-                        urlParams.append(key, value);
+                        url.searchParams.append(key, value);
                     }
                 }
                 
-                const url = API_URL + '?' + urlParams.toString();
+                const urlStr = url.toString();
+                log(`URL: ${urlStr.substring(0, 120)}...`);
                 
-                const timeout = setTimeout(() => {
-                    cleanup();
-                    reject(new Error('Timeout JSONP'));
-                }, 15000);
+                // Crear iframe oculto para evitar problemas de CORS/redirect
+                const iframe = document.createElement('iframe');
+                iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
+                document.body.appendChild(iframe);
                 
-                window[callbackName] = function(data) {
-                    clearTimeout(timeout);
+                const iframeDoc = iframe.contentWindow.document;
+                
+                // Función callback global
+                window[cbName] = function(data) {
+                    log(`JSONP #${id} ← Respuesta recibida`);
+                    log(`JSONP #${id} ← Data: ${JSON.stringify(data).substring(0, 200)}`);
                     cleanup();
                     resolve(data);
                 };
                 
                 function cleanup() {
-                    delete window[callbackName];
-                    if (script.parentNode) script.parentNode.removeChild(script);
+                    delete window[cbName];
+                    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
                 }
                 
-                script.onerror = function() {
-                    clearTimeout(timeout);
+                // Timeout
+                const timeout = setTimeout(() => {
+                    log(`JSONP #${id} ← TIMEOUT (15s)`, 'error');
                     cleanup();
-                    reject(new Error('Error JSONP'));
-                };
+                    reject(new Error('Timeout JSONP'));
+                }, 15000);
                 
-                script.src = url;
-                document.head.appendChild(script);
+                // Escribir script en el iframe
+                try {
+                    iframeDoc.open();
+                    iframeDoc.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head><meta charset="UTF-8"></head>
+                        <body>
+                            <script>
+                                window.onerror = function(msg) {
+                                    parent.postMessage({jsonpError: msg, id: ${id}}, '*');
+                                };
+                            <\/script>
+                            <script src="${urlStr}"><\/script>
+                        </body>
+                        </html>
+                    `);
+                    iframeDoc.close();
+                } catch(e) {
+                    log(`JSONP #${id} ← Error creando iframe: ${e.message}`, 'error');
+                    cleanup();
+                    reject(e);
+                }
+                
+                // Escuchar mensajes del iframe (fallback)
+                const msgHandler = function(e) {
+                    if (e.data && e.data.jsonpError && e.data.id === id) {
+                        log(`JSONP #${id} ← Error desde iframe: ${e.data.jsonpError}`, 'error');
+                    }
+                };
+                window.addEventListener('message', msgHandler, {once: true});
             });
         }
 
@@ -520,30 +330,35 @@
             btn.innerHTML = 'Verificando... <span class="spinner"></span>';
             errorDiv.classList.remove('show');
             
+            log('=== LOGIN INICIADO ===');
+            log(`Usuario: ${username}`);
+            
             try {
                 const response = await apiFetchJSONP('login', {
                     username: username,
                     password: password
                 });
                 
+                log(`Respuesta login: ${JSON.stringify(response)}`);
+                
                 if (response.success && response.usuario) {
                     tempUsuario = response.usuario;
+                    log(`Login OK - Rol: ${tempUsuario.rol}, Dep: ${tempUsuario.dependencia}`, 'success');
                     
-                    // Si es administrador, ir directo al dashboard
-                    if (response.usuario.rol === 'administrador') {
-                        completeLogin(response.usuario);
+                    if (tempUsuario.rol === 'administrador') {
+                        completeLogin(tempUsuario);
                     } else {
-                        // Si es operador, pedir clave de dependencia
-                        showDepKeyPrompt(response.usuario);
+                        showDepKeyPrompt(tempUsuario);
                     }
                 } else {
+                    log(`Login FALLIDO: ${response.error || 'desconocido'}`, 'error');
                     errorDiv.textContent = response.error || 'Usuario o contraseña incorrectos';
                     errorDiv.classList.add('show');
                     btn.disabled = false;
                     btn.textContent = 'Ingresar';
                 }
             } catch (error) {
-                console.error('Error login:', error);
+                log(`Error login: ${error.message}`, 'error');
                 errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
                 errorDiv.classList.add('show');
                 btn.disabled = false;
@@ -552,9 +367,12 @@
         }
 
         // ============================================================
-        // MOSTRAR PROMPT DE CLAVE DE DEPENDENCIA (Paso 2)
+        // MOSTRAR PROMPT DE CLAVE DE DEPENDENCIA
         // ============================================================
         function showDepKeyPrompt(usuario) {
+            log('=== MOSTRANDO PROMPT CLAVE DEP ===');
+            log(`Dependencia a verificar: ${usuario.dependencia}`);
+            
             const loginCard = document.getElementById('loginCard');
             
             loginCard.innerHTML = `
@@ -582,13 +400,11 @@
                 </form>
             `;
             
-            // Focus automático
             setTimeout(() => {
                 const input = document.getElementById('depKeyInput');
                 if (input) input.focus();
             }, 100);
             
-            // Enter key
             const depInput = document.getElementById('depKeyInput');
             if (depInput) {
                 depInput.addEventListener('keypress', function(e) {
@@ -611,9 +427,21 @@
                 return;
             }
             
+            if (!tempUsuario) {
+                errorDiv.textContent = 'Error: Sesión perdida. Vuelva a iniciar sesión.';
+                errorDiv.classList.add('show');
+                log('ERROR: tempUsuario es null', 'error');
+                return;
+            }
+            
             btn.disabled = true;
             btn.innerHTML = 'Verificando... <span class="spinner"></span>';
             errorDiv.classList.remove('show');
+            
+            log('=== VERIFICAR CLAVE DEP ===');
+            log(`Username: ${tempUsuario.username}`);
+            log(`Dependencia: ${tempUsuario.dependencia}`);
+            log(`Clave ingresada: ${depKey}`);
             
             try {
                 const response = await apiFetchJSONP('verifyDepKey', {
@@ -622,16 +450,20 @@
                     dependencia: tempUsuario.dependencia
                 });
                 
+                log(`Respuesta verifyDepKey: ${JSON.stringify(response)}`);
+                
                 if (response.success) {
+                    log('Clave CORRECTA - Accediendo...', 'success');
                     completeLogin(tempUsuario);
                 } else {
+                    log(`Clave FALLIDA: ${response.error || 'desconocido'}`, 'error');
                     errorDiv.textContent = response.error || 'Clave de dependencia incorrecta';
                     errorDiv.classList.add('show');
                     btn.disabled = false;
                     btn.textContent = 'Verificar Clave';
                 }
             } catch (error) {
-                console.error('Error verifyDepKey:', error);
+                log(`Error verifyDepKey: ${error.message}`, 'error');
                 errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
                 errorDiv.classList.add('show');
                 btn.disabled = false;
@@ -648,9 +480,10 @@
         }
 
         // ============================================================
-        // COMPLETAR LOGIN (guardar sesión y mostrar dashboard)
+        // COMPLETAR LOGIN
         // ============================================================
         function completeLogin(usuario) {
+            log('=== LOGIN COMPLETADO ===', 'success');
             const session = {
                 usuario: usuario,
                 token: usuario.token || Date.now().toString(),
@@ -665,7 +498,6 @@
         // ============================================================
         function showDashboard(usuario) {
             document.getElementById('loginOverlay').classList.add('hidden');
-            
             document.getElementById('userInfo').style.display = 'flex';
             document.getElementById('userName').textContent = usuario.username;
             document.getElementById('userRole').textContent = usuario.rol;
@@ -681,7 +513,7 @@
         }
 
         // ============================================================
-        // GENERAR BOTONES (filtrado por rol)
+        // GENERAR BOTONES
         // ============================================================
         function generateButtons(usuario) {
             const dependencies = [
@@ -696,36 +528,29 @@
 
             dependencies.forEach(dep => {
                 if (usuario.rol === 'operador' && usuario.dependencia !== 'TODAS') {
-                    if (dep !== usuario.dependencia && dep !== 'PARTE FINAL') {
-                        return;
-                    }
+                    if (dep !== usuario.dependencia && dep !== 'PARTE FINAL') return;
                 }
 
                 const btn = document.createElement('button');
                 btn.className = 'btn-dependency';
-                
                 const isUserDep = dep === usuario.dependencia;
                 if (isUserDep) {
                     btn.style.borderColor = '#C9A227';
                     btn.style.background = 'rgba(255,255,255,1)';
                 }
-
                 btn.innerHTML = `
                     <span class="icon">🛡️</span>
                     <span class="name">${dep}</span>
                     <span class="type">${isUserDep ? 'Tu dependencia' : 'Dependencia'}</span>
                 `;
-
                 btn.onclick = () => {
                     localStorage.setItem('currentDependency', dep);
-                    
                     if (dep === "PARTE FINAL") {
                         window.location.href = 'https://jesepgutahnotificaciones-blip.github.io/parte_jesep/index_main.html';
                     } else {
                         window.location.href = 'dashboard.html';
                     }
                 };
-
                 container.appendChild(btn);
             });
         }
@@ -741,12 +566,11 @@
         }
 
         // ============================================================
-        // VERIFICAR SESIÓN AL CARGAR
+        // VERIFICAR SESIÓN
         // ============================================================
         function checkSession() {
             const sessionStr = localStorage.getItem('policiaSession');
             if (!sessionStr) return false;
-            
             try {
                 const session = JSON.parse(sessionStr);
                 if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) {
@@ -754,43 +578,37 @@
                     return false;
                 }
                 return session.usuario;
-            } catch (e) {
-                return false;
-            }
+            } catch (e) { return false; }
         }
 
         // ============================================================
         // INICIALIZACIÓN
         // ============================================================
         function init() {
+            log('=== PÁGINA CARGADA ===');
+            log(`API_URL: ${API_URL.substring(0, 60)}...`);
+            
             const usuario = checkSession();
             if (usuario) {
+                log('Sesión existente encontrada', 'success');
                 showDashboard(usuario);
             } else {
+                log('No hay sesión activa');
                 document.getElementById('loginOverlay').classList.remove('hidden');
             }
-            
             updateDate();
         }
 
         function updateDate() {
             const now = new Date();
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
         }
 
-        // Enter en inputs del login inicial
         document.addEventListener('DOMContentLoaded', function() {
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
-            
             if (usernameInput) {
                 usernameInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') passwordInput.focus();
@@ -803,7 +621,6 @@
             }
         });
 
-        // Iniciar
         init();
     </script>
 </body>
