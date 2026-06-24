@@ -446,22 +446,22 @@
     </div>
 
     <script>
-       
-//============================================================
-// CONFIG API
-//============================================================
 
-const API_URL='https://script.google.com/macros/s/AKfycbwtFfeiHJ0nz3dDV5MqMjZ_Kcq-_-fl9-B1eiqGD9T-_MX0WObyWTDmyWyCG7J_CYga/exec';
+//====================================================
+// CONFIG
+//====================================================
 
-let jsonpCallbackId=0;
+const API_URL='https://script.google.com/macros/s/AKfycbyFjKMpsmIBnuxFgqJTyhuoVQti3t57C75IywkRQOUzLXKkVl0hYphqMoBF5zkk9wHO/exec';
+
 let usuarioActual=null;
+let callbackCount=0;
 
 
-//============================================================
+//====================================================
 // FECHA
-//============================================================
+//====================================================
 
-document.getElementById("currentDate").innerHTML=
+document.getElementById("currentDate").innerText=
 new Date().toLocaleDateString(
 'es-CO',
 {
@@ -473,54 +473,47 @@ day:'numeric'
 );
 
 
-//============================================================
+//====================================================
 // JSONP
-//============================================================
+//====================================================
 
 function apiFetchJSONP(action,params={}){
 
 return new Promise((resolve,reject)=>{
 
 const callbackName=
-'callback_'+(++jsonpCallbackId);
+"jsonp_"+(++callbackCount);
 
 window[callbackName]=function(data){
 
+try{
+
 delete window[callbackName];
 
-if(script.parentNode){
-script.parentNode.removeChild(script);
-}
+document.body.removeChild(script);
 
 resolve(data);
 
+}catch(e){}
+
 };
 
-const script=document.createElement("script");
+const script=
+document.createElement("script");
 
 let url=
 API_URL+
-'?action='+
-encodeURIComponent(action)+
-'&callback='+
-callbackName;
+"?action="+encodeURIComponent(action)+
+"&callback="+callbackName;
 
-Object.keys(params).forEach(key=>{
+for(let key in params){
 
-if(
-params[key]!==undefined &&
-params[key]!==null
-){
-
-url +=
-'&'+
+url+="&"+
 encodeURIComponent(key)+
-'='+
+"="+
 encodeURIComponent(params[key]);
 
 }
-
-});
 
 script.src=url;
 
@@ -530,7 +523,7 @@ delete window[callbackName];
 
 reject(
 new Error(
-'Error de conexión Apps Script'
+"Error conexión Apps Script"
 )
 );
 
@@ -543,44 +536,44 @@ document.body.appendChild(script);
 }
 
 
-//============================================================
+//====================================================
 // LOGIN
-//============================================================
+//====================================================
 
 async function handleLogin(){
 
-const user=
-document.getElementById(
-'username'
-).value.trim();
+const username=
+document
+.getElementById("username")
+.value
+.trim();
 
-const pass=
-document.getElementById(
-'password'
-).value.trim();
+const password=
+document
+.getElementById("password")
+.value
+.trim();
 
 const btn=
 document.getElementById(
-'btnLogin'
+"btnLogin"
 );
 
-const error=
+const errorDiv=
 document.getElementById(
-'loginError'
+"loginError"
 );
 
-
-error.classList.remove(
-'show'
+errorDiv.classList.remove(
+"show"
 );
 
-error.innerText='';
+errorDiv.innerHTML="";
 
-
-if(!user || !pass){
+if(!username || !password){
 
 mostrarError(
-'Ingrese usuario y contraseña'
+"Ingrese usuario y contraseña"
 );
 
 return;
@@ -592,32 +585,38 @@ try{
 btn.disabled=true;
 
 btn.innerHTML=
-'Validando... <span class="spinner"></span>';
+'Ingresando... <span class="spinner"></span>';
 
 const response=
 await apiFetchJSONP(
-'login',
+"login",
 {
-username:user,
-password:pass
+username:username,
+password:password
 }
 );
 
 console.log(
-'Respuesta login:',
+"RESPUESTA LOGIN:",
 response
 );
 
+
 if(
 response &&
-response.success &&
+response.success===true &&
 response.usuario
 ){
 
 usuarioActual=
 response.usuario;
 
-guardarSesion();
+localStorage.setItem(
+"usuarioSistema",
+JSON.stringify(
+usuarioActual
+)
+);
 
 mostrarSistema();
 
@@ -626,7 +625,7 @@ else{
 
 mostrarError(
 response.error ||
-'Usuario o contraseña incorrectos'
+"Usuario o contraseña incorrectos"
 );
 
 }
@@ -637,91 +636,92 @@ catch(err){
 console.error(err);
 
 mostrarError(
-'Error de conexión'
+"Error conectando Apps Script"
 );
 
 }
 finally{
 
 btn.disabled=false;
-btn.innerHTML='Ingresar';
+
+btn.innerHTML=
+"Ingresar";
 
 }
 
 }
 
 
-//============================================================
+//====================================================
 // MOSTRAR SISTEMA
-//============================================================
+//====================================================
 
 function mostrarSistema(){
 
 document
 .getElementById(
-'loginOverlay'
+"loginOverlay"
 )
 .classList.add(
-'hidden'
+"hidden"
 );
 
+
 document
 .getElementById(
-'userInfo'
+"userInfo"
 )
-.style.display='flex';
+.style.display=
+"flex";
 
 
 document
 .getElementById(
-'userName'
-)
-innerHTML=
+"userName"
+).innerHTML=
 usuarioActual.username;
 
 
 document
 .getElementById(
-'userRole'
-)
-innerHTML=
+"userRole"
+).innerHTML=
 usuarioActual.rol;
 
 
 document
 .getElementById(
-'welcomeText'
-)
-innerHTML=
-'Dependencia asignada: <strong>'+
+"welcomeText"
+).innerHTML=
+"Dependencia asignada: <b>"+
 usuarioActual.dependencia+
-'</strong>';
+"</b>";
 
 crearBotonDependencia();
 
 }
 
 
-//============================================================
-// BOTÓN DEPENDENCIA
-//============================================================
+//====================================================
+// DEPENDENCIA
+//====================================================
 
 function crearBotonDependencia(){
 
 const container=
 document.getElementById(
-'buttonsContainer'
+"buttonsContainer"
 );
 
-container.innerHTML='';
+container.innerHTML="";
 
 const btn=
 document.createElement(
-'button'
+"button"
 );
 
 btn.className=
-'btn-dependency';
+"btn-dependency";
 
 btn.innerHTML=
 `
@@ -730,11 +730,10 @@ btn.innerHTML=
 <span class="type">${usuarioActual.rol}</span>
 `;
 
-btn.onclick=function(){
+btn.onclick=()=>{
 
-window.location.href=
-'panel.html?dependency='+
-encodeURIComponent(
+alert(
+"Dependencia: "+
 usuarioActual.dependencia
 );
 
@@ -747,62 +746,34 @@ btn
 }
 
 
-//============================================================
-// GUARDAR SESION
-//============================================================
+//====================================================
+// ERROR
+//====================================================
 
-function guardarSesion(){
+function mostrarError(msg){
 
-localStorage.setItem(
-'usuarioSistema',
-JSON.stringify(
-usuarioActual
-)
+const div=
+document.getElementById(
+"loginError"
+);
+
+div.innerHTML=msg;
+
+div.classList.add(
+"show"
 );
 
 }
 
 
-//============================================================
-// CARGAR SESION
-//============================================================
-
-function cargarSesion(){
-
-const data=
-localStorage.getItem(
-'usuarioSistema'
-);
-
-if(!data)return;
-
-try{
-
-usuarioActual=
-JSON.parse(data);
-
-mostrarSistema();
-
-}
-catch(e){
-
-localStorage.removeItem(
-'usuarioSistema'
-);
-
-}
-
-}
-
-
-//============================================================
+//====================================================
 // LOGOUT
-//============================================================
+//====================================================
 
 function logout(){
 
 localStorage.removeItem(
-'usuarioSistema'
+"usuarioSistema"
 );
 
 location.reload();
@@ -810,41 +781,42 @@ location.reload();
 }
 
 
-//============================================================
-// ERROR LOGIN
-//============================================================
+//====================================================
+// RECUPERAR SESION
+//====================================================
 
-function mostrarError(msg){
+window.onload=function(){
 
-const error=
-document.getElementById(
-'loginError'
+const usuario=
+localStorage.getItem(
+"usuarioSistema"
 );
 
-error.innerHTML=msg;
+if(usuario){
 
-error.classList.add(
-'show'
-);
+usuarioActual=
+JSON.parse(usuario);
+
+mostrarSistema();
 
 }
 
+};
 
-//============================================================
-// ENTER LOGIN
-//============================================================
+
+//====================================================
+// ENTER
+//====================================================
 
 document
 .getElementById(
-'password'
+"password"
 )
 .addEventListener(
-'keypress',
+"keypress",
 function(e){
 
-if(
-e.key==="Enter"
-){
+if(e.key==="Enter"){
 
 handleLogin();
 
@@ -853,19 +825,8 @@ handleLogin();
 }
 );
 
-
-//============================================================
-// INICIO
-//============================================================
-
-window.onload=function(){
-
-cargarSesion();
-
-};
-
-
-    </script>
+</script>
+    
 </body>
 </html>
 
