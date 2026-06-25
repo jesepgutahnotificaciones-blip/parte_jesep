@@ -99,7 +99,6 @@
         }
         .btn-logout:hover { background: rgba(255,255,255,0.3); }
 
-        /* DEBUG BADGE */
         .debug-dep {
             background: rgba(255,200,0,0.25);
             border: 1px solid var(--amarillo-policia);
@@ -446,7 +445,7 @@
             background: var(--blanco);
             border-radius: 16px;
             width: 90%;
-            max-width: 620px;
+            max-width: 950px;
             max-height: 82vh;
             overflow: hidden;
             box-shadow: 0 24px 60px rgba(0,0,0,0.35);
@@ -610,6 +609,34 @@
         }
         .footer-institutional p { color: var(--blanco); font-size: 0.8rem; opacity: 0.8; }
         .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1rem; margin-top: 6px; letter-spacing: 2px; }
+
+        /* Estilos para observaciones en el popup */
+        .observacion-cell {
+            max-width: 280px;
+            font-size: 0.78rem;
+            color: var(--gris-oscuro);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .observacion-vacia {
+            color: #bbb;
+            font-style: italic;
+        }
+        .novedad-cell {
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .novedad-badge-popup {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            background: #e8f5e9;
+            color: #1B5E20;
+            border: 1px solid #a5d6a7;
+        }
+
         @media (max-width: 1024px) {
             .turnos-grid, .novedades-grid { grid-template-columns: 1fr; }
             .categorias-grid { grid-template-columns: repeat(3, 1fr); }
@@ -640,7 +667,6 @@
         </div>
         <div class="header-right">
             <span class="date-display" id="currentDate"></span>
-            <!-- Badge visible de dependencia activa (ayuda a verificar que no sea ASJUR por defecto) -->
             <span class="debug-dep" id="depBadge" title="Dependencia activa">📍 ...</span>
             <div class="user-info" id="userInfo" style="display:none;">
                 <span id="userNameDisplay"></span>
@@ -696,7 +722,7 @@
                 <div class="modal-cat-breakdown" id="modalCatBreakdown"></div>
             </div>
             <div class="modal-search" id="modalSearchBar" style="display:none;">
-                <input type="text" id="modalSearchInput" placeholder="🔍 Buscar por nombre o grado..." oninput="filtrarModalTabla()">
+                <input type="text" id="modalSearchInput" placeholder="🔍 Buscar por nombre, grado, novedad o observación..." oninput="filtrarModalTabla()">
             </div>
             <div class="modal-body" id="modalBody">
                 <div class="modal-loading">
@@ -709,16 +735,12 @@
 
     <script>
         /* =============================================
-           CONFIGURACIÓN
+           CONFIGURACIÓN - URL de tu Web App V7
         ============================================= */
         const API_URL = 'https://script.google.com/macros/s/AKfycbwgsWHDQd0OA5W6r2yupbr_f9qsNoDd1rtgi3GvIypCoHTzJ_a0CSafHJ85VCODtEZl/exec';
 
-        // ─── NOMBRE EXACTO DE LA HOJA EN EL SPREADSHEET ───
         const SHEET_REGISTRO = 'Registro_Cambios';
 
-        // DEPENDENCY se resuelve SIEMPRE desde la sesión guardada.
-        // Si no hay sesión, queda vacío y se avisa al usuario.
-        // NUNCA se usa 'ASJUR' como valor por defecto codificado.
         let DEPENDENCY = '';
         let USUARIO_ACTUAL = null;
         let ROL_ACTUAL = 'usuario';
@@ -732,19 +754,12 @@
            MAPEO DE CELDAS  (hoja: Registro_Cambios)
            Formación fila 2, Novedades filas 8-21
         ============================================= */
-
-        // EN FORMACION por turno
-        // A: Total=I2, OF=J2, NE=K2, PT=L2, PP=M2, AXP=N2, NO UNI=O2
-        // B: Total=P2, OF=Q2, NE=R2, PT=S2, PP=T2, AXP=U2, NO UNI=V2
-        // C: Total=W2, OF=X2, NE=Y2, PT=Z2, PP=AA2, AXP=AB2, NO UNI=AC2
         const FORMACION_CELLS = {
             A: { total: 'I2',  oficiales: 'J2',  ne: 'K2',  patrulleros: 'L2',  pp: 'M2',  axp: 'N2',  nouni: 'O2'  },
             B: { total: 'P2',  oficiales: 'Q2',  ne: 'R2',  patrulleros: 'S2',  pp: 'T2',  axp: 'U2',  nouni: 'V2'  },
             C: { total: 'W2',  oficiales: 'X2',  ne: 'Y2',  patrulleros: 'Z2',  pp: 'AA2', axp: 'AB2', nouni: 'AC2' }
         };
 
-        // NOVEDADES por turno (filas 8–21)
-        // A: columna J | B: columna Q | C: columna X
         const NOVEDADES_CELLS = {
             A: {
                 'OFICINA':                 'J8',
@@ -804,7 +819,7 @@
         ];
 
         /* =============================================
-           JSONP  — siempre envía dependency Y sheet
+           JSONP
         ============================================= */
         function apiFetchJSONP(action, params) {
             params = params || {};
@@ -814,8 +829,8 @@
                 const urlParams = new URLSearchParams();
 
                 urlParams.append('action',     action);
-                urlParams.append('dependency', DEPENDENCY);   // dependencia real del usuario
-                urlParams.append('sheet',      SHEET_REGISTRO); // hoja Registro_Cambios
+                urlParams.append('dependency', DEPENDENCY);
+                urlParams.append('sheet',      SHEET_REGISTRO);
                 urlParams.append('callback',   callbackName);
                 urlParams.append('usuario',    USUARIO_ACTUAL || 'Sistema');
                 urlParams.append('rol',        ROL_ACTUAL     || 'usuario');
@@ -848,8 +863,6 @@
 
         /* =============================================
            SESIÓN
-           La dependencia SOLO se toma de la sesión guardada.
-           Si no existe sesión se muestra aviso y NO se asume ninguna.
         ============================================= */
         function checkSession() {
             const sessionStr = localStorage.getItem('policiaSession');
@@ -870,35 +883,25 @@
             if (usuario) {
                 USUARIO_ACTUAL = usuario.username;
                 ROL_ACTUAL     = usuario.rol        || 'usuario';
-
-                // Fuente de verdad: siempre la sesión, nunca localStorage suelto
                 if (usuario.dependencia) {
                     DEPENDENCY = usuario.dependencia.trim();
                 } else {
-                    // Si la sesión no trae dependencia, intenta el key de respaldo
                     DEPENDENCY = (localStorage.getItem('currentDependency') || '').trim();
                 }
-
-                // Sincroniza el key de respaldo con lo que hay en sesión
                 if (DEPENDENCY) localStorage.setItem('currentDependency', DEPENDENCY);
-
                 document.getElementById('userInfo').style.display = 'flex';
                 document.getElementById('userNameDisplay').textContent = USUARIO_ACTUAL;
                 document.getElementById('userRoleDisplay').textContent  = ROL_ACTUAL;
-
             } else {
-                // Sin sesión: intenta el key de respaldo antes de quedar vacío
                 DEPENDENCY = (localStorage.getItem('currentDependency') || '').trim();
             }
 
-            // Actualiza la UI con la dependencia resuelta
             const depTexto = DEPENDENCY || 'SIN DEPENDENCIA';
             document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades — ' + depTexto;
             document.getElementById('depBadge').textContent    = '📍 ' + depTexto;
 
-            // Aviso visible si aún no hay dependencia
             if (!DEPENDENCY) {
-                console.warn('[Dashboard] No hay dependencia definida en la sesión. Inicie sesión para ver datos correctos.');
+                console.warn('[Dashboard] No hay dependencia definida. Inicie sesión para ver datos correctos.');
             }
         }
 
@@ -917,7 +920,6 @@
                 'Cargando datos' + (DEPENDENCY ? ' de ' + DEPENDENCY : '') + '...';
 
             try {
-                // Construir lista de celdas (todas las que necesitamos de Registro_Cambios)
                 const todasCeldas = [];
                 ['A', 'B', 'C'].forEach(turno => {
                     Object.values(FORMACION_CELLS[turno]).forEach(c => todasCeldas.push(c));
@@ -1163,7 +1165,8 @@
         }
 
         /* =============================================
-           MODAL DE FUNCIONARIOS
+           MODAL DE FUNCIONARIOS - CON NOVEDAD Y OBSERVACIÓN
+           Compatible con Código.gs V7
         ============================================= */
         function abrirModal(novedadNombre, turnoLetra) {
             const overlay = document.getElementById('modalOverlay');
@@ -1176,6 +1179,8 @@
             overlay.classList.add('active');
 
             setTimeout(() => {
+                // Filtrar de allPersonnelData que viene del endpoint getData del GS V7
+                // El GS V7 devuelve: { grado, nombres, turno, novedad, observacion }
                 const filtrados = allPersonnelData.filter(p => {
                     const turnoP = (p.turno   || '').toString().trim().toUpperCase();
                     const novP   = (p.novedad || '').toString().trim();
@@ -1220,19 +1225,29 @@
                 <thead>
                     <tr>
                         <th style="width:36px;">#</th>
-                        <th style="width:120px;">Grado</th>
+                        <th style="width:90px;">Grado</th>
                         <th>Apellidos y Nombres</th>
-                        <th style="width:70px;">Turno</th>
+                        <th style="width:60px;">Turno</th>
+                        <th style="width:150px;">Novedad</th>
+                        <th>Observación</th>
                     </tr>
                 </thead>
                 <tbody>`;
             funcionarios.forEach((f, idx) => {
+                const observacion = (f.observacion || '').trim();
+                const obsHTML = observacion
+                    ? `<div class="observacion-cell">${observacion}</div>`
+                    : `<div class="observacion-cell observacion-vacia">Sin observación</div>`;
+                const novedadTexto = (f.novedad || '').trim();
+                
                 html += `
                 <tr>
                     <td style="color:var(--gris-texto);font-size:0.75rem;">${idx + 1}</td>
                     <td><span class="modal-badge" style="background:var(--amarillo-policia);color:var(--azul-oscuro);">${f.grado || '-'}</span></td>
                     <td><strong>${f.nombres || '-'}</strong></td>
                     <td><span class="modal-badge" style="background:#e3f2fd;color:#0D47A1;">${f.turno || '-'}</span></td>
+                    <td><span class="novedad-badge-popup">${novedadTexto || '-'}</span></td>
+                    <td>${obsHTML}</td>
                 </tr>`;
             });
             html += `</tbody></table>`;
@@ -1244,7 +1259,9 @@
             const filtrados = q
                 ? modalFuncionariosFull.filter(f =>
                     (f.nombres || '').toLowerCase().includes(q) ||
-                    (f.grado   || '').toLowerCase().includes(q)
+                    (f.grado   || '').toLowerCase().includes(q) ||
+                    (f.novedad || '').toLowerCase().includes(q) ||
+                    (f.observacion || '').toLowerCase().includes(q)
                   )
                 : modalFuncionariosFull;
             document.getElementById('modalTotal').textContent = filtrados.length;
