@@ -282,7 +282,7 @@
         function logout() { localStorage.removeItem('policiaSession'); localStorage.removeItem('currentDependency'); location.reload(); }
 
         // ============================================================
-        // V9: Cargar datos desde hoja Registro_Cambios (celdas específicas)
+        // V10: Cargar datos desde hoja Registro_Cambios (estructura exacta)
         // ============================================================
         async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -297,52 +297,55 @@
 
             try {
                 // ============================================================
-                // PASO 1: Leer celdas de Formacion desde Registro_Cambios
-                // I2 = Total En Formacion Turno A
-                // P2 = Total En Formacion Turno B
-                // W2 = Total En Formacion Turno C
+                // PASO 1: Leer Formacion desde Registro_Cambios
+                // Turno A: I2=total, J2:O2=categorias(OF,NE,PT,PP,AXP,NO UNI)
+                // Turno B: P2=total, Q2:V2=categorias
+                // Turno C: W2=total, X2:AC2=categorias
                 // ============================================================
-                logDebug('=== Leyendo celdas de Registro_Cambios ===');
-                const formacionCells = await apiFetchJSONP('getCells', {
+                logDebug('=== Leyendo Formacion de Registro_Cambios ===');
+                const formacionA = await apiFetchJSONP('getCells', {
                     sheet: 'Registro_Cambios',
-                    cells: 'I2,P2,W2'
+                    cells: 'I2,J2,K2,L2,M2,N2,O2'
                 });
-                logDebug('Formacion cells response: ' + JSON.stringify(formacionCells));
+                const formacionB = await apiFetchJSONP('getCells', {
+                    sheet: 'Registro_Cambios',
+                    cells: 'P2,Q2,R2,S2,T2,U2,V2'
+                });
+                const formacionC = await apiFetchJSONP('getCells', {
+                    sheet: 'Registro_Cambios',
+                    cells: 'W2,X2,Y2,Z2,AA2,AB2,AC2'
+                });
 
-                let formacionA = 0, formacionB = 0, formacionC = 0;
-                if (formacionCells.success && formacionCells.values) {
-                    formacionA = parseInt(formacionCells.values['I2']) || 0;
-                    formacionB = parseInt(formacionCells.values['P2']) || 0;
-                    formacionC = parseInt(formacionCells.values['W2']) || 0;
-                }
-                logDebug('Formacion: A=' + formacionA + ' B=' + formacionB + ' C=' + formacionC);
+                logDebug('Formacion A: ' + JSON.stringify(formacionA));
+                logDebug('Formacion B: ' + JSON.stringify(formacionB));
+                logDebug('Formacion C: ' + JSON.stringify(formacionC));
 
                 // ============================================================
-                // PASO 2: Leer celdas de Novedades desde Registro_Cambios
-                // J8:J21 = Novedades Turno A (14 filas = 14 tipos de novedad)
-                // Q8:Q21 = Novedades Turno B
-                // X8:X21 = Novedades Turno C
+                // PASO 2: Leer Novedades desde Registro_Cambios
+                // Turno A: J8:J21 (14 filas)
+                // Turno B: Q8:Q21 (14 filas)
+                // Turno C: X8:X21 (14 filas)
                 // ============================================================
-                logDebug('=== Leyendo novedades de Registro_Cambios ===');
-                const novedadesCellsA = await apiFetchJSONP('getCells', {
+                logDebug('=== Leyendo Novedades de Registro_Cambios ===');
+                const novedadesA = await apiFetchJSONP('getCells', {
                     sheet: 'Registro_Cambios',
                     cells: 'J8,J9,J10,J11,J12,J13,J14,J15,J16,J17,J18,J19,J20,J21'
                 });
-                const novedadesCellsB = await apiFetchJSONP('getCells', {
+                const novedadesB = await apiFetchJSONP('getCells', {
                     sheet: 'Registro_Cambios',
                     cells: 'Q8,Q9,Q10,Q11,Q12,Q13,Q14,Q15,Q16,Q17,Q18,Q19,Q20,Q21'
                 });
-                const novedadesCellsC = await apiFetchJSONP('getCells', {
+                const novedadesC = await apiFetchJSONP('getCells', {
                     sheet: 'Registro_Cambios',
                     cells: 'X8,X9,X10,X11,X12,X13,X14,X15,X16,X17,X18,X19,X20,X21'
                 });
 
-                logDebug('Novedades A response: ' + JSON.stringify(novedadesCellsA).substring(0, 200));
-                logDebug('Novedades B response: ' + JSON.stringify(novedadesCellsB).substring(0, 200));
-                logDebug('Novedades C response: ' + JSON.stringify(novedadesCellsC).substring(0, 200));
+                logDebug('Novedades A: ' + JSON.stringify(novedadesA).substring(0, 200));
+                logDebug('Novedades B: ' + JSON.stringify(novedadesB).substring(0, 200));
+                logDebug('Novedades C: ' + JSON.stringify(novedadesC).substring(0, 200));
 
                 // ============================================================
-                // PASO 3: Cargar datos de personal de las 3 hojas de turno
+                // PASO 3: Cargar datos de personal de las 3 hojas de turno (para modal)
                 // ============================================================
                 const [dataA, dataB, dataC, auditoriaResponse, usuariosResponse] = await Promise.all([
                     apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_A' }),
@@ -358,46 +361,46 @@
 
                 // Combinar todos los datos de personal
                 allPersonnelData = [];
-                const turnosData = { A: [], B: [], C: [] };
-
                 ['A', 'B', 'C'].forEach((turno, idx) => {
                     const resp = [dataA, dataB, dataC][idx];
                     if (resp.success && resp.data) {
                         resp.data.forEach(row => {
                             row.turno = turno;
                             allPersonnelData.push(row);
-                            turnosData[turno].push(row);
                         });
                     }
                 });
 
-                logDebug('Total allPersonnelData combinados: ' + allPersonnelData.length);
+                logDebug('Total allPersonnelData: ' + allPersonnelData.length);
 
-                if (auditoriaResponse.success && auditoriaResponse.data) allAuditoriaData = auditoriaResponse.data;
-
-                // ============================================================
-                // PASO 4: Calcular categorias de formacion desde datos de personal
-                // ============================================================
-                const formacionCats = calcularFormacion(turnosData);
-
-                // Sobreescribir totales con los valores de Registro_Cambios
-                formacionCats.A.total = formacionA;
-                formacionCats.B.total = formacionB;
-                formacionCats.C.total = formacionC;
+                if (auditoriaResponse.success && auditoriaResponse.data) {
+                    allAuditoriaData = auditoriaResponse.data;
+                }
 
                 // ============================================================
-                // PASO 5: Procesar novedades desde Registro_Cambios
+                // PASO 4: Procesar Formacion
                 // ============================================================
-                const novedadesA = procesarNovedadesDesdeCeldas(novedadesCellsA, 'J');
-                const novedadesB = procesarNovedadesDesdeCeldas(novedadesCellsB, 'Q');
-                const novedadesC = procesarNovedadesDesdeCeldas(novedadesCellsC, 'X');
+                const formacionData = {
+                    A: extraerFormacion(formacionA, ['I2','J2','K2','L2','M2','N2','O2']),
+                    B: extraerFormacion(formacionB, ['P2','Q2','R2','S2','T2','U2','V2']),
+                    C: extraerFormacion(formacionC, ['W2','X2','Y2','Z2','AA2','AB2','AC2'])
+                };
+
+                // ============================================================
+                // PASO 5: Procesar Novedades
+                // ============================================================
+                const novedadesData = {
+                    A: extraerNovedades(novedadesA, 'J'),
+                    B: extraerNovedades(novedadesB, 'Q'),
+                    C: extraerNovedades(novedadesC, 'X')
+                };
 
                 // ============================================================
                 // PASO 6: Renderizar Formacion
                 // ============================================================
                 let formacionHTML = '';
                 ['A', 'B', 'C'].forEach(t => {
-                    formacionHTML += renderizarParteTurno(t, formacionCats[t]);
+                    formacionHTML += renderizarParteTurno(t, formacionData[t]);
                 });
                 document.getElementById('turnosContainer').innerHTML = formacionHTML;
 
@@ -405,15 +408,17 @@
                 // PASO 7: Renderizar Novedades
                 // ============================================================
                 let novedadesHTML = '';
-                novedadesHTML += renderizarNovedadesTurno('A', novedadesA);
-                novedadesHTML += renderizarNovedadesTurno('B', novedadesB);
-                novedadesHTML += renderizarNovedadesTurno('C', novedadesC);
+                ['A', 'B', 'C'].forEach(t => {
+                    novedadesHTML += renderizarNovedadesTurno(t, novedadesData[t]);
+                });
                 document.getElementById('novedadesContainer').innerHTML = novedadesHTML;
 
                 // ============================================================
-                // PASO 8: Renderizar Usuarios
+                // PASO 8: Renderizar Usuarios con actividad real
                 // ============================================================
-                if (usuariosResponse.success && usuariosResponse.data) renderizarUsuarios(usuariosResponse.data);
+                if (usuariosResponse.success && usuariosResponse.data) {
+                    renderizarUsuarios(usuariosResponse.data);
+                }
 
             } catch (e) {
                 console.error(e);
@@ -425,49 +430,45 @@
         }
 
         // ============================================================
-        // Procesar novedades desde celdas de Registro_Cambios
-        // Las celdas J8:J21, Q8:Q21, X8:X21 contienen los totales
+        // Extraer datos de formacion desde response de getCells
+        // celdas[0]=total, celdas[1..6]=OF,NE,PT,PP,AXP,NO UNI
         // ============================================================
-        function procesarNovedadesDesdeCeldas(response, columna) {
-            const resultado = [];
-            if (!response.success || !response.values) {
-                // Si falla, devolver todo en 0
-                NOVEDADES_ORDEN.forEach(n => resultado.push({ nombre: n, total: 0 }));
-                return resultado;
-            }
+        function extraerFormacion(response, celdas) {
+            const resultado = { total: 0, oficiales: 0, ne: 0, patrulleros: 0, pp: 0, axp: 0, nouni: 0 };
+            if (!response.success || !response.values) return resultado;
 
-            const valores = response.values;
-            // Mapear las 14 filas (8-21) a las 14 novedades en orden
-            NOVEDADES_ORDEN.forEach((novedad, idx) => {
-                const fila = 8 + idx; // J8, J9, ... J21
-                const celda = columna + fila;
-                const valor = valores[celda];
-                const total = (valor !== undefined && valor !== null && valor !== '') ? parseInt(valor) : 0;
-                resultado.push({ nombre: novedad, total: isNaN(total) ? 0 : total });
-            });
+            const v = response.values;
+            resultado.total = parseInt(v[celdas[0]]) || 0;
+            resultado.oficiales = parseInt(v[celdas[1]]) || 0;
+            resultado.ne = parseInt(v[celdas[2]]) || 0;
+            resultado.patrulleros = parseInt(v[celdas[3]]) || 0;
+            resultado.pp = parseInt(v[celdas[4]]) || 0;
+            resultado.axp = parseInt(v[celdas[5]]) || 0;
+            resultado.nouni = parseInt(v[celdas[6]]) || 0;
 
             return resultado;
         }
 
-        // Calcular formacion por categoria desde los datos reales de personal
-        function calcularFormacion(turnosData) {
-            const resultado = { A: {}, B: {}, C: {} };
-            ['A', 'B', 'C'].forEach(t => {
-                const datos = turnosData[t];
-                const cats = { oficiales: 0, ne: 0, patrulleros: 0, pp: 0, axp: 0, nouni: 0, total: 0 };
-                datos.forEach(p => {
-                    const grado = (p.grado || '').toString().trim().toUpperCase();
-                    if (!grado) return;
-                    cats.total++;
-                    if (grado === 'OF' || grado.includes('OFICIAL')) cats.oficiales++;
-                    else if (grado === 'NE' || grado.includes('SUBOFICIAL') || grado.includes('SUBINTENDENTE')) cats.ne++;
-                    else if (grado === 'PT' || grado.includes('PATRULLERO')) cats.patrulleros++;
-                    else if (grado === 'PP' || grado.includes('PATRULLERO DE POLICIA')) cats.pp++;
-                    else if (grado === 'AXP' || grado.includes('AUXILIAR')) cats.axp++;
-                    else cats.nouni++;
-                });
-                resultado[t] = cats;
+        // ============================================================
+        // Extraer novedades desde response de getCells
+        // Las 14 filas corresponden a las 14 novedades en orden
+        // ============================================================
+        function extraerNovedades(response, columna) {
+            const resultado = [];
+            if (!response.success || !response.values) {
+                NOVEDADES_ORDEN.forEach(n => resultado.push({ nombre: n, total: 0 }));
+                return resultado;
+            }
+
+            const v = response.values;
+            NOVEDADES_ORDEN.forEach((novedad, idx) => {
+                const fila = 8 + idx;
+                const celda = columna + fila;
+                const valor = v[celda];
+                const total = (valor !== undefined && valor !== null && valor !== '') ? parseInt(valor) : 0;
+                resultado.push({ nombre: novedad, total: isNaN(total) ? 0 : total });
             });
+
             return resultado;
         }
 
@@ -487,16 +488,67 @@
             return `<div class="novedades-card"><div class="novedades-header"><h3>📋 NOVEDADES</h3><div class="novedades-badge">TURNO ${tl}</div></div><div class="novedades-body">${itemsHTML}<div class="novedades-total-card"><div class="novedades-total-label">Total Novedades</div><div class="novedades-total-value">${totalNovedades}</div></div></div></div>`;
         }
 
+        // ============================================================
+        // V10: Renderizar Usuarios con deteccion de actividad REAL
+        // Un usuario esta activo si tiene registros en AUDITORIA de las ultimas 8h
+        // ============================================================
         function renderizarUsuarios(usuarios) {
-            if (!usuarios || usuarios.length === 0) { document.getElementById('usuariosContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">No hay usuarios registrados</div>'; return; }
+            if (!usuarios || usuarios.length === 0) {
+                document.getElementById('usuariosContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">No hay usuarios registrados</div>';
+                return;
+            }
+
+            // Calcular ultima actividad real desde AUDITORIA
             const ultimaActividad = {};
-            allAuditoriaData.forEach(r => { const u = (r.usuario || '').trim(); if (!u) return; const ts = new Date(r.fechaHora).getTime(); if (!ultimaActividad[u] || ts > ultimaActividad[u]) ultimaActividad[u] = ts; });
-            const ahora = Date.now(); let html = '';
-            usuarios.forEach(u => {
-                const nombre = u.usuario || '?'; const rol = u.rol || 'usuario'; const dep = u.dependencia || ''; const ini = nombre.substring(0,2).toUpperCase(); const lastTs = ultimaActividad[nombre]; const activo = lastTs && (ahora - lastTs < 8*60*60*1000);
-                let txt = 'Sin actividad'; if (lastTs) { const d = ahora - lastTs; if (d < 60000) txt = 'Hace < 1 min'; else if (d < 3600000) txt = 'Hace ' + Math.floor(d/60000) + ' min'; else if (d < 86400000) txt = 'Hace ' + Math.floor(d/3600000) + 'h'; else txt = 'Hace ' + Math.floor(d/86400000) + ' dia(s)'; }
-                html += `<div class="usuario-card"><div class="usuario-avatar ${activo?'avatar-activo':'avatar-inactivo'}">${ini}</div><div class="usuario-info"><div class="usuario-nombre">${nombre}</div><div class="usuario-rol">${rol}</div>${dep?`<div class="usuario-dep">${dep}</div>`:''}<div class="ultimo-acceso">⏱ ${txt}</div></div><div class="usuario-estado"><div class="estado-dot ${activo?'dot-activo':'dot-inactivo'}"></div><span class="estado-badge ${activo?'estado-activo':'estado-inactivo'}">${activo?'✓ ACTIVO':'○ INACTIVO'}</span></div></div>`;
+            allAuditoriaData.forEach(r => {
+                const u = (r.usuario || '').trim();
+                if (!u) return;
+                const ts = r.fechaHora ? new Date(r.fechaHora).getTime() : 0;
+                if (!ultimaActividad[u] || ts > ultimaActividad[u]) {
+                    ultimaActividad[u] = ts;
+                }
             });
+
+            logDebug('Usuarios con actividad en auditoria: ' + Object.keys(ultimaActividad).join(', '));
+
+            const ahora = Date.now();
+            let html = '';
+
+            usuarios.forEach(u => {
+                const nombre = u.usuario || '?';
+                const rol = u.rol || 'usuario';
+                const dep = u.dependencia || '';
+                const ini = nombre.substring(0, 2).toUpperCase();
+                const lastTs = ultimaActividad[nombre];
+
+                // Activo = tuvo actividad en AUDITORIA en las ultimas 8 horas
+                const activo = lastTs && (ahora - lastTs < 8 * 60 * 60 * 1000);
+
+                let txt = 'Sin actividad';
+                if (lastTs) {
+                    const d = ahora - lastTs;
+                    if (d < 60000) txt = 'Hace < 1 min';
+                    else if (d < 3600000) txt = 'Hace ' + Math.floor(d / 60000) + ' min';
+                    else if (d < 86400000) txt = 'Hace ' + Math.floor(d / 3600000) + 'h';
+                    else txt = 'Hace ' + Math.floor(d / 86400000) + ' dia(s)';
+                }
+
+                html += `<div class="usuario-card">
+                    <div class="usuario-avatar ${activo ? 'avatar-activo' : 'avatar-inactivo'}">${ini}</div>
+                    <div class="usuario-info">
+                        <div class="usuario-nombre">${nombre}</div>
+                        <div class="usuario-rol">${rol}</div>
+                        ${dep ? `<div class="usuario-dep">${dep}</div>` : ''}
+                        <div class="ultimo-acceso">⏱ ${txt}</div>
+                    </div>
+                    <div class="usuario-estado">
+                        <span class="estado-badge ${activo ? 'estado-activo' : 'estado-inactivo'}">
+                            ${activo ? '✓ ACTIVO' : '○ INACTIVO'}
+                        </span>
+                    </div>
+                </div>`;
+            });
+
             document.getElementById('usuariosContainer').innerHTML = html;
         }
 
