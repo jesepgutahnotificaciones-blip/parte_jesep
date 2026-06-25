@@ -235,14 +235,15 @@
             'EXCUSA PARCIAL': 'nov-excusa-parcial', 'CURSO DE ASCENSO': 'nov-curso', 'COMISION': 'nov-comision'
         };
 
-        function apiFetchJSONP(action, params) {
+        function apiFetchJSONP(action, params, overrides) {
             params = params || {};
+            overrides = overrides || {};
             return new Promise((resolve, reject) => {
                 const cbName = 'jsonpCb_' + (++jsonpCallbackId) + '_' + Date.now();
                 const script = document.createElement('script');
                 const urlP = new URLSearchParams();
                 urlP.append('action', action);
-                urlP.append('dependency', DEPENDENCY);
+                urlP.append('dependency', ('dependency' in overrides) ? overrides.dependency : DEPENDENCY);
                 urlP.append('callback', cbName);
                 urlP.append('usuario', USUARIO_ACTUAL || 'Sistema');
                 urlP.append('rol', ROL_ACTUAL || 'usuario');
@@ -309,15 +310,21 @@
                 logDebug('Formacion B: ' + JSON.stringify(formacionB));
                 logDebug('Formacion C: ' + JSON.stringify(formacionC));
 
-                logDebug('=== Leyendo Novedades de TODAS las hojas de turno ===');
-                const allNovedadesResponse = await apiFetchJSONP('getAllNovedades');
-                logDebug('AllNovedades response: ' + JSON.stringify(allNovedadesResponse).substring(0, 300));
+                // V13: Leer novedades directo de Registro_Cambios (42 celdas, instantáneo)
+                logDebug('=== Leyendo Novedades de Registro_Cambios (directo) ===');
+                const [novCeldasA, novCeldasB, novCeldasC] = await Promise.all([
+                    apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'J8,J9,J10,J11,J12,J13,J14,J15,J16,J17,J18,J19,J20,J21' }),
+                    apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'Q8,Q9,Q10,Q11,Q12,Q13,Q14,Q15,Q16,Q17,Q18,Q19,Q20,Q21' }),
+                    apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'X8,X9,X10,X11,X12,X13,X14,X15,X16,X17,X18,X19,X20,X21' })
+                ]);
+                logDebug('NovA: ' + JSON.stringify(novCeldasA).substring(0, 150));
+                logDebug('NovB: ' + JSON.stringify(novCeldasB).substring(0, 150));
+                logDebug('NovC: ' + JSON.stringify(novCeldasC).substring(0, 150));
 
-                const [dataA, dataB, dataC, auditoriaResponse, usuariosResponse] = await Promise.all([
+                const [dataA, dataB, dataC, usuariosResponse] = await Promise.all([
                     apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_A' }),
                     apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_B' }),
                     apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_C' }),
-                    apiFetchJSONP('getAuditoria'),
                     apiFetchJSONP('getUsuarios')
                 ]);
 
@@ -338,30 +345,31 @@
 
                 logDebug('Total allPersonnelData: ' + allPersonnelData.length);
 
-                if (auditoriaResponse.success && auditoriaResponse.data) {
-                    allAuditoriaData = auditoriaResponse.data;
-                }
-
                 const formacionData = {
                     A: extraerFormacion(formacionA, ['I2','J2','K2','L2','M2','N2','O2']),
                     B: extraerFormacion(formacionB, ['P2','Q2','R2','S2','T2','U2','V2']),
                     C: extraerFormacion(formacionC, ['W2','X2','Y2','Z2','AA2','AB2','AC2'])
                 };
 
-                let novedadesData = { A: [], B: [], C: [] };
-                if (allNovedadesResponse.success && allNovedadesResponse.novedades) {
-                    const novedadesRaw = allNovedadesResponse.novedades;
-                    ['A', 'B', 'C'].forEach(t => {
-                        novedadesData[t] = NOVEDADES_ORDEN.map(n => ({
-                            nombre: n,
-                            total: (novedadesRaw[t] && novedadesRaw[t][n]) || 0
-                        }));
-                    });
-                } else {
-                    ['A', 'B', 'C'].forEach(t => {
-                        novedadesData[t] = NOVEDADES_ORDEN.map(n => ({ nombre: n, total: 0 }));
-                    });
-                }
+                // V13: Mapear celdas de Registro_Cambios a NOVEDADES_ORDEN
+                // Filas 8-21 = índices 0-13 de NOVEDADES_ORDEN
+                const colsMap = { A: novCeldasA, B: novCeldasB, C: novCeldasC };
+                const celdasBase = {
+                    A: ['J8','J9','J10','J11','J12','J13','J14','J15','J16','J17','J18','J19','J20','J21'],
+                    B: ['Q8','Q9','Q10','Q11','Q12','Q13','Q14','Q15','Q16','Q17','Q18','Q19','Q20','Q21'],
+                    C: ['X8','X9','X10','X11','X12','X13','X14','X15','X16','X17','X18','X19','X20','X21']
+                };
+                const novedadesData = { A: [], B: [], C: [] };
+                ['A', 'B', 'C'].forEach(t => {
+                    const resp = colsMap[t];
+                    const celdas = celdasBase[t];
+                    novedadesData[t] = NOVEDADES_ORDEN.map((nombre, idx) => ({
+                        nombre: nombre,
+                        total: (resp.success && resp.values && resp.values[celdas[idx]] !== undefined)
+                            ? (parseInt(resp.values[celdas[idx]]) || 0)
+                            : 0
+                    }));
+                });
 
                 let formacionHTML = '';
                 ['A', 'B', 'C'].forEach(t => {
@@ -375,8 +383,25 @@
                 });
                 document.getElementById('novedadesContainer').innerHTML = novedadesHTML;
 
+                // Leer AUDITORIA completa (sin filtro de dep) para detectar
+                // quién ha guardado con el botón Guardar en las últimas 8h
                 if (usuariosResponse.success && usuariosResponse.data) {
-                    renderizarUsuarios(usuariosResponse.data);
+                    const auditoriaTotal = await apiFetchJSONP('getAuditoria', {}, { dependency: '' });
+                    const ahora = Date.now();
+                    const ultimaActividad = {};
+                    if (auditoriaTotal.success && auditoriaTotal.data) {
+                        auditoriaTotal.data.forEach(r => {
+                            if ((r.accion || '') !== 'GUARDAR_NOVEDAD') return;
+                            const u = (r.usuario || '').trim();
+                            if (!u) return;
+                            const ts = r.fechaHora ? new Date(r.fechaHora).getTime() : 0;
+                            if (!ultimaActividad[u] || ts > ultimaActividad[u]) {
+                                ultimaActividad[u] = ts;
+                            }
+                        });
+                    }
+                    logDebug('Actividad por usuario: ' + JSON.stringify(ultimaActividad));
+                    renderizarUsuarios(usuariosResponse.data, ultimaActividad, ahora);
                 }
 
             } catch (e) {
@@ -419,49 +444,36 @@
         }
 
         // ============================================================
-        // Renderizar Usuarios
-        // ACTUALIZADO  = tuvo actividad en auditoria en las últimas 8h
-        // SIN ACTUALIZAR = sin actividad registrada en ese periodo
+        // Renderizar Usuarios V14
+        // ACTUALIZADO  = el usuario presionó Guardar (accion=GUARDAR_NOVEDAD en AUDITORIA)
+        // SIN ACTUALIZAR = sin registros de guardado
+        // ultimaActividad: { 'nombreUsuario': timestamp }
         // ============================================================
-        function renderizarUsuarios(usuarios) {
+        function renderizarUsuarios(usuarios, ultimaActividad, ahora) {
+            ultimaActividad = ultimaActividad || {};
+            ahora = ahora || Date.now();
             if (!usuarios || usuarios.length === 0) {
                 document.getElementById('usuariosContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">No hay usuarios registrados</div>';
                 return;
             }
 
-            // Calcular última actividad real desde AUDITORIA
-            const ultimaActividad = {};
-            allAuditoriaData.forEach(r => {
-                const u = (r.usuario || '').trim();
-                if (!u) return;
-                const ts = r.fechaHora ? new Date(r.fechaHora).getTime() : 0;
-                if (!ultimaActividad[u] || ts > ultimaActividad[u]) {
-                    ultimaActividad[u] = ts;
-                }
-            });
-
-            logDebug('Usuarios con actividad en auditoria: ' + Object.keys(ultimaActividad).join(', '));
-
-            const ahora = Date.now();
             let html = '';
 
             usuarios.forEach(u => {
                 const nombre = u.usuario || '?';
                 const rol = u.rol || 'usuario';
-                const dep = u.dependencia || '';
+                const dep = (u.dependencia || '').trim();
                 const ini = nombre.substring(0, 2).toUpperCase();
-                const lastTs = ultimaActividad[nombre];
-
-                // ACTUALIZADO = tuvo actividad en AUDITORIA en las últimas 8 horas
-                const actualizado = lastTs && (ahora - lastTs < 8 * 60 * 60 * 1000);
+                const lastTs = ultimaActividad[nombre] || 0;
+                const actualizado = lastTs > 0;
 
                 let txt = 'Sin actividad registrada';
-                if (lastTs) {
+                if (actualizado) {
                     const d = ahora - lastTs;
-                    if (d < 60000) txt = 'Actualizado hace < 1 min';
+                    if (d < 60000)       txt = 'Actualizado hace < 1 min';
                     else if (d < 3600000) txt = 'Actualizado hace ' + Math.floor(d / 60000) + ' min';
                     else if (d < 86400000) txt = 'Actualizado hace ' + Math.floor(d / 3600000) + 'h';
-                    else txt = 'Actualizado hace ' + Math.floor(d / 86400000) + ' dia(s)';
+                    else                  txt = 'Actualizado hace ' + Math.floor(d / 86400000) + ' dia(s)';
                 }
 
                 html += `<div class="usuario-card">
