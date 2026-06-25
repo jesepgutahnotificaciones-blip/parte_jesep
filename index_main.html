@@ -88,15 +88,20 @@
         .usuarios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 30px; }
         .usuario-card { background: var(--blanco); border-radius: 10px; padding: 14px 16px; box-shadow: var(--sombra-card); border: 1px solid var(--borde); display: flex; align-items: center; gap: 14px; }
         .usuario-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; }
-        .avatar-activo { background: #e8f5e9; color: #1E8E3E; border: 2px solid #1E8E3E; }
-        .avatar-inactivo { background: #fff3e0; color: #E65100; border: 2px solid #E65100; }
+        /* ACTUALIZADO = verde (igual que antes, tuvo actividad reciente) */
+        .avatar-actualizado { background: #e8f5e9; color: #1E8E3E; border: 2px solid #1E8E3E; }
+        /* SIN ACTUALIZAR = gris neutro (sin actividad reciente) */
+        .avatar-sin-actualizar { background: #f1f3f4; color: #80868B; border: 2px solid #B0BEC5; }
         .usuario-info { flex: 1; min-width: 0; }
         .usuario-nombre { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .usuario-rol { font-size: 0.7rem; color: var(--gris-texto); text-transform: uppercase; }
         .usuario-dep { font-size: 0.7rem; color: var(--azul-oscuro); font-weight: 600; }
-        .estado-badge { padding: 3px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; }
-        .estado-activo { background: #e8f5e9; color: #1B5E20; }
-        .estado-inactivo { background: #fff3e0; color: #BF360C; }
+        .ultimo-acceso { font-size: 0.68rem; color: var(--gris-texto); margin-top: 2px; }
+        .estado-badge { padding: 3px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; white-space: nowrap; }
+        /* ACTUALIZADO: fondo verde */
+        .estado-actualizado { background: #e8f5e9; color: #1B5E20; border: 1px solid #a5d6a7; }
+        /* SIN ACTUALIZAR: fondo gris neutro */
+        .estado-sin-actualizar { background: #f1f3f4; color: #5F6368; border: 1px solid #DADCE0; }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
         .modal-content { background: var(--blanco); border-radius: 16px; width: 90%; max-width: 950px; max-height: 82vh; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.35); transform: scale(0.9) translateY(20px); transition: transform 0.25s ease; display: flex; flex-direction: column; }
@@ -281,9 +286,6 @@
 
         function logout() { localStorage.removeItem('policiaSession'); localStorage.removeItem('currentDependency'); location.reload(); }
 
-        // ============================================================
-        // V11: Cargar datos
-        // ============================================================
         async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
             document.getElementById('loadingText').textContent = 'Cargando datos' + (DEPENDENCY ? ' de ' + DEPENDENCY : '') + '...';
@@ -296,9 +298,6 @@
             }
 
             try {
-                // ============================================================
-                // PASO 1: Leer Formacion desde Registro_Cambios
-                // ============================================================
                 logDebug('=== Leyendo Formacion de Registro_Cambios ===');
                 const [formacionA, formacionB, formacionC] = await Promise.all([
                     apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'I2,J2,K2,L2,M2,N2,O2' }),
@@ -310,17 +309,10 @@
                 logDebug('Formacion B: ' + JSON.stringify(formacionB));
                 logDebug('Formacion C: ' + JSON.stringify(formacionC));
 
-                // ============================================================
-                // PASO 2: Leer Novedades de TODAS las hojas de turno
-                // V11: Usa getAllNovedades que lee de todas las hojas *_TURNO_*
-                // ============================================================
                 logDebug('=== Leyendo Novedades de TODAS las hojas de turno ===');
                 const allNovedadesResponse = await apiFetchJSONP('getAllNovedades');
                 logDebug('AllNovedades response: ' + JSON.stringify(allNovedadesResponse).substring(0, 300));
 
-                // ============================================================
-                // PASO 3: Cargar datos de personal de las 3 hojas de turno (para modal)
-                // ============================================================
                 const [dataA, dataB, dataC, auditoriaResponse, usuariosResponse] = await Promise.all([
                     apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_A' }),
                     apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_B' }),
@@ -333,7 +325,6 @@
                 logDebug('Turno B: success=' + dataB.success + ' count=' + (dataB.data ? dataB.data.length : 0));
                 logDebug('Turno C: success=' + dataC.success + ' count=' + (dataC.data ? dataC.data.length : 0));
 
-                // Combinar todos los datos de personal
                 allPersonnelData = [];
                 ['A', 'B', 'C'].forEach((turno, idx) => {
                     const resp = [dataA, dataB, dataC][idx];
@@ -351,18 +342,12 @@
                     allAuditoriaData = auditoriaResponse.data;
                 }
 
-                // ============================================================
-                // PASO 4: Procesar Formacion
-                // ============================================================
                 const formacionData = {
                     A: extraerFormacion(formacionA, ['I2','J2','K2','L2','M2','N2','O2']),
                     B: extraerFormacion(formacionB, ['P2','Q2','R2','S2','T2','U2','V2']),
                     C: extraerFormacion(formacionC, ['W2','X2','Y2','Z2','AA2','AB2','AC2'])
                 };
 
-                // ============================================================
-                // PASO 5: Procesar Novedades desde getAllNovedades
-                // ============================================================
                 let novedadesData = { A: [], B: [], C: [] };
                 if (allNovedadesResponse.success && allNovedadesResponse.novedades) {
                     const novedadesRaw = allNovedadesResponse.novedades;
@@ -373,33 +358,23 @@
                         }));
                     });
                 } else {
-                    // Fallback: inicializar en 0
                     ['A', 'B', 'C'].forEach(t => {
                         novedadesData[t] = NOVEDADES_ORDEN.map(n => ({ nombre: n, total: 0 }));
                     });
                 }
 
-                // ============================================================
-                // PASO 6: Renderizar Formacion
-                // ============================================================
                 let formacionHTML = '';
                 ['A', 'B', 'C'].forEach(t => {
                     formacionHTML += renderizarParteTurno(t, formacionData[t]);
                 });
                 document.getElementById('turnosContainer').innerHTML = formacionHTML;
 
-                // ============================================================
-                // PASO 7: Renderizar Novedades
-                // ============================================================
                 let novedadesHTML = '';
                 ['A', 'B', 'C'].forEach(t => {
                     novedadesHTML += renderizarNovedadesTurno(t, novedadesData[t]);
                 });
                 document.getElementById('novedadesContainer').innerHTML = novedadesHTML;
 
-                // ============================================================
-                // PASO 8: Renderizar Usuarios con actividad real
-                // ============================================================
                 if (usuariosResponse.success && usuariosResponse.data) {
                     renderizarUsuarios(usuariosResponse.data);
                 }
@@ -413,13 +388,9 @@
             }
         }
 
-        // ============================================================
-        // Extraer datos de formacion desde response de getCells
-        // ============================================================
         function extraerFormacion(response, celdas) {
             const resultado = { total: 0, oficiales: 0, ne: 0, patrulleros: 0, pp: 0, axp: 0, nouni: 0 };
             if (!response.success || !response.values) return resultado;
-
             const v = response.values;
             resultado.total = parseInt(v[celdas[0]]) || 0;
             resultado.oficiales = parseInt(v[celdas[1]]) || 0;
@@ -428,7 +399,6 @@
             resultado.pp = parseInt(v[celdas[4]]) || 0;
             resultado.axp = parseInt(v[celdas[5]]) || 0;
             resultado.nouni = parseInt(v[celdas[6]]) || 0;
-
             return resultado;
         }
 
@@ -449,7 +419,9 @@
         }
 
         // ============================================================
-        // V11: Renderizar Usuarios con deteccion de actividad REAL
+        // Renderizar Usuarios
+        // ACTUALIZADO  = tuvo actividad en auditoria en las últimas 8h
+        // SIN ACTUALIZAR = sin actividad registrada en ese periodo
         // ============================================================
         function renderizarUsuarios(usuarios) {
             if (!usuarios || usuarios.length === 0) {
@@ -457,7 +429,7 @@
                 return;
             }
 
-            // Calcular ultima actividad real desde AUDITORIA
+            // Calcular última actividad real desde AUDITORIA
             const ultimaActividad = {};
             allAuditoriaData.forEach(r => {
                 const u = (r.usuario || '').trim();
@@ -480,20 +452,20 @@
                 const ini = nombre.substring(0, 2).toUpperCase();
                 const lastTs = ultimaActividad[nombre];
 
-                // Activo = tuvo actividad en AUDITORIA en las ultimas 8 horas
-                const activo = lastTs && (ahora - lastTs < 8 * 60 * 60 * 1000);
+                // ACTUALIZADO = tuvo actividad en AUDITORIA en las últimas 8 horas
+                const actualizado = lastTs && (ahora - lastTs < 8 * 60 * 60 * 1000);
 
-                let txt = 'Sin actividad';
+                let txt = 'Sin actividad registrada';
                 if (lastTs) {
                     const d = ahora - lastTs;
-                    if (d < 60000) txt = 'Hace < 1 min';
-                    else if (d < 3600000) txt = 'Hace ' + Math.floor(d / 60000) + ' min';
-                    else if (d < 86400000) txt = 'Hace ' + Math.floor(d / 3600000) + 'h';
-                    else txt = 'Hace ' + Math.floor(d / 86400000) + ' dia(s)';
+                    if (d < 60000) txt = 'Actualizado hace < 1 min';
+                    else if (d < 3600000) txt = 'Actualizado hace ' + Math.floor(d / 60000) + ' min';
+                    else if (d < 86400000) txt = 'Actualizado hace ' + Math.floor(d / 3600000) + 'h';
+                    else txt = 'Actualizado hace ' + Math.floor(d / 86400000) + ' dia(s)';
                 }
 
                 html += `<div class="usuario-card">
-                    <div class="usuario-avatar ${activo ? 'avatar-activo' : 'avatar-inactivo'}">${ini}</div>
+                    <div class="usuario-avatar ${actualizado ? 'avatar-actualizado' : 'avatar-sin-actualizar'}">${ini}</div>
                     <div class="usuario-info">
                         <div class="usuario-nombre">${nombre}</div>
                         <div class="usuario-rol">${rol}</div>
@@ -501,8 +473,8 @@
                         <div class="ultimo-acceso">⏱ ${txt}</div>
                     </div>
                     <div class="usuario-estado">
-                        <span class="estado-badge ${activo ? 'estado-activo' : 'estado-inactivo'}">
-                            ${activo ? '✓ ACTIVO' : '○ INACTIVO'}
+                        <span class="estado-badge ${actualizado ? 'estado-actualizado' : 'estado-sin-actualizar'}">
+                            ${actualizado ? '✓ ACTUALIZADO' : '○ SIN ACTUALIZAR'}
                         </span>
                     </div>
                 </div>`;
