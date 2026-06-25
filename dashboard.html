@@ -488,11 +488,11 @@
 
     <script>
         // ============================================================
-        // CONFIGURACIÓN API INTERFAZ FUNCIONAL
+        // CONFIGURACIÓN API - V9 CORREGIDO (USA JSONP PARA TODO)
         // ============================================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbx9RMgrVgYwpjQb4q8GmpOwIlP322IOCmyzUDE7F1CS2DsSVhocxJQQg2QkA0ily82n/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzAvBej656DQ6gGZufZCcGwh8Qz3fn5STt4Otnl1xWVdXxv77A4lxH9taaqNdkgfEfV/exec';
 
-        let currentDependency = 'ASJUR';  // Se actualizará después del login
+        let currentDependency = 'ASJUR';
         let allTableData = [];
         let currentFilter = 'ALL';
         let tempUsuario = null;
@@ -511,7 +511,7 @@
         }
 
         // ============================================================
-        // API FETCH - GET (para lectura de datos)
+        // API FETCH - JSONP (FUNCIONA PARA LECTURA Y ESCRITURA)
         // ============================================================
         let jsonpCallbackId = 0;
         
@@ -537,7 +537,7 @@
                 
                 const timeout = setTimeout(() => {
                     cleanup();
-                    reject(new Error('Timeout JSONP'));
+                    reject(new Error('Timeout JSONP - el servidor no respondió'));
                 }, 15000);
                 
                 window[callbackName] = function(data) {
@@ -554,96 +554,12 @@
                 script.onerror = function() {
                     clearTimeout(timeout);
                     cleanup();
-                    reject(new Error('Error JSONP'));
+                    reject(new Error('Error JSONP - no se pudo cargar el script'));
                 };
                 
                 script.src = url;
                 document.head.appendChild(script);
             });
-        }
-
-        async function apiFetch(action, params) {
-            params = params || {};
-            try {
-                const urlParams = new URLSearchParams();
-                urlParams.append('action', action);
-                urlParams.append('dependency', currentDependency);
-                for (const key in params) {
-                    if (params[key] !== undefined && params[key] !== null) {
-                        urlParams.append(key, params[key]);
-                    }
-                }
-                const url = API_URL + '?' + urlParams.toString();
-                
-                console.log('FETCH URL:', url);
-                
-                const response = await fetch(url, {
-                    method: 'GET',
-                    redirect: 'follow',
-                    headers: { 'Accept': 'application/json' }
-                });
-                
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                const data = await response.json();
-                console.log('RESPONSE:', data);
-                return data;
-                
-            } catch (fetchError) {
-                console.log('Fetch error, trying JSONP:', fetchError.message);
-                try {
-                    return await apiFetchJSONP(action, params);
-                } catch (jsonpError) {
-                    throw new Error('No se pudo conectar con el servidor');
-                }
-            }
-        }
-
-        // ============================================================
-        // API SAVE - POST (para guardar novedades y observaciones)
-        // ============================================================
-        async function apiSave(action, params) {
-            params = params || {};
-            params.action = action;
-            params.dependency = currentDependency;
-            
-            // Construir el cuerpo como form-data para evitar preflight CORS
-            const formData = new URLSearchParams();
-            for (const key in params) {
-                if (params[key] !== undefined && params[key] !== null) {
-                    formData.append(key, params[key]);
-                }
-            }
-            
-            console.log('POST save params:', formData.toString());
-            
-            try {
-                // Intentar POST con no-cors (Apps Script acepta esto)
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: formData.toString()
-                });
-                
-                // Con no-cors no podemos leer la respuesta, asumimos éxito
-                console.log('POST enviado (no-cors)');
-                
-                // Esperar un momento y verificar
-                await new Promise(r => setTimeout(r, 800));
-                
-                return { success: true, message: 'Datos enviados' };
-                
-            } catch (error) {
-                console.error('Error POST:', error);
-                // Fallback: intentar con GET (algunos backends de Apps Script aceptan save por GET)
-                try {
-                    return await apiFetch(action, params);
-                } catch (e) {
-                    throw new Error('No se pudo guardar: ' + error.message);
-                }
-            }
         }
 
         // ============================================================
@@ -671,7 +587,6 @@
                 if (response.success && response.usuario) {
                     tempUsuario = response.usuario;
                     
-                    // Actualizar currentDependency con la del usuario
                     if (response.usuario.dependencia) {
                         currentDependency = response.usuario.dependencia;
                         localStorage.setItem('currentDependency', currentDependency);
@@ -790,7 +705,6 @@
             };
             localStorage.setItem('policiaSession', JSON.stringify(session));
             
-            // Guardar dependencia en localStorage
             if (usuario.dependencia) {
                 currentDependency = usuario.dependencia;
                 localStorage.setItem('currentDependency', currentDependency);
@@ -831,7 +745,6 @@
                     return false;
                 }
                 
-                // Restaurar dependencia desde localStorage
                 const savedDep = localStorage.getItem('currentDependency');
                 if (savedDep) {
                     currentDependency = savedDep;
@@ -859,7 +772,7 @@
         // ============================================================
         async function loadTotalFuncionarios() {
             try {
-                const result = await apiFetch('getTotalFuncionarios');
+                const result = await apiFetchJSONP('getTotalFuncionarios');
                 if (result.success && result.total !== undefined) {
                     document.getElementById('totalFuncionarios').textContent = result.total;
                     document.getElementById('headerStats').style.display = 'flex';
@@ -883,12 +796,12 @@
                 document.getElementById('tableContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando personal de ' + currentDependency + '...</p></div>';
 
                 if (turno && turno !== 'ALL') {
-                    const summaryData = await apiFetch('getSummary', { turno: turno });
+                    const summaryData = await apiFetchJSONP('getSummary', { turno: turno });
                     console.log('Summary data:', summaryData);
                     if (summaryData.success) renderSummary(summaryData.summary);
                 }
 
-                const data = await apiFetch('getData');
+                const data = await apiFetchJSONP('getData');
                 console.log('Table data:', data);
                 
                 if (data.success) {
@@ -907,21 +820,129 @@
         }
 
         // ============================================================
-        // GUARDAR NOVEDAD Y OBSERVACIÓN - CORREGIDO CON POST
+        // GUARDAR NOVEDAD - CORREGIDO CON JSONP
         // ============================================================
-        async function saveData(row, novedad, observation) {
-            console.log('saveData called - row:', row, 'novedad:', novedad, 'observation:', observation);
-            
-            const params = {
-                row: row.toString(),
-                novedad: novedad || '',
-                observation: observation || ''
-            };
-            
-            console.log('saveData params:', params);
-            
-            // Usar apiSave (POST) en lugar de apiFetch (GET)
-            return await apiSave('saveData', params);
+        async function saveNovedad(select, row) {
+            const novedad = select.value;
+            const status = document.getElementById('status-novedad-' + row);
+
+            // Buscar observación actual para NO borrarla
+            const textarea = document.querySelector(`textarea[onblur*="saveObservation(this, ${row})"]`);
+            const observacionActual = textarea ? textarea.value.trim() : '';
+
+            status.textContent = '⏳ Guardando en documento columna G...';
+            status.className = 'status-msg show';
+
+            try {
+                const result = await apiFetchJSONP('saveData', {
+                    row: row.toString(),
+                    novedad: novedad || '',
+                    observation: observacionActual
+                });
+                
+                console.log('Resultado saveNovedad:', result);
+
+                if (result && result.success) {
+                    const badge = document.getElementById('badge-' + row);
+                    if (badge) {
+                        badge.className = 'col-novedad ' + getNovedadClass(novedad);
+                        badge.textContent = novedad || 'Seleccione Novedad';
+                    }
+
+                    status.textContent = '✓ Guardado y vericado (G)';
+                    status.className = 'status-msg show success';
+                } else {
+                    throw new Error((result && result.error) || 'Error del servidor');
+                }
+
+                setTimeout(() => {
+                    status.classList.remove('show');
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error saveNovedad:', error);
+                status.textContent = '✗ Error: ' + (error.message || 'No se pudo guardar');
+                status.className = 'status-msg show error';
+                
+                setTimeout(() => {
+                    status.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        // ============================================================
+        // GUARDAR OBSERVACIÓN - CORREGIDO CON JSONP
+        // ============================================================
+        async function saveObservation(textarea, row) {
+            const observation = textarea.value.trim();
+
+            // Buscar novedad actual para NO borrarla
+            const select = document.querySelector(`select[onchange*="saveNovedad(this, ${row})"]`);
+            const novedadActual = select ? select.value : '';
+
+            const status = document.getElementById('status-' + row);
+
+            status.textContent = '⏳ Guardando en columna H...';
+            status.className = 'status-msg show';
+
+            try {
+                const result = await apiFetchJSONP('saveData', {
+                    row: row.toString(),
+                    novedad: novedadActual,
+                    observation: observation
+                });
+                
+                console.log('Resultado saveObservation:', result);
+
+                if (result && result.success) {
+                    status.textContent = '✓ Guardado y verificado H';
+                    status.className = 'status-msg show success';
+                } else {
+                    throw new Error((result && result.error) || 'Error del servidor');
+                }
+
+                setTimeout(() => {
+                    status.classList.remove('show');
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error saveObservation:', error);
+                status.textContent = '✗ Error: ' + (error.message || 'No se pudo guardar');
+                status.className = 'status-msg show error';
+                
+                setTimeout(() => {
+                    status.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        function getNovedadClass(novedad) {
+            const n = (novedad || '').toUpperCase();
+            if (n.indexOf('OFICINA') !== -1) return 'novedad-oficina';
+            if (n.indexOf('VACACIONES') !== -1) return 'novedad-vacaciones';
+            if (n.indexOf('SERVICIO') !== -1) return 'novedad-servicio';
+            if (n.indexOf('GRAVIDEZ') !== -1) return 'novedad-gravidez';
+            if (n === 'EXCUSA PARCIAL') return 'novedad-excusa-parcial';
+            if (n === 'EXCUSADO DEL SERVICIO') return 'novedad-excusa-servicio';
+            if (n.indexOf('EXCUSA') !== -1) return 'novedad-excusa';
+            if (n.indexOf('PERMISO') !== -1) return 'novedad-permiso';
+            if (n.indexOf('CITA') !== -1) return 'novedad-cita';
+            if (n.indexOf('MATERNIDAD') !== -1) return 'novedad-maternidad';
+            if (n === 'RETARDAD@') return 'novedad-retardada';
+            if (n.indexOf('OTRA') !== -1) return 'novedad-otra';
+            if (n.indexOf('CURSO') !== -1) return 'novedad-curso';
+            if (n.indexOf('COMISION') !== -1) return 'novedad-comision';
+            return 'novedad-normal';
+        }
+
+        function createNovedadSelect(currentValue, row) {
+            let options = '<option value="">Seleccione Novedad</option>';
+            NOVEDADES.forEach(function(n) {
+                const selected = (currentValue === n) ? 'selected' : '';
+                options += '<option value="' + n + '" ' + selected + '>' + n + '</option>';
+            });
+
+            return '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><select class="novedad-select" onchange="saveNovedad(this, ' + row + ')">' + options + '</select><span class="col-novedad ' + getNovedadClass(currentValue) + '" id="badge-' + row + '">' + (currentValue || 'Seleccione Novedad') + '</span><span class="status-msg" id="status-novedad-' + row + '"></span></div>';
         }
 
         function showError(message) {
@@ -1069,7 +1090,7 @@
                 document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen Turno ' + turno + '...</p></div>';
                 
                 try {
-                    const summaryData = await apiFetch('getSummary', { turno: turno });
+                    const summaryData = await apiFetchJSONP('getSummary', { turno: turno });
                     console.log('Summary response:', summaryData);
                     if (summaryData.success) renderSummary(summaryData.summary);
                 } catch (e) {
@@ -1097,111 +1118,6 @@
             renderTable(filteredData);
         }
 
-        // ============================================================
-        // GUARDAR NOVEDAD Y OBSERVACIÓN (CORREGIDO - USA POST)
-        // ============================================================
-        async function saveNovedad(select, row) {
-            const novedad = select.value;
-            const status = document.getElementById('status-novedad-' + row);
-
-            // Buscar observación actual para NO borrarla
-            const textarea = document.querySelector(`textarea[onblur*="${row}"]`);
-            const observacionActual = textarea ? textarea.value.trim() : '';
-
-            status.textContent = '⏳ Guardando...';
-            status.className = 'status-msg show';
-
-            try {
-                const result = await saveData(row, novedad, observacionActual);
-                console.log('Resultado saveNovedad:', result);
-
-                const badge = document.getElementById('badge-' + row);
-                if (badge) {
-                    badge.className = 'col-novedad ' + getNovedadClass(novedad);
-                    badge.textContent = novedad || 'Seleccione Novedad';
-                }
-
-                status.textContent = '✓ Guardado';
-                status.className = 'status-msg show success';
-
-                setTimeout(() => {
-                    status.classList.remove('show');
-                }, 3000);
-
-            } catch (error) {
-                console.error('Error saveNovedad:', error);
-                status.textContent = '✗ Error: ' + (error.message || 'No se pudo guardar');
-                status.className = 'status-msg show error';
-                
-                setTimeout(() => {
-                    status.classList.remove('show');
-                }, 5000);
-            }
-        }
-
-        async function saveObservation(textarea, row) {
-            const observation = textarea.value.trim();
-
-            // Buscar novedad actual para NO borrarla
-            const select = document.querySelector(`select[onchange*="${row}"]`);
-            const novedadActual = select ? select.value : '';
-
-            const status = document.getElementById('status-' + row);
-
-            status.textContent = '⏳ Guardando...';
-            status.className = 'status-msg show';
-
-            try {
-                const result = await saveData(row, novedadActual, observation);
-                console.log('Resultado saveObservation:', result);
-
-                status.textContent = '✓ Guardado';
-                status.className = 'status-msg show success';
-
-                setTimeout(() => {
-                    status.classList.remove('show');
-                }, 3000);
-
-            } catch (error) {
-                console.error('Error saveObservation:', error);
-                status.textContent = '✗ Error: ' + (error.message || 'No se pudo guardar');
-                status.className = 'status-msg show error';
-                
-                setTimeout(() => {
-                    status.classList.remove('show');
-                }, 5000);
-            }
-        }
-
-        function getNovedadClass(novedad) {
-            const n = (novedad || '').toUpperCase();
-            if (n.indexOf('OFICINA') !== -1) return 'novedad-oficina';
-            if (n.indexOf('VACACIONES') !== -1) return 'novedad-vacaciones';
-            if (n.indexOf('SERVICIO') !== -1) return 'novedad-servicio';
-            if (n.indexOf('GRAVIDEZ') !== -1) return 'novedad-gravidez';
-            if (n === 'EXCUSA PARCIAL') return 'novedad-excusa-parcial';
-            if (n === 'EXCUSADO DEL SERVICIO') return 'novedad-excusa-servicio';
-            if (n.indexOf('EXCUSA') !== -1) return 'novedad-excusa';
-            if (n.indexOf('PERMISO') !== -1) return 'novedad-permiso';
-            if (n.indexOf('CITA') !== -1) return 'novedad-cita';
-            if (n.indexOf('MATERNIDAD') !== -1) return 'novedad-maternidad';
-            if (n === 'RETARDAD@') return 'novedad-retardada';
-            if (n.indexOf('OTRA') !== -1) return 'novedad-otra';
-            if (n.indexOf('CURSO') !== -1) return 'novedad-curso';
-            if (n.indexOf('COMISION') !== -1) return 'novedad-comision';
-            return 'novedad-normal';
-        }
-
-        function createNovedadSelect(currentValue, row) {
-            let options = '<option value="" selected>Seleccione Novedad</option>';
-            NOVEDADES.forEach(function(n) {
-                const selected = (currentValue === n) ? 'selected' : '';
-                options += '<option value="' + n + '" ' + selected + '>' + n + '</option>';
-            });
-
-            return '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><select class="novedad-select" onchange="saveNovedad(this, ' + row + ')">' + options + '</select><span class="col-novedad ' + getNovedadClass(currentValue) + '" id="badge-' + row + '">' + (currentValue || 'Seleccione Novedad') + '</span><span class="status-msg" id="status-novedad-' + row + '">✓ Guardado</span></div>';
-        }
-
         function renderTable(data) {
             const container = document.getElementById('tableContainer');
 
@@ -1213,7 +1129,7 @@
             let html = '<table><thead><tr><th>GRADO</th><th>APELLIDOS Y NOMBRES</th><th>TURNO</th><th>NOVEDAD</th><th>OBSERVACIONES</th></tr></thead><tbody>';
 
             data.forEach(function(person) {
-                html += '<tr><td><span class="col-grado">' + (person.colD || person.grado || '-') + '</span></td><td>' + (person.nombres || '-') + '</td><td>' + (person.turno || '-') + '</td><td>' + createNovedadSelect(person.novedad, person.row) + '</td><td><div class="obs-container"><textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ' + person.row + ')">' + (person.observacion || '') + '</textarea><div class="obs-actions"><button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ' + person.row + ')">💾 Guardar</button><span class="status-msg" id="status-' + person.row + '">✓ Guardado</span></div></div></td></tr>';
+                html += '<tr><td><span class="col-grado">' + (person.grado || '-') + '</span></td><td>' + (person.nombres || '-') + '</td><td>' + (person.turno || '-') + '</td><td>' + createNovedadSelect(person.novedad, person.row) + '</td><td><div class="obs-container"><textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ' + person.row + ')">' + (person.observacion || '') + '</textarea><div class="obs-actions"><button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ' + person.row + ')">💾 Guardar</button><span class="status-msg" id="status-' + person.row + '"></span></div></div></td></tr>';
             });
 
             html += '</tbody></table>';
