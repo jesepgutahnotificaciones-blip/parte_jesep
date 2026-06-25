@@ -243,6 +243,7 @@
                 urlP.append('rol', ROL_ACTUAL || 'usuario');
                 for (const [k, v] of Object.entries(params)) { if (v !== undefined && v !== null) urlP.append(k, v); }
                 const url = API_URL + '?' + urlP.toString();
+                logDebug('JSONP URL: ' + url.substring(0, 200));
                 const to = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 18000);
                 window[cbName] = function(data) { clearTimeout(to); cleanup(); resolve(data); };
                 function cleanup() { delete window[cbName]; if (script.parentNode) script.parentNode.removeChild(script); }
@@ -281,7 +282,7 @@
         function logout() { localStorage.removeItem('policiaSession'); localStorage.removeItem('currentDependency'); location.reload(); }
 
         // ============================================================
-        // NUEVO: Cargar datos desde hojas {DEP}_TURNO_{A|B|C}
+        // V9: Cargar datos desde hoja Registro_Cambios (celdas específicas)
         // ============================================================
         async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -295,7 +296,54 @@
             }
 
             try {
-                // Cargar las 3 hojas de turno en paralelo
+                // ============================================================
+                // PASO 1: Leer celdas de Formacion desde Registro_Cambios
+                // I2 = Total En Formacion Turno A
+                // P2 = Total En Formacion Turno B
+                // W2 = Total En Formacion Turno C
+                // ============================================================
+                logDebug('=== Leyendo celdas de Registro_Cambios ===');
+                const formacionCells = await apiFetchJSONP('getCells', {
+                    sheet: 'Registro_Cambios',
+                    cells: 'I2,P2,W2'
+                });
+                logDebug('Formacion cells response: ' + JSON.stringify(formacionCells));
+
+                let formacionA = 0, formacionB = 0, formacionC = 0;
+                if (formacionCells.success && formacionCells.values) {
+                    formacionA = parseInt(formacionCells.values['I2']) || 0;
+                    formacionB = parseInt(formacionCells.values['P2']) || 0;
+                    formacionC = parseInt(formacionCells.values['W2']) || 0;
+                }
+                logDebug('Formacion: A=' + formacionA + ' B=' + formacionB + ' C=' + formacionC);
+
+                // ============================================================
+                // PASO 2: Leer celdas de Novedades desde Registro_Cambios
+                // J8:J21 = Novedades Turno A (14 filas = 14 tipos de novedad)
+                // Q8:Q21 = Novedades Turno B
+                // X8:X21 = Novedades Turno C
+                // ============================================================
+                logDebug('=== Leyendo novedades de Registro_Cambios ===');
+                const novedadesCellsA = await apiFetchJSONP('getCells', {
+                    sheet: 'Registro_Cambios',
+                    cells: 'J8,J9,J10,J11,J12,J13,J14,J15,J16,J17,J18,J19,J20,J21'
+                });
+                const novedadesCellsB = await apiFetchJSONP('getCells', {
+                    sheet: 'Registro_Cambios',
+                    cells: 'Q8,Q9,Q10,Q11,Q12,Q13,Q14,Q15,Q16,Q17,Q18,Q19,Q20,Q21'
+                });
+                const novedadesCellsC = await apiFetchJSONP('getCells', {
+                    sheet: 'Registro_Cambios',
+                    cells: 'X8,X9,X10,X11,X12,X13,X14,X15,X16,X17,X18,X19,X20,X21'
+                });
+
+                logDebug('Novedades A response: ' + JSON.stringify(novedadesCellsA).substring(0, 200));
+                logDebug('Novedades B response: ' + JSON.stringify(novedadesCellsB).substring(0, 200));
+                logDebug('Novedades C response: ' + JSON.stringify(novedadesCellsC).substring(0, 200));
+
+                // ============================================================
+                // PASO 3: Cargar datos de personal de las 3 hojas de turno
+                // ============================================================
                 const [dataA, dataB, dataC, auditoriaResponse, usuariosResponse] = await Promise.all([
                     apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_A' }),
                     apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_B' }),
@@ -308,7 +356,7 @@
                 logDebug('Turno B: success=' + dataB.success + ' count=' + (dataB.data ? dataB.data.length : 0));
                 logDebug('Turno C: success=' + dataC.success + ' count=' + (dataC.data ? dataC.data.length : 0));
 
-                // Combinar todos los datos y agregar el turno a cada registro
+                // Combinar todos los datos de personal
                 allPersonnelData = [];
                 const turnosData = { A: [], B: [], C: [] };
 
@@ -316,7 +364,6 @@
                     const resp = [dataA, dataB, dataC][idx];
                     if (resp.success && resp.data) {
                         resp.data.forEach(row => {
-                            // Asegurar que cada fila tenga el turno correcto
                             row.turno = turno;
                             allPersonnelData.push(row);
                             turnosData[turno].push(row);
@@ -328,37 +375,81 @@
 
                 if (auditoriaResponse.success && auditoriaResponse.data) allAuditoriaData = auditoriaResponse.data;
 
-                // Calcular formacion y novedades directamente de los datos
-                const formacion = calcularFormacion(turnosData);
-                const novedades = calcularNovedades(turnosData);
+                // ============================================================
+                // PASO 4: Calcular categorias de formacion desde datos de personal
+                // ============================================================
+                const formacionCats = calcularFormacion(turnosData);
 
-                // Renderizar Formacion
+                // Sobreescribir totales con los valores de Registro_Cambios
+                formacionCats.A.total = formacionA;
+                formacionCats.B.total = formacionB;
+                formacionCats.C.total = formacionC;
+
+                // ============================================================
+                // PASO 5: Procesar novedades desde Registro_Cambios
+                // ============================================================
+                const novedadesA = procesarNovedadesDesdeCeldas(novedadesCellsA, 'J');
+                const novedadesB = procesarNovedadesDesdeCeldas(novedadesCellsB, 'Q');
+                const novedadesC = procesarNovedadesDesdeCeldas(novedadesCellsC, 'X');
+
+                // ============================================================
+                // PASO 6: Renderizar Formacion
+                // ============================================================
                 let formacionHTML = '';
                 ['A', 'B', 'C'].forEach(t => {
-                    formacionHTML += renderizarParteTurno(t, formacion[t]);
+                    formacionHTML += renderizarParteTurno(t, formacionCats[t]);
                 });
                 document.getElementById('turnosContainer').innerHTML = formacionHTML;
 
-                // Renderizar Novedades
+                // ============================================================
+                // PASO 7: Renderizar Novedades
+                // ============================================================
                 let novedadesHTML = '';
-                ['A', 'B', 'C'].forEach(t => {
-                    novedadesHTML += renderizarNovedadesTurno(t, novedades[t]);
-                });
+                novedadesHTML += renderizarNovedadesTurno('A', novedadesA);
+                novedadesHTML += renderizarNovedadesTurno('B', novedadesB);
+                novedadesHTML += renderizarNovedadesTurno('C', novedadesC);
                 document.getElementById('novedadesContainer').innerHTML = novedadesHTML;
 
-                // Renderizar Usuarios
+                // ============================================================
+                // PASO 8: Renderizar Usuarios
+                // ============================================================
                 if (usuariosResponse.success && usuariosResponse.data) renderizarUsuarios(usuariosResponse.data);
 
             } catch (e) {
                 console.error(e);
                 logDebug('ERROR cargarDatos: ' + e.message);
-                document.getElementById('turnosContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ Error de conexion</div>';
+                document.getElementById('turnosContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ Error de conexion: ' + e.message + '</div>';
             } finally {
                 setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 500);
             }
         }
 
-        // Calcular formacion por categoria desde los datos reales
+        // ============================================================
+        // Procesar novedades desde celdas de Registro_Cambios
+        // Las celdas J8:J21, Q8:Q21, X8:X21 contienen los totales
+        // ============================================================
+        function procesarNovedadesDesdeCeldas(response, columna) {
+            const resultado = [];
+            if (!response.success || !response.values) {
+                // Si falla, devolver todo en 0
+                NOVEDADES_ORDEN.forEach(n => resultado.push({ nombre: n, total: 0 }));
+                return resultado;
+            }
+
+            const valores = response.values;
+            // Mapear las 14 filas (8-21) a las 14 novedades en orden
+            NOVEDADES_ORDEN.forEach((novedad, idx) => {
+                const fila = 8 + idx; // J8, J9, ... J21
+                const celda = columna + fila;
+                const valor = valores[celda];
+                const total = (valor !== undefined && valor !== null && valor !== '') ? parseInt(valor) : 0;
+                resultado.push({ nombre: novedad, total: isNaN(total) ? 0 : total });
+            });
+
+            return resultado;
+        }
+
+        // Calcular formacion por categoria desde los datos reales de personal
         function calcularFormacion(turnosData) {
             const resultado = { A: {}, B: {}, C: {} };
             ['A', 'B', 'C'].forEach(t => {
@@ -376,27 +467,6 @@
                     else cats.nouni++;
                 });
                 resultado[t] = cats;
-            });
-            return resultado;
-        }
-
-        // Calcular novedades contando desde los datos reales
-        function calcularNovedades(turnosData) {
-            const resultado = { A: [], B: [], C: [] };
-            ['A', 'B', 'C'].forEach(t => {
-                const datos = turnosData[t];
-                const conteo = {};
-                // Inicializar todas en 0
-                NOVEDADES_ORDEN.forEach(n => conteo[n] = 0);
-                // Contar
-                datos.forEach(p => {
-                    const nov = (p.novedad || '').toString().trim();
-                    if (nov && NOVEDADES_ORDEN.includes(nov)) {
-                        conteo[nov]++;
-                    }
-                });
-                // Convertir a array
-                resultado[t] = NOVEDADES_ORDEN.map(n => ({ nombre: n, total: conteo[n] }));
             });
             return resultado;
         }
