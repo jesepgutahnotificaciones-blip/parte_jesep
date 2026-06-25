@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Novedades - Policía Nacional de Colombia</title>
+    <title>Dashboard Novedades - Policia Nacional de Colombia</title>
     <style>
         :root {
             --verde-policia: #01592F;
@@ -15,641 +15,128 @@
             --gris-texto: #5F6368;
             --gris-oscuro: #3C4043;
             --rojo-suave: #D93025;
-            --verde-exito: #1E8E3E;
-            --naranja-advertencia: #F9A825;
             --borde: #DADCE0;
-            --sombra-suave: 0 2px 8px rgba(0,0,0,0.1);
             --sombra-card: 0 4px 12px rgba(0,0,0,0.15);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, var(--gris-fondo) 0%, #e8ecef 100%);
-            min-height: 100vh;
-            color: var(--gris-oscuro);
-            font-size: 14px;
-        }
-
-        .header-institutional {
-            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
-            color: var(--blanco);
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--sombra-suave);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, var(--gris-fondo) 0%, #e8ecef 100%); min-height: 100vh; color: var(--gris-oscuro); font-size: 14px; }
+        .header-institutional { background: linear-gradient(135deg, #01592F 0%, #173E56 100%); color: var(--blanco); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
         .header-left { display: flex; align-items: center; gap: 14px; }
-        .header-left img { width: 42px; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
-        .header-text h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+        .header-left img { width: 42px; height: auto; }
+        .header-text h1 { font-size: 1.1rem; font-weight: 700; }
         .header-text .subtitulo { color: var(--amarillo-policia); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-
         .header-right { display: flex; align-items: center; gap: 16px; }
         .date-display { color: var(--blanco); font-size: 0.8rem; opacity: 0.9; }
-        .btn-refresh {
-            background: linear-gradient(135deg, var(--amarillo-policia) 0%, #B8941F 100%);
-            color: var(--azul-oscuro);
-            border: none;
-            padding: 8px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        .btn-refresh:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.15);
-            padding: 6px 14px;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.3);
-            color: var(--blanco);
-            font-size: 0.8rem;
-        }
-        .user-badge {
-            background: var(--amarillo-policia);
-            color: var(--azul-oscuro);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-        }
-        .btn-logout {
-            background: rgba(255,255,255,0.2);
-            color: var(--blanco);
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 4px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.7rem;
-        }
-        .btn-logout:hover { background: rgba(255,255,255,0.3); }
-
-        .debug-dep {
-            background: rgba(255,200,0,0.25);
-            border: 1px solid var(--amarillo-policia);
-            color: var(--amarillo-policia);
-            font-size: 0.7rem;
-            padding: 3px 10px;
-            border-radius: 4px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
+        .btn-refresh { background: linear-gradient(135deg, var(--amarillo-policia) 0%, #B8941F 100%); color: var(--azul-oscuro); border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.8rem; }
+        .user-info { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); color: var(--blanco); font-size: 0.8rem; }
+        .user-badge { background: var(--amarillo-policia); color: var(--azul-oscuro); padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 0.7rem; }
+        .btn-logout { background: rgba(255,255,255,0.2); color: var(--blanco); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+        .debug-dep { background: rgba(255,200,0,0.25); border: 1px solid var(--amarillo-policia); color: var(--amarillo-policia); font-size: 0.7rem; padding: 3px 10px; border-radius: 4px; font-weight: 700; }
         .main-content { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
-
-        .section-title {
-            color: var(--verde-policia);
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .section-title::before {
-            content: '';
-            display: inline-block;
-            width: 4px;
-            height: 24px;
-            background: var(--amarillo-policia);
-            border-radius: 2px;
-        }
-
-        .turnos-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .turno-card {
-            background: var(--blanco);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--sombra-card);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid var(--borde);
-        }
-        .turno-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-
-        .turno-header {
-            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
-            color: var(--blanco);
-            padding: 14px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .turno-header h2 { font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; }
-        .turno-badge {
-            background: var(--amarillo-policia);
-            color: var(--azul-oscuro);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-        }
-
-        .forman-subtitle {
-            background: linear-gradient(135deg, #1a5f3f 0%, #0d3d2d 100%);
-            color: var(--blanco);
-            text-align: center;
-            padding: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
+        .section-title { color: var(--verde-policia); font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .section-title::before { content: ''; display: inline-block; width: 4px; height: 24px; background: var(--amarillo-policia); border-radius: 2px; }
+        .turnos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .turno-card { background: var(--blanco); border-radius: 12px; overflow: hidden; box-shadow: var(--sombra-card); border: 1px solid var(--borde); }
+        .turno-header { background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); color: var(--blanco); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; }
+        .turno-header h2 { font-size: 1rem; font-weight: 700; }
+        .turno-badge { background: var(--amarillo-policia); color: var(--azul-oscuro); padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; }
+        .forman-subtitle { background: linear-gradient(135deg, #1a5f3f 0%, #0d3d2d 100%); color: var(--blanco); text-align: center; padding: 8px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
         .turno-body { padding: 16px; }
-
-        .categorias-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .categoria-item {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 10px 6px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid var(--borde);
-            transition: all 0.2s ease;
-        }
-        .categoria-item:hover { transform: scale(1.05); }
-
-        .categoria-item .label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--gris-texto);
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .categoria-item .value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--verde-policia);
-        }
+        .categorias-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+        .categoria-item { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 10px 6px; border-radius: 8px; text-align: center; border: 1px solid var(--borde); }
+        .categoria-item .label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gris-texto); font-weight: 600; margin-bottom: 4px; }
+        .categoria-item .value { font-size: 1.3rem; font-weight: 700; color: var(--verde-policia); }
         .categoria-item .value.zero { color: #ccc; font-weight: 400; }
-
-        .cat-oficiales { border-left: 3px solid #1967D2; }
-        .cat-ne { border-left: 3px solid #1E8E3E; }
-        .cat-patrulleros { border-left: 3px solid #B06000; }
-        .cat-pp { border-left: 3px solid #9C1B6A; }
-        .cat-axp { border-left: 3px solid #7B1FA2; }
-        .cat-nouni { border-left: 3px solid #5F6368; }
-
-        .total-card {
-            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
-            color: var(--blanco);
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 10px;
-        }
+        .total-card { background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); color: var(--blanco); padding: 12px; border-radius: 8px; text-align: center; margin-top: 10px; }
         .total-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
         .total-value { font-size: 1.8rem; font-weight: 700; color: var(--amarillo-policia); }
-
         .novedades-section { margin-top: 30px; }
         .novedades-section .section-title { color: var(--azul-oscuro); }
         .novedades-section .section-title::before { background: var(--rojo-suave); }
-
-        .novedades-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .novedades-card {
-            background: var(--blanco);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--sombra-card);
-            border: 1px solid var(--borde);
-        }
-
-        .novedades-header {
-            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
-            color: var(--blanco);
-            padding: 12px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .novedades-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .novedades-card { background: var(--blanco); border-radius: 12px; overflow: hidden; box-shadow: var(--sombra-card); border: 1px solid var(--borde); }
+        .novedades-header { background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: var(--blanco); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; }
         .novedades-header h3 { font-size: 1rem; font-weight: 700; }
-        .novedades-badge {
-            background: var(--amarillo-policia);
-            color: var(--azul-oscuro);
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-weight: 700;
-            font-size: 0.7rem;
-        }
-
+        .novedades-badge { background: var(--amarillo-policia); color: var(--azul-oscuro); padding: 3px 10px; border-radius: 15px; font-weight: 700; font-size: 0.7rem; }
         .novedades-body { padding: 14px; }
-
-        .novedad-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            margin-bottom: 6px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            border-left: 3px solid transparent;
-            cursor: pointer;
-        }
-        .novedad-item:hover { background: #f0f7ff; transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .novedad-item:active { transform: translateX(2px) scale(0.99); }
-
-        .novedad-nombre {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--gris-oscuro);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .novedad-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; transition: all 0.2s ease; border-left: 3px solid transparent; cursor: pointer; }
+        .novedad-item:hover { background: #f0f7ff; transform: translateX(4px); }
+        .novedad-nombre { font-size: 0.78rem; font-weight: 600; color: var(--gris-oscuro); display: flex; align-items: center; gap: 8px; }
         .novedad-icon { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-
-        .nov-oficina { border-left-color: #1967D2; }
-        .nov-oficina .novedad-icon { background: #1967D2; }
-        .nov-vacaciones { border-left-color: #1E8E3E; }
-        .nov-vacaciones .novedad-icon { background: #1E8E3E; }
-        .nov-servicio { border-left-color: #B06000; }
-        .nov-servicio .novedad-icon { background: #B06000; }
-        .nov-gravidez { border-left-color: #9C1B6A; }
-        .nov-gravidez .novedad-icon { background: #9C1B6A; }
-        .nov-excusa { border-left-color: #7B1FA2; }
-        .nov-excusa .novedad-icon { background: #7B1FA2; }
-        .nov-permiso { border-left-color: #00796B; }
-        .nov-permiso .novedad-icon { background: #00796B; }
-        .nov-cita { border-left-color: #0277BD; }
-        .nov-cita .novedad-icon { background: #0277BD; }
-        .nov-maternidad { border-left-color: #C53929; }
-        .nov-maternidad .novedad-icon { background: #C53929; }
-        .nov-excusa-servicio { border-left-color: #6A1B9A; }
-        .nov-excusa-servicio .novedad-icon { background: #6A1B9A; }
-        .nov-otra { border-left-color: #F9A825; }
-        .nov-otra .novedad-icon { background: #F9A825; }
-        .nov-retardado { border-left-color: #E65100; }
-        .nov-retardado .novedad-icon { background: #E65100; }
-        .nov-excusa-parcial { border-left-color: #303F9F; }
-        .nov-excusa-parcial .novedad-icon { background: #303F9F; }
-        .nov-curso { border-left-color: #0D47A1; }
-        .nov-curso .novedad-icon { background: #0D47A1; }
-        .nov-comision { border-left-color: #00695C; }
-        .nov-comision .novedad-icon { background: #00695C; }
-
-        .novedad-total {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--verde-policia);
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            padding: 2px 10px;
-            border-radius: 12px;
-            min-width: 28px;
-            text-align: center;
-            flex-shrink: 0;
-        }
+        .nov-oficina { border-left-color: #1967D2; } .nov-oficina .novedad-icon { background: #1967D2; }
+        .nov-vacaciones { border-left-color: #1E8E3E; } .nov-vacaciones .novedad-icon { background: #1E8E3E; }
+        .nov-servicio { border-left-color: #B06000; } .nov-servicio .novedad-icon { background: #B06000; }
+        .nov-gravidez { border-left-color: #9C1B6A; } .nov-gravidez .novedad-icon { background: #9C1B6A; }
+        .nov-excusa { border-left-color: #7B1FA2; } .nov-excusa .novedad-icon { background: #7B1FA2; }
+        .nov-permiso { border-left-color: #00796B; } .nov-permiso .novedad-icon { background: #00796B; }
+        .nov-cita { border-left-color: #0277BD; } .nov-cita .novedad-icon { background: #0277BD; }
+        .nov-maternidad { border-left-color: #C53929; } .nov-maternidad .novedad-icon { background: #C53929; }
+        .nov-excusa-servicio { border-left-color: #6A1B9A; } .nov-excusa-servicio .novedad-icon { background: #6A1B9A; }
+        .nov-otra { border-left-color: #F9A825; } .nov-otra .novedad-icon { background: #F9A825; }
+        .nov-retardado { border-left-color: #E65100; } .nov-retardado .novedad-icon { background: #E65100; }
+        .nov-excusa-parcial { border-left-color: #303F9F; } .nov-excusa-parcial .novedad-icon { background: #303F9F; }
+        .nov-curso { border-left-color: #0D47A1; } .nov-curso .novedad-icon { background: #0D47A1; }
+        .nov-comision { border-left-color: #00695C; } .nov-comision .novedad-icon { background: #00695C; }
+        .novedad-total { font-size: 1rem; font-weight: 700; color: var(--verde-policia); background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 2px 10px; border-radius: 12px; min-width: 28px; text-align: center; }
         .novedad-total.zero { color: #bbb; background: #f5f5f5; font-weight: 400; }
-
-        .novedad-item .click-hint {
-            font-size: 0.6rem;
-            color: var(--gris-texto);
-            opacity: 0;
-            transition: opacity 0.2s;
-            margin-left: 4px;
-        }
+        .novedad-item .click-hint { font-size: 0.6rem; color: var(--gris-texto); opacity: 0; transition: opacity 0.2s; margin-left: 4px; }
         .novedad-item:hover .click-hint { opacity: 1; }
-
-        .novedades-total-card {
-            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
-            color: var(--blanco);
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .novedades-total-card { background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: var(--blanco); padding: 12px; border-radius: 8px; text-align: center; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; }
         .novedades-total-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .novedades-total-value { font-size: 1.5rem; font-weight: 700; color: var(--amarillo-policia); }
-
         .usuarios-section { margin-top: 30px; }
-        .usuarios-section .section-title { color: var(--azul-oscuro); }
-        .usuarios-section .section-title::before { background: var(--amarillo-policia); }
-
-        .usuarios-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 16px;
-            margin-bottom: 30px;
-        }
-
-        .usuario-card {
-            background: var(--blanco);
-            border-radius: 10px;
-            padding: 14px 16px;
-            box-shadow: var(--sombra-card);
-            border: 1px solid var(--borde);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            transition: transform 0.2s ease;
-        }
-        .usuario-card:hover { transform: translateY(-2px); }
-
-        .usuario-avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
+        .usuarios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .usuario-card { background: var(--blanco); border-radius: 10px; padding: 14px 16px; box-shadow: var(--sombra-card); border: 1px solid var(--borde); display: flex; align-items: center; gap: 14px; }
+        .usuario-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; }
         .avatar-activo { background: #e8f5e9; color: #1E8E3E; border: 2px solid #1E8E3E; }
         .avatar-inactivo { background: #fff3e0; color: #E65100; border: 2px solid #E65100; }
-
         .usuario-info { flex: 1; min-width: 0; }
-        .usuario-nombre { font-size: 0.85rem; font-weight: 700; color: var(--gris-oscuro); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .usuario-rol { font-size: 0.7rem; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.5px; }
-        .usuario-dep { font-size: 0.7rem; color: var(--azul-oscuro); font-weight: 600; margin-top: 2px; }
-
-        .usuario-estado {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-        .estado-badge {
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .usuario-nombre { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .usuario-rol { font-size: 0.7rem; color: var(--gris-texto); text-transform: uppercase; }
+        .usuario-dep { font-size: 0.7rem; color: var(--azul-oscuro); font-weight: 600; }
+        .estado-badge { padding: 3px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; }
         .estado-activo { background: #e8f5e9; color: #1B5E20; }
         .estado-inactivo { background: #fff3e0; color: #BF360C; }
-        .estado-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .dot-activo { background: #1E8E3E; box-shadow: 0 0 6px rgba(30,142,62,0.5); animation: pulso 2s infinite; }
-        .dot-inactivo { background: #E65100; }
-        @keyframes pulso {
-            0%, 100% { box-shadow: 0 0 4px rgba(30,142,62,0.5); }
-            50% { box-shadow: 0 0 10px rgba(30,142,62,0.8); }
-        }
-        .ultimo-acceso { font-size: 0.6rem; color: var(--gris-texto); }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.65);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease;
-            backdrop-filter: blur(2px);
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
-        .modal-content {
-            background: var(--blanco);
-            border-radius: 16px;
-            width: 90%;
-            max-width: 950px;
-            max-height: 82vh;
-            overflow: hidden;
-            box-shadow: 0 24px 60px rgba(0,0,0,0.35);
-            transform: scale(0.9) translateY(20px);
-            transition: transform 0.25s ease;
-            display: flex;
-            flex-direction: column;
-        }
+        .modal-content { background: var(--blanco); border-radius: 16px; width: 90%; max-width: 950px; max-height: 82vh; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.35); transform: scale(0.9) translateY(20px); transition: transform 0.25s ease; display: flex; flex-direction: column; }
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
-        .modal-header {
-            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
-            color: var(--blanco);
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-shrink: 0;
-        }
+        .modal-header { background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%); color: var(--blanco); padding: 16px 20px; display: flex; justify-content: space-between; align-items: flex-start; }
         .modal-header-left h3 { font-size: 1.05rem; font-weight: 700; }
-        .modal-header-left .modal-subtitle { font-size: 0.75rem; opacity: 0.8; margin-top: 3px; }
-        .modal-close {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: var(--blanco);
-            font-size: 1.2rem;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-            flex-shrink: 0;
-        }
-        .modal-close:hover { background: rgba(255,255,255,0.3); }
-        .modal-stats-bar {
-            background: #f8f9fa;
-            border-bottom: 1px solid var(--borde);
-            padding: 10px 20px;
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .modal-stat { display: flex; flex-direction: column; align-items: center; }
+        .modal-close { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: var(--blanco); font-size: 1.2rem; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .modal-stats-bar { background: #f8f9fa; border-bottom: 1px solid var(--borde); padding: 10px 20px; display: flex; gap: 20px; align-items: center; }
         .modal-stat .ms-val { font-size: 1.2rem; font-weight: 700; color: var(--verde-policia); }
         .modal-stat .ms-label { font-size: 0.65rem; text-transform: uppercase; color: var(--gris-texto); }
-        .modal-search {
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--borde);
-            flex-shrink: 0;
-        }
-        .modal-search input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid var(--borde);
-            border-radius: 6px;
-            font-size: 0.85rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .modal-search input:focus { border-color: var(--verde-policia); }
+        .modal-search { padding: 12px 20px; border-bottom: 1px solid var(--borde); }
+        .modal-search input { width: 100%; padding: 8px 12px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.85rem; }
         .modal-body { padding: 0; overflow-y: auto; flex: 1; }
-        .modal-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-        .modal-table thead {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-        .modal-table th {
-            padding: 10px 16px;
-            text-align: left;
-            font-weight: 700;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--gris-oscuro);
-            border-bottom: 2px solid var(--borde);
-        }
-        .modal-table td {
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--gris-suave);
-            vertical-align: middle;
-        }
+        .modal-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .modal-table thead { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); position: sticky; top: 0; z-index: 1; }
+        .modal-table th { padding: 10px 16px; text-align: left; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gris-oscuro); border-bottom: 2px solid var(--borde); }
+        .modal-table td { padding: 10px 16px; border-bottom: 1px solid var(--gris-suave); vertical-align: middle; }
         .modal-table tr:nth-child(even) { background: #fafbfc; }
         .modal-table tr:hover { background: #f0f7ff; }
-        .modal-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .modal-loading {
-            text-align: center;
-            padding: 50px 20px;
-            color: var(--gris-texto);
-        }
-        .modal-loading .spinner-sm {
-            width: 36px; height: 36px;
-            border: 3px solid var(--gris-suave);
-            border-top-color: var(--amarillo-policia);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 12px;
-        }
-        .modal-empty {
-            text-align: center;
-            padding: 50px 20px;
-            color: var(--gris-texto);
-        }
-        .modal-empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
-        .modal-cat-breakdown {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .cat-chip {
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            background: #e3f2fd;
-            color: #0D47A1;
-        }
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.96);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
-        }
+        .modal-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .modal-loading { text-align: center; padding: 50px 20px; color: var(--gris-texto); }
+        .modal-empty { text-align: center; padding: 50px 20px; color: var(--gris-texto); }
+        .cat-chip { padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; background: #e3f2fd; color: #0D47A1; }
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.96); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; }
         .loading-overlay.hidden { opacity: 0; pointer-events: none; }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 4px solid var(--gris-suave);
-            border-top-color: var(--amarillo-policia);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 16px;
-        }
+        .spinner { width: 50px; height: 50px; border: 4px solid var(--gris-suave); border-top-color: var(--amarillo-policia); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { color: var(--gris-texto); font-size: 1rem; font-weight: 500; }
-        .footer-institutional {
-            text-align: center;
-            padding: 20px;
-            margin-top: 40px;
-            background: linear-gradient(135deg, #01592F 0%, #173E56 100%);
-        }
+        .footer-institutional { text-align: center; padding: 20px; margin-top: 40px; background: linear-gradient(135deg, #01592F 0%, #173E56 100%); }
         .footer-institutional p { color: var(--blanco); font-size: 0.8rem; opacity: 0.8; }
-        .footer-institutional .motto { color: var(--amarillo-policia); font-weight: 700; font-size: 1rem; margin-top: 6px; letter-spacing: 2px; }
-
-        /* Estilos para observaciones en el popup */
-        .observacion-cell {
-            max-width: 280px;
-            font-size: 0.78rem;
-            color: var(--gris-oscuro);
-            line-height: 1.4;
-            word-break: break-word;
-        }
-        .observacion-vacia {
-            color: #bbb;
-            font-style: italic;
-        }
-        .novedad-cell {
-            font-weight: 700;
-            font-size: 0.8rem;
-        }
-        .novedad-badge-popup {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            background: #e8f5e9;
-            color: #1B5E20;
-            border: 1px solid #a5d6a7;
-        }
-
-        @media (max-width: 1024px) {
-            .turnos-grid, .novedades-grid { grid-template-columns: 1fr; }
-            .categorias-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .header-institutional { flex-direction: column; gap: 10px; padding: 10px 16px; }
-            .categorias-grid { grid-template-columns: repeat(2, 1fr); }
-            .modal-content { width: 96%; max-height: 90vh; }
-        }
+        .observacion-cell { max-width: 280px; font-size: 0.78rem; color: var(--gris-oscuro); line-height: 1.4; word-break: break-word; }
+        .observacion-vacia { color: #bbb; font-style: italic; }
+        .novedad-badge-popup { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; background: #e8f5e9; color: #1B5E20; border: 1px solid #a5d6a7; }
+        .debug-panel { position: fixed; bottom: 40px; right: 10px; background: rgba(0,0,0,0.9); color: #0f0; font-family: monospace; font-size: 11px; padding: 10px; border-radius: 6px; max-width: 500px; max-height: 300px; overflow-y: auto; z-index: 99999; display: none; }
+        .debug-panel.visible { display: block; }
+        .debug-toggle { position: fixed; bottom: 10px; right: 10px; background: #333; color: #0f0; border: 1px solid #0f0; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; z-index: 99999; }
+        @media (max-width: 1024px) { .turnos-grid, .novedades-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .header-institutional { flex-direction: column; gap: 10px; } .modal-content { width: 96%; } }
     </style>
 </head>
 <body>
-
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
         <div class="loading-text" id="loadingText">Cargando datos del sistema...</div>
@@ -657,17 +144,15 @@
 
     <div class="header-institutional">
         <div class="header-left">
-            <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png"
-                 alt="Escudo Policía Nacional"
-                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
+            <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" alt="Escudo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
             <div class="header-text">
-                <h1>POLICÍA NACIONAL DE COLOMBIA</h1>
+                <h1>POLICIA NACIONAL DE COLOMBIA</h1>
                 <div class="subtitulo" id="depSubtitle">Dashboard de Novedades - Cargando...</div>
             </div>
         </div>
         <div class="header-right">
             <span class="date-display" id="currentDate"></span>
-            <span class="debug-dep" id="depBadge" title="Dependencia activa">📍 ...</span>
+            <span class="debug-dep" id="depBadge">📍 ...</span>
             <div class="user-info" id="userInfo" style="display:none;">
                 <span id="userNameDisplay"></span>
                 <span class="user-badge" id="userRoleDisplay"></span>
@@ -678,32 +163,27 @@
     </div>
 
     <div class="main-content">
-
-        <h2 class="section-title">📊 Estado de Formación</h2>
-        <div class="turnos-grid" id="turnosContainer">
-            <div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">Cargando formación...</div>
-        </div>
+        <h2 class="section-title">📊 Estado de Formacion</h2>
+        <div class="turnos-grid" id="turnosContainer"><div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">Cargando formacion...</div></div>
 
         <div class="novedades-section">
             <h2 class="section-title">📋 Novedades por Turno</h2>
-            <div class="novedades-grid" id="novedadesContainer">
-                <div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">Cargando novedades...</div>
-            </div>
+            <div class="novedades-grid" id="novedadesContainer"><div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">Cargando novedades...</div></div>
         </div>
 
         <div class="usuarios-section">
             <h2 class="section-title">👥 Usuarios Registrados</h2>
-            <div class="usuarios-grid" id="usuariosContainer">
-                <div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">Cargando usuarios...</div>
-            </div>
+            <div class="usuarios-grid" id="usuariosContainer"><div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">Cargando usuarios...</div></div>
         </div>
-
     </div>
 
     <div class="footer-institutional">
-        <p>Sistema de Gestión de Novedades - Policía Nacional de Colombia</p>
+        <p>Sistema de Gestion de Novedades - Policia Nacional de Colombia</p>
         <p class="motto">★ DIOS Y PATRIA ★</p>
     </div>
+
+    <button class="debug-toggle" onclick="toggleDebug()">🐛 DEBUG</button>
+    <div class="debug-panel" id="debugPanel"></div>
 
     <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalClick(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
@@ -712,480 +192,263 @@
                     <h3 id="modalTitle">👥 Funcionarios</h3>
                     <div class="modal-subtitle" id="modalSubtitle"></div>
                 </div>
-                <button class="modal-close" onclick="cerrarModal()" aria-label="Cerrar">✕</button>
+                <button class="modal-close" onclick="cerrarModal()">✕</button>
             </div>
             <div class="modal-stats-bar" id="modalStatsBar" style="display:none;">
-                <div class="modal-stat">
-                    <span class="ms-val" id="modalTotal">0</span>
-                    <span class="ms-label">Total</span>
-                </div>
+                <div class="modal-stat"><span class="ms-val" id="modalTotal">0</span><span class="ms-label">Total</span></div>
                 <div class="modal-cat-breakdown" id="modalCatBreakdown"></div>
             </div>
             <div class="modal-search" id="modalSearchBar" style="display:none;">
-                <input type="text" id="modalSearchInput" placeholder="🔍 Buscar por nombre, grado, novedad o observación..." oninput="filtrarModalTabla()">
+                <input type="text" id="modalSearchInput" placeholder="Buscar por nombre, grado, novedad u observacion..." oninput="filtrarModalTabla()">
             </div>
             <div class="modal-body" id="modalBody">
-                <div class="modal-loading">
-                    <div class="spinner-sm"></div>
-                    <p>Buscando funcionarios...</p>
-                </div>
+                <div class="modal-loading"><div class="spinner-sm"></div><p>Buscando funcionarios...</p></div>
             </div>
         </div>
     </div>
 
     <script>
-        /* =============================================
-           CONFIGURACIÓN - URL de tu Web App V7
-        ============================================= */
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwgsWHDQd0OA5W6r2yupbr_f9qsNoDd1rtgi3GvIypCoHTzJ_a0CSafHJ85VCODtEZl/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx9RMgrVgYwpjQb4q8GmpOwIlP322IOCmyzUDE7F1CS2DsSVhocxJQQg2QkA0ily82n/exec';
+        let DEPENDENCY = '', USUARIO_ACTUAL = null, ROL_ACTUAL = 'usuario';
+        let allPersonnelData = [], allAuditoriaData = [], modalFuncionariosFull = [], jsonpCallbackId = 0;
 
-        const SHEET_REGISTRO = 'Registro_Cambios';
+        function logDebug(msg) {
+            const panel = document.getElementById('debugPanel');
+            const line = document.createElement('div');
+            line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+            panel.appendChild(line);
+            console.log(msg);
+        }
+        function toggleDebug() { document.getElementById('debugPanel').classList.toggle('visible'); }
 
-        let DEPENDENCY = '';
-        let USUARIO_ACTUAL = null;
-        let ROL_ACTUAL = 'usuario';
+        const NOVEDADES_ORDEN = ['OFICINA','VACACIONES','SERVICIO','ESTADO DE GRAVIDEZ','EXCUSA TOTAL','PERMISO','CITA MEDICA','LICENCIA DE MATERNIDAD','EXCUSADO DEL SERVICIO','OTRA NOVEDAD','RETARDAD@','EXCUSA PARCIAL','CURSO DE ASCENSO','COMISION'];
 
-        let allPersonnelData  = [];
-        let allAuditoriaData  = [];
-        let modalFuncionariosFull = [];
-        let jsonpCallbackId = 0;
-
-        /* =============================================
-           MAPEO DE CELDAS  (hoja: Registro_Cambios)
-           Formación fila 2, Novedades filas 8-21
-        ============================================= */
-        const FORMACION_CELLS = {
-            A: { total: 'I2',  oficiales: 'J2',  ne: 'K2',  patrulleros: 'L2',  pp: 'M2',  axp: 'N2',  nouni: 'O2'  },
-            B: { total: 'P2',  oficiales: 'Q2',  ne: 'R2',  patrulleros: 'S2',  pp: 'T2',  axp: 'U2',  nouni: 'V2'  },
-            C: { total: 'W2',  oficiales: 'X2',  ne: 'Y2',  patrulleros: 'Z2',  pp: 'AA2', axp: 'AB2', nouni: 'AC2' }
+        const NOVEDADES_CSS = {
+            'OFICINA': 'nov-oficina', 'VACACIONES': 'nov-vacaciones', 'SERVICIO': 'nov-servicio', 'ESTADO DE GRAVIDEZ': 'nov-gravidez',
+            'EXCUSA TOTAL': 'nov-excusa', 'PERMISO': 'nov-permiso', 'CITA MEDICA': 'nov-cita', 'LICENCIA DE MATERNIDAD': 'nov-maternidad',
+            'EXCUSADO DEL SERVICIO': 'nov-excusa-servicio', 'OTRA NOVEDAD': 'nov-otra', 'RETARDAD@': 'nov-retardado',
+            'EXCUSA PARCIAL': 'nov-excusa-parcial', 'CURSO DE ASCENSO': 'nov-curso', 'COMISION': 'nov-comision'
         };
 
-        const NOVEDADES_CELLS = {
-            A: {
-                'OFICINA':                 'J8',
-                'VACACIONES':              'J9',
-                'SERVICIO':                'J10',
-                'ESTADO DE GRAVIDEZ':      'J11',
-                'EXCUSA TOTAL':            'J12',
-                'PERMISO':                 'J13',
-                'CITA MEDICA':             'J14',
-                'LICENCIA DE MATERNIDAD':  'J15',
-                'EXCUSADO DEL SERVICIO':   'J16',
-                'OTRA NOVEDAD':            'J17',
-                'RETARDAD@':               'J18',
-                'EXCUSA PARCIAL':          'J19',
-                'CURSO DE ASCENSO':        'J20',
-                'COMISION':                'J21'
-            },
-            B: {
-                'OFICINA':                 'Q8',
-                'VACACIONES':              'Q9',
-                'SERVICIO':                'Q10',
-                'ESTADO DE GRAVIDEZ':      'Q11',
-                'EXCUSA TOTAL':            'Q12',
-                'PERMISO':                 'Q13',
-                'CITA MEDICA':             'Q14',
-                'LICENCIA DE MATERNIDAD':  'Q15',
-                'EXCUSADO DEL SERVICIO':   'Q16',
-                'OTRA NOVEDAD':            'Q17',
-                'RETARDAD@':               'Q18',
-                'EXCUSA PARCIAL':          'Q19',
-                'CURSO DE ASCENSO':        'Q20',
-                'COMISION':                'Q21'
-            },
-            C: {
-                'OFICINA':                 'X8',
-                'VACACIONES':              'X9',
-                'SERVICIO':                'X10',
-                'ESTADO DE GRAVIDEZ':      'X11',
-                'EXCUSA TOTAL':            'X12',
-                'PERMISO':                 'X13',
-                'CITA MEDICA':             'X14',
-                'LICENCIA DE MATERNIDAD':  'X15',
-                'EXCUSADO DEL SERVICIO':   'X16',
-                'OTRA NOVEDAD':            'X17',
-                'RETARDAD@':               'X18',
-                'EXCUSA PARCIAL':          'X19',
-                'CURSO DE ASCENSO':        'X20',
-                'COMISION':                'X21'
-            }
-        };
-
-        const NOVEDADES_ORDEN = [
-            'OFICINA', 'VACACIONES', 'SERVICIO', 'ESTADO DE GRAVIDEZ',
-            'EXCUSA TOTAL', 'PERMISO', 'CITA MEDICA', 'LICENCIA DE MATERNIDAD',
-            'EXCUSADO DEL SERVICIO', 'OTRA NOVEDAD', 'RETARDAD@',
-            'EXCUSA PARCIAL', 'CURSO DE ASCENSO', 'COMISION'
-        ];
-
-        /* =============================================
-           JSONP
-        ============================================= */
         function apiFetchJSONP(action, params) {
             params = params || {};
             return new Promise((resolve, reject) => {
-                const callbackName = 'jsonpCb_' + (++jsonpCallbackId) + '_' + Date.now();
+                const cbName = 'jsonpCb_' + (++jsonpCallbackId) + '_' + Date.now();
                 const script = document.createElement('script');
-                const urlParams = new URLSearchParams();
-
-                urlParams.append('action',     action);
-                urlParams.append('dependency', DEPENDENCY);
-                urlParams.append('sheet',      SHEET_REGISTRO);
-                urlParams.append('callback',   callbackName);
-                urlParams.append('usuario',    USUARIO_ACTUAL || 'Sistema');
-                urlParams.append('rol',        ROL_ACTUAL     || 'usuario');
-
-                for (const [key, value] of Object.entries(params)) {
-                    if (value !== undefined && value !== null) urlParams.append(key, value);
-                }
-
-                const url = API_URL + '?' + urlParams.toString();
-                const timeout = setTimeout(() => { cleanup(); reject(new Error('Timeout JSONP')); }, 18000);
-                window[callbackName] = function(data) { clearTimeout(timeout); cleanup(); resolve(data); };
-                function cleanup() {
-                    delete window[callbackName];
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                }
-                script.onerror = function() { clearTimeout(timeout); cleanup(); reject(new Error('Error JSONP')); };
+                const urlP = new URLSearchParams();
+                urlP.append('action', action);
+                urlP.append('dependency', DEPENDENCY);
+                urlP.append('callback', cbName);
+                urlP.append('usuario', USUARIO_ACTUAL || 'Sistema');
+                urlP.append('rol', ROL_ACTUAL || 'usuario');
+                for (const [k, v] of Object.entries(params)) { if (v !== undefined && v !== null) urlP.append(k, v); }
+                const url = API_URL + '?' + urlP.toString();
+                const to = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 18000);
+                window[cbName] = function(data) { clearTimeout(to); cleanup(); resolve(data); };
+                function cleanup() { delete window[cbName]; if (script.parentNode) script.parentNode.removeChild(script); }
+                script.onerror = function() { clearTimeout(to); cleanup(); reject(new Error('Error JSONP')); };
                 script.src = url;
                 document.head.appendChild(script);
             });
         }
 
-        /* =============================================
-           FECHA
-        ============================================= */
         function updateDate() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
 
-        /* =============================================
-           SESIÓN
-        ============================================= */
         function checkSession() {
-            const sessionStr = localStorage.getItem('policiaSession');
-            if (!sessionStr) return null;
-            try {
-                const session = JSON.parse(sessionStr);
-                if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) {
-                    localStorage.removeItem('policiaSession');
-                    return null;
-                }
-                return session.usuario;
-            } catch(e) { return null; }
+            const s = localStorage.getItem('policiaSession');
+            if (!s) return null;
+            try { const session = JSON.parse(s); if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) { localStorage.removeItem('policiaSession'); return null; } return session.usuario; }
+            catch(e) { return null; }
         }
 
         function initSession() {
-            const usuario = checkSession();
-
-            if (usuario) {
-                USUARIO_ACTUAL = usuario.username;
-                ROL_ACTUAL     = usuario.rol        || 'usuario';
-                if (usuario.dependencia) {
-                    DEPENDENCY = usuario.dependencia.trim();
-                } else {
-                    DEPENDENCY = (localStorage.getItem('currentDependency') || '').trim();
-                }
+            const u = checkSession();
+            if (u) {
+                USUARIO_ACTUAL = u.username; ROL_ACTUAL = u.rol || 'usuario';
+                DEPENDENCY = u.dependencia ? u.dependencia.trim() : (localStorage.getItem('currentDependency') || '').trim();
                 if (DEPENDENCY) localStorage.setItem('currentDependency', DEPENDENCY);
                 document.getElementById('userInfo').style.display = 'flex';
                 document.getElementById('userNameDisplay').textContent = USUARIO_ACTUAL;
-                document.getElementById('userRoleDisplay').textContent  = ROL_ACTUAL;
-            } else {
-                DEPENDENCY = (localStorage.getItem('currentDependency') || '').trim();
-            }
-
-            const depTexto = DEPENDENCY || 'SIN DEPENDENCIA';
-            document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades — ' + depTexto;
-            document.getElementById('depBadge').textContent    = '📍 ' + depTexto;
-
-            if (!DEPENDENCY) {
-                console.warn('[Dashboard] No hay dependencia definida. Inicie sesión para ver datos correctos.');
-            }
+                document.getElementById('userRoleDisplay').textContent = ROL_ACTUAL;
+            } else { DEPENDENCY = (localStorage.getItem('currentDependency') || '').trim(); }
+            const dt = DEPENDENCY || 'SIN DEPENDENCIA';
+            document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades — ' + dt;
+            document.getElementById('depBadge').textContent = '📍 ' + dt;
         }
 
-        function logout() {
-            localStorage.removeItem('policiaSession');
-            localStorage.removeItem('currentDependency');
-            location.reload();
-        }
+        function logout() { localStorage.removeItem('policiaSession'); localStorage.removeItem('currentDependency'); location.reload(); }
 
-        /* =============================================
-           CARGAR DATOS
-        ============================================= */
+        // ============================================================
+        // NUEVO: Cargar datos desde hojas {DEP}_TURNO_{A|B|C}
+        // ============================================================
         async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.getElementById('loadingText').textContent =
-                'Cargando datos' + (DEPENDENCY ? ' de ' + DEPENDENCY : '') + '...';
+            document.getElementById('loadingText').textContent = 'Cargando datos' + (DEPENDENCY ? ' de ' + DEPENDENCY : '') + '...';
+
+            if (!DEPENDENCY) {
+                document.getElementById('turnosContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ No hay dependencia definida. Inicie sesion.</div>';
+                document.getElementById('novedadesContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ Sin dependencia</div>';
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                return;
+            }
 
             try {
-                const todasCeldas = [];
-                ['A', 'B', 'C'].forEach(turno => {
-                    Object.values(FORMACION_CELLS[turno]).forEach(c => todasCeldas.push(c));
-                    Object.values(NOVEDADES_CELLS[turno]).forEach(c => todasCeldas.push(c));
-                });
-                const cellsString = todasCeldas.join(',');
-
-                const [cellsResponse, dataResponse, auditoriaResponse, usuariosResponse] = await Promise.all([
-                    apiFetchJSONP('getCells',     { cells: cellsString }),
-                    apiFetchJSONP('getData'),
+                // Cargar las 3 hojas de turno en paralelo
+                const [dataA, dataB, dataC, auditoriaResponse, usuariosResponse] = await Promise.all([
+                    apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_A' }),
+                    apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_B' }),
+                    apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_C' }),
                     apiFetchJSONP('getAuditoria'),
                     apiFetchJSONP('getUsuarios')
                 ]);
 
-                if (dataResponse.success && dataResponse.data)         allPersonnelData  = dataResponse.data;
+                logDebug('Turno A: success=' + dataA.success + ' count=' + (dataA.data ? dataA.data.length : 0));
+                logDebug('Turno B: success=' + dataB.success + ' count=' + (dataB.data ? dataB.data.length : 0));
+                logDebug('Turno C: success=' + dataC.success + ' count=' + (dataC.data ? dataC.data.length : 0));
+
+                // Combinar todos los datos y agregar el turno a cada registro
+                allPersonnelData = [];
+                const turnosData = { A: [], B: [], C: [] };
+
+                ['A', 'B', 'C'].forEach((turno, idx) => {
+                    const resp = [dataA, dataB, dataC][idx];
+                    if (resp.success && resp.data) {
+                        resp.data.forEach(row => {
+                            // Asegurar que cada fila tenga el turno correcto
+                            row.turno = turno;
+                            allPersonnelData.push(row);
+                            turnosData[turno].push(row);
+                        });
+                    }
+                });
+
+                logDebug('Total allPersonnelData combinados: ' + allPersonnelData.length);
+
                 if (auditoriaResponse.success && auditoriaResponse.data) allAuditoriaData = auditoriaResponse.data;
 
-                const celdas = (cellsResponse.success && cellsResponse.values) ? cellsResponse.values : {};
+                // Calcular formacion y novedades directamente de los datos
+                const formacion = calcularFormacion(turnosData);
+                const novedades = calcularNovedades(turnosData);
 
-                // ── Renderizar Formación ──────────────────────────
+                // Renderizar Formacion
                 let formacionHTML = '';
-                ['A', 'B', 'C'].forEach(turno => {
-                    const map = FORMACION_CELLS[turno];
-                    const datos = {
-                        total:       parseInt(celdas[map.total])       || 0,
-                        oficiales:   parseInt(celdas[map.oficiales])   || 0,
-                        ne:          parseInt(celdas[map.ne])           || 0,
-                        patrulleros: parseInt(celdas[map.patrulleros]) || 0,
-                        pp:          parseInt(celdas[map.pp])          || 0,
-                        axp:         parseInt(celdas[map.axp])         || 0,
-                        nouni:       parseInt(celdas[map.nouni])       || 0
-                    };
-                    formacionHTML += renderizarParteTurno(turno, datos);
+                ['A', 'B', 'C'].forEach(t => {
+                    formacionHTML += renderizarParteTurno(t, formacion[t]);
                 });
-                document.getElementById('turnosContainer').innerHTML = formacionHTML ||
-                    '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ No se pudieron cargar datos de formación</div>';
+                document.getElementById('turnosContainer').innerHTML = formacionHTML;
 
-                // ── Renderizar Novedades ──────────────────────────
+                // Renderizar Novedades
                 let novedadesHTML = '';
-                ['A', 'B', 'C'].forEach(turno => {
-                    const novedades = NOVEDADES_ORDEN.map(nombre => ({
-                        nombre,
-                        total: parseInt(celdas[NOVEDADES_CELLS[turno][nombre]]) || 0
-                    }));
-                    novedadesHTML += renderizarNovedadesTurno(turno, novedades);
+                ['A', 'B', 'C'].forEach(t => {
+                    novedadesHTML += renderizarNovedadesTurno(t, novedades[t]);
                 });
-                document.getElementById('novedadesContainer').innerHTML = novedadesHTML ||
-                    '<div class="novedades-card" style="grid-column:1/-1;"><div class="novedades-body" style="padding:40px;text-align:center;color:#999;">No hay novedades registradas</div></div>';
+                document.getElementById('novedadesContainer').innerHTML = novedadesHTML;
 
-                // ── Renderizar Usuarios ───────────────────────────
-                if (usuariosResponse.success && usuariosResponse.data) {
-                    renderizarUsuarios(usuariosResponse.data);
-                } else {
-                    document.getElementById('usuariosContainer').innerHTML =
-                        '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#D93025;">⚠️ No se pudieron cargar los usuarios</div>';
-                }
+                // Renderizar Usuarios
+                if (usuariosResponse.success && usuariosResponse.data) renderizarUsuarios(usuariosResponse.data);
 
-            } catch (error) {
-                console.error('Error cargando datos:', error);
-                document.getElementById('turnosContainer').innerHTML =
-                    '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ Error de conexión. Verifique la red.</div>';
+            } catch (e) {
+                console.error(e);
+                logDebug('ERROR cargarDatos: ' + e.message);
+                document.getElementById('turnosContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#D93025;">⚠️ Error de conexion</div>';
             } finally {
                 setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 500);
             }
         }
 
-        /* =============================================
-           RENDERIZAR FORMACIÓN
-        ============================================= */
-        function renderizarParteTurno(turnoLetra, datos) {
-            const oficiales   = datos.oficiales   || 0;
-            const ne          = datos.ne           || 0;
-            const patrulleros = datos.patrulleros  || 0;
-            const pp          = datos.pp           || 0;
-            const axp         = datos.axp          || 0;
-            const nouni       = datos.nouni        || 0;
-            const total       = datos.total        || 0;
-            const emojis = { A: '🅰️', B: '🅱️', C: '🅾️' };
-
-            return `
-            <div class="turno-card">
-                <div class="turno-header">
-                    <h2>${emojis[turnoLetra] || '🔵'} EN FORMACIÓN</h2>
-                    <div class="turno-badge">TURNO ${turnoLetra}</div>
-                </div>
-                <div class="forman-subtitle">FORMAN</div>
-                <div class="turno-body">
-                    <div class="categorias-grid">
-                        <div class="categoria-item cat-oficiales">
-                            <div class="label">OF</div>
-                            <div class="value ${oficiales===0?'zero':''}">${oficiales}</div>
-                        </div>
-                        <div class="categoria-item cat-ne">
-                            <div class="label">NE</div>
-                            <div class="value ${ne===0?'zero':''}">${ne}</div>
-                        </div>
-                        <div class="categoria-item cat-patrulleros">
-                            <div class="label">PT</div>
-                            <div class="value ${patrulleros===0?'zero':''}">${patrulleros}</div>
-                        </div>
-                        <div class="categoria-item cat-pp">
-                            <div class="label">PP</div>
-                            <div class="value ${pp===0?'zero':''}">${pp}</div>
-                        </div>
-                        <div class="categoria-item cat-axp">
-                            <div class="label">AXP</div>
-                            <div class="value ${axp===0?'zero':''}">${axp}</div>
-                        </div>
-                        <div class="categoria-item cat-nouni">
-                            <div class="label">NO UNI</div>
-                            <div class="value ${nouni===0?'zero':''}">${nouni}</div>
-                        </div>
-                    </div>
-                    <div class="total-card">
-                        <div class="total-label">Total En Formación Turno ${turnoLetra}</div>
-                        <div class="total-value">${total}</div>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        /* =============================================
-           RENDERIZAR NOVEDADES
-        ============================================= */
-        const NOVEDADES_CSS = {
-            'OFICINA':                'nov-oficina',
-            'VACACIONES':             'nov-vacaciones',
-            'SERVICIO':               'nov-servicio',
-            'ESTADO DE GRAVIDEZ':     'nov-gravidez',
-            'EXCUSA TOTAL':           'nov-excusa',
-            'PERMISO':                'nov-permiso',
-            'CITA MEDICA':            'nov-cita',
-            'LICENCIA DE MATERNIDAD': 'nov-maternidad',
-            'EXCUSADO DEL SERVICIO':  'nov-excusa-servicio',
-            'OTRA NOVEDAD':           'nov-otra',
-            'RETARDAD@':              'nov-retardado',
-            'EXCUSA PARCIAL':         'nov-excusa-parcial',
-            'CURSO DE ASCENSO':       'nov-curso',
-            'COMISION':               'nov-comision'
-        };
-
-        function renderizarNovedadesTurno(turnoLetra, novedades) {
-            let itemsHTML = '';
-            let totalNovedades = 0;
-
-            novedades.forEach(novedad => {
-                const total = parseInt(novedad.total) || 0;
-                totalNovedades += total;
-                const cssClass  = NOVEDADES_CSS[novedad.nombre] || 'nov-otra';
-                const clickable = total > 0 ? '' : 'style="opacity:0.6;cursor:default;"';
-                const onclick   = total > 0
-                    ? `onclick="abrirModal('${novedad.nombre.replace(/'/g, "\\'")}', '${turnoLetra}')"`
-                    : '';
-
-                itemsHTML += `
-                <div class="novedad-item ${cssClass}" ${onclick} ${clickable}
-                     title="${total > 0 ? 'Ver funcionarios con esta novedad' : 'Sin funcionarios'}">
-                    <div class="novedad-nombre">
-                        <span class="novedad-icon"></span>
-                        ${novedad.nombre}
-                        ${total > 0 ? '<span class="click-hint">👁 Ver</span>' : ''}
-                    </div>
-                    <div class="novedad-total ${total===0?'zero':''}">${total}</div>
-                </div>`;
+        // Calcular formacion por categoria desde los datos reales
+        function calcularFormacion(turnosData) {
+            const resultado = { A: {}, B: {}, C: {} };
+            ['A', 'B', 'C'].forEach(t => {
+                const datos = turnosData[t];
+                const cats = { oficiales: 0, ne: 0, patrulleros: 0, pp: 0, axp: 0, nouni: 0, total: 0 };
+                datos.forEach(p => {
+                    const grado = (p.grado || '').toString().trim().toUpperCase();
+                    if (!grado) return;
+                    cats.total++;
+                    if (grado === 'OF' || grado.includes('OFICIAL')) cats.oficiales++;
+                    else if (grado === 'NE' || grado.includes('SUBOFICIAL') || grado.includes('SUBINTENDENTE')) cats.ne++;
+                    else if (grado === 'PT' || grado.includes('PATRULLERO')) cats.patrulleros++;
+                    else if (grado === 'PP' || grado.includes('PATRULLERO DE POLICIA')) cats.pp++;
+                    else if (grado === 'AXP' || grado.includes('AUXILIAR')) cats.axp++;
+                    else cats.nouni++;
+                });
+                resultado[t] = cats;
             });
-
-            return `
-            <div class="novedades-card">
-                <div class="novedades-header">
-                    <h3>📋 NOVEDADES</h3>
-                    <div class="novedades-badge">TURNO ${turnoLetra}</div>
-                </div>
-                <div class="novedades-body">
-                    ${itemsHTML}
-                    <div class="novedades-total-card">
-                        <div class="novedades-total-label">Total Novedades</div>
-                        <div class="novedades-total-value">${totalNovedades}</div>
-                    </div>
-                </div>
-            </div>`;
+            return resultado;
         }
 
-        /* =============================================
-           RENDERIZAR USUARIOS
-        ============================================= */
-        const UMBRAL_ACTIVO_MS = 8 * 60 * 60 * 1000;
+        // Calcular novedades contando desde los datos reales
+        function calcularNovedades(turnosData) {
+            const resultado = { A: [], B: [], C: [] };
+            ['A', 'B', 'C'].forEach(t => {
+                const datos = turnosData[t];
+                const conteo = {};
+                // Inicializar todas en 0
+                NOVEDADES_ORDEN.forEach(n => conteo[n] = 0);
+                // Contar
+                datos.forEach(p => {
+                    const nov = (p.novedad || '').toString().trim();
+                    if (nov && NOVEDADES_ORDEN.includes(nov)) {
+                        conteo[nov]++;
+                    }
+                });
+                // Convertir a array
+                resultado[t] = NOVEDADES_ORDEN.map(n => ({ nombre: n, total: conteo[n] }));
+            });
+            return resultado;
+        }
+
+        function renderizarParteTurno(tl, d) {
+            const emojis = { A: '🅰️', B: '🅱️', C: '🅾️' };
+            return `<div class="turno-card"><div class="turno-header"><h2>${emojis[tl]||'🔵'} EN FORMACION</h2><div class="turno-badge">TURNO ${tl}</div></div><div class="forman-subtitle">FORMAN</div><div class="turno-body"><div class="categorias-grid"><div class="categoria-item"><div class="label">OF</div><div class="value ${d.oficiales===0?'zero':''}">${d.oficiales}</div></div><div class="categoria-item"><div class="label">NE</div><div class="value ${d.ne===0?'zero':''}">${d.ne}</div></div><div class="categoria-item"><div class="label">PT</div><div class="value ${d.patrulleros===0?'zero':''}">${d.patrulleros}</div></div><div class="categoria-item"><div class="label">PP</div><div class="value ${d.pp===0?'zero':''}">${d.pp}</div></div><div class="categoria-item"><div class="label">AXP</div><div class="value ${d.axp===0?'zero':''}">${d.axp}</div></div><div class="categoria-item"><div class="label">NO UNI</div><div class="value ${d.nouni===0?'zero':''}">${d.nouni}</div></div></div><div class="total-card"><div class="total-label">Total En Formacion Turno ${tl}</div><div class="total-value">${d.total}</div></div></div></div>`;
+        }
+
+        function renderizarNovedadesTurno(tl, novedades) {
+            let itemsHTML = '', totalNovedades = 0;
+            novedades.forEach(nv => {
+                const total = parseInt(nv.total) || 0; totalNovedades += total;
+                const css = NOVEDADES_CSS[nv.nombre] || 'nov-otra';
+                const onclick = total > 0 ? `onclick="abrirModal('${nv.nombre.replace(/'/g, "\\'")}', '${tl}')"` : '';
+                itemsHTML += `<div class="novedad-item ${css}" ${onclick} ${total===0?'style="opacity:0.6;cursor:default;"':''}><div class="novedad-nombre"><span class="novedad-icon"></span>${nv.nombre}${total>0?'<span class="click-hint">👁 Ver</span>':''}</div><div class="novedad-total ${total===0?'zero':''}">${total}</div></div>`;
+            });
+            return `<div class="novedades-card"><div class="novedades-header"><h3>📋 NOVEDADES</h3><div class="novedades-badge">TURNO ${tl}</div></div><div class="novedades-body">${itemsHTML}<div class="novedades-total-card"><div class="novedades-total-label">Total Novedades</div><div class="novedades-total-value">${totalNovedades}</div></div></div></div>`;
+        }
 
         function renderizarUsuarios(usuarios) {
-            if (!usuarios || usuarios.length === 0) {
-                document.getElementById('usuariosContainer').innerHTML =
-                    '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">No hay usuarios registrados</div>';
-                return;
-            }
-
+            if (!usuarios || usuarios.length === 0) { document.getElementById('usuariosContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">No hay usuarios registrados</div>'; return; }
             const ultimaActividad = {};
-            allAuditoriaData.forEach(reg => {
-                const user = (reg.usuario || '').trim();
-                if (!user) return;
-                const ts = new Date(reg.fechaHora).getTime();
-                if (!ultimaActividad[user] || ts > ultimaActividad[user]) {
-                    ultimaActividad[user] = ts;
-                }
-            });
-
-            const ahora = Date.now();
-            let html = '';
+            allAuditoriaData.forEach(r => { const u = (r.usuario || '').trim(); if (!u) return; const ts = new Date(r.fechaHora).getTime(); if (!ultimaActividad[u] || ts > ultimaActividad[u]) ultimaActividad[u] = ts; });
+            const ahora = Date.now(); let html = '';
             usuarios.forEach(u => {
-                const nombre  = u.usuario || '?';
-                const rol     = u.rol     || 'usuario';
-                const dep     = u.dependencia || '';
-                const iniciales = nombre.substring(0, 2).toUpperCase();
-                const lastTs  = ultimaActividad[nombre];
-                const activo  = lastTs && (ahora - lastTs < UMBRAL_ACTIVO_MS);
-
-                let ultimoTexto = 'Sin actividad registrada';
-                if (lastTs) {
-                    const diff = ahora - lastTs;
-                    if (diff < 60000)      ultimoTexto = 'Hace menos de 1 min';
-                    else if (diff < 3600000)  ultimoTexto = 'Hace ' + Math.floor(diff/60000) + ' min';
-                    else if (diff < 86400000) ultimoTexto = 'Hace ' + Math.floor(diff/3600000) + 'h ' + Math.floor((diff%3600000)/60000) + 'min';
-                    else                      ultimoTexto = 'Hace ' + Math.floor(diff/86400000) + ' día(s)';
-                }
-
-                html += `
-                <div class="usuario-card">
-                    <div class="usuario-avatar ${activo ? 'avatar-activo' : 'avatar-inactivo'}">${iniciales}</div>
-                    <div class="usuario-info">
-                        <div class="usuario-nombre">${nombre}</div>
-                        <div class="usuario-rol">${rol}</div>
-                        ${dep ? `<div class="usuario-dep">${dep}</div>` : ''}
-                        <div class="ultimo-acceso">⏱ ${ultimoTexto}</div>
-                    </div>
-                    <div class="usuario-estado">
-                        <div class="estado-dot ${activo ? 'dot-activo' : 'dot-inactivo'}"></div>
-                        <span class="estado-badge ${activo ? 'estado-activo' : 'estado-inactivo'}">
-                            ${activo ? '✓ ACTIVO' : '○ INACTIVO'}
-                        </span>
-                    </div>
-                </div>`;
+                const nombre = u.usuario || '?'; const rol = u.rol || 'usuario'; const dep = u.dependencia || ''; const ini = nombre.substring(0,2).toUpperCase(); const lastTs = ultimaActividad[nombre]; const activo = lastTs && (ahora - lastTs < 8*60*60*1000);
+                let txt = 'Sin actividad'; if (lastTs) { const d = ahora - lastTs; if (d < 60000) txt = 'Hace < 1 min'; else if (d < 3600000) txt = 'Hace ' + Math.floor(d/60000) + ' min'; else if (d < 86400000) txt = 'Hace ' + Math.floor(d/3600000) + 'h'; else txt = 'Hace ' + Math.floor(d/86400000) + ' dia(s)'; }
+                html += `<div class="usuario-card"><div class="usuario-avatar ${activo?'avatar-activo':'avatar-inactivo'}">${ini}</div><div class="usuario-info"><div class="usuario-nombre">${nombre}</div><div class="usuario-rol">${rol}</div>${dep?`<div class="usuario-dep">${dep}</div>`:''}<div class="ultimo-acceso">⏱ ${txt}</div></div><div class="usuario-estado"><div class="estado-dot ${activo?'dot-activo':'dot-inactivo'}"></div><span class="estado-badge ${activo?'estado-activo':'estado-inactivo'}">${activo?'✓ ACTIVO':'○ INACTIVO'}</span></div></div>`;
             });
-
             document.getElementById('usuariosContainer').innerHTML = html;
         }
 
-        /* =============================================
-           MODAL DE FUNCIONARIOS - CON NOVEDAD Y OBSERVACIÓN
-           Compatible con Código.gs V7
-        ============================================= */
         function abrirModal(novedadNombre, turnoLetra) {
+            logDebug('=== MODAL === novedad="' + novedadNombre + '" turno="' + turnoLetra + '"');
+            logDebug('allPersonnelData.length=' + allPersonnelData.length);
             const overlay = document.getElementById('modalOverlay');
-            document.getElementById('modalTitle').textContent    = '👥 ' + novedadNombre;
+            document.getElementById('modalTitle').textContent = '👥 ' + novedadNombre;
             document.getElementById('modalSubtitle').textContent = 'Turno ' + turnoLetra + ' — ' + (DEPENDENCY || 'Sin dependencia');
             document.getElementById('modalBody').innerHTML = '<div class="modal-loading"><div class="spinner-sm"></div><p>Buscando funcionarios...</p></div>';
-            document.getElementById('modalStatsBar').style.display  = 'none';
+            document.getElementById('modalStatsBar').style.display = 'none';
             document.getElementById('modalSearchBar').style.display = 'none';
             document.getElementById('modalSearchInput').value = '';
             overlay.classList.add('active');
 
             setTimeout(() => {
-                // Filtrar de allPersonnelData que viene del endpoint getData del GS V7
-                // El GS V7 devuelve: { grado, nombres, turno, novedad, observacion }
                 const filtrados = allPersonnelData.filter(p => {
-                    const turnoP = (p.turno   || '').toString().trim().toUpperCase();
-                    const novP   = (p.novedad || '').toString().trim();
+                    const turnoP = (p.turno || '').toString().trim().toUpperCase();
+                    const novP = (p.novedad || '').toString().trim();
                     return turnoP === turnoLetra && novP === novedadNombre;
                 });
+                logDebug('Filtrados: ' + filtrados.length);
                 modalFuncionariosFull = filtrados;
                 renderizarModal(filtrados, novedadNombre, turnoLetra);
             }, 280);
@@ -1194,96 +457,44 @@
         function renderizarModal(funcionarios, novedadNombre, turnoLetra) {
             const body = document.getElementById('modalBody');
             if (funcionarios.length === 0) {
-                document.getElementById('modalStatsBar').style.display  = 'none';
+                document.getElementById('modalStatsBar').style.display = 'none';
                 document.getElementById('modalSearchBar').style.display = 'none';
-                body.innerHTML = `
-                <div class="modal-empty">
-                    <div class="empty-icon">📭</div>
-                    <p style="font-weight:600;margin-bottom:8px;">Sin funcionarios registrados</p>
-                    <p style="font-size:0.8rem;">No hay funcionarios con <strong>${novedadNombre}</strong> en Turno ${turnoLetra}.</p>
-                </div>`;
+                body.innerHTML = '<div class="modal-empty"><div class="empty-icon">📭</div><p style="font-weight:600;margin-bottom:8px;">Sin funcionarios registrados</p><p style="font-size:0.8rem;">No hay funcionarios con <strong>' + novedadNombre + '</strong> en Turno ' + turnoLetra + '.</p></div>';
                 return;
             }
             document.getElementById('modalStatsBar').style.display = 'flex';
             document.getElementById('modalTotal').textContent = funcionarios.length;
-
             const gradoCount = {};
-            funcionarios.forEach(f => {
-                const g = f.grado || 'N/D';
-                gradoCount[g] = (gradoCount[g] || 0) + 1;
-            });
-            document.getElementById('modalCatBreakdown').innerHTML =
-                Object.entries(gradoCount).map(([g, c]) => `<span class="cat-chip">${g}: ${c}</span>`).join('');
-
+            funcionarios.forEach(f => { const g = f.grado || 'N/D'; gradoCount[g] = (gradoCount[g] || 0) + 1; });
+            document.getElementById('modalCatBreakdown').innerHTML = Object.entries(gradoCount).map(([g,c]) => '<span class="cat-chip">' + g + ': ' + c + '</span>').join('');
             document.getElementById('modalSearchBar').style.display = 'block';
             body.innerHTML = construirTablaModal(funcionarios);
         }
 
         function construirTablaModal(funcionarios) {
-            let html = `
-            <table class="modal-table" id="modalTable">
-                <thead>
-                    <tr>
-                        <th style="width:36px;">#</th>
-                        <th style="width:90px;">Grado</th>
-                        <th>Apellidos y Nombres</th>
-                        <th style="width:60px;">Turno</th>
-                        <th style="width:150px;">Novedad</th>
-                        <th>Observación</th>
-                    </tr>
-                </thead>
-                <tbody>`;
+            let html = '<table class="modal-table"><thead><tr><th style="width:36px;">#</th><th style="width:90px;">Grado</th><th>Apellidos y Nombres</th><th style="width:60px;">Turno</th><th style="width:150px;">Novedad</th><th>Observacion</th></tr></thead><tbody>';
             funcionarios.forEach((f, idx) => {
-                const observacion = (f.observacion || '').trim();
-                const obsHTML = observacion
-                    ? `<div class="observacion-cell">${observacion}</div>`
-                    : `<div class="observacion-cell observacion-vacia">Sin observación</div>`;
-                const novedadTexto = (f.novedad || '').trim();
-                
-                html += `
-                <tr>
-                    <td style="color:var(--gris-texto);font-size:0.75rem;">${idx + 1}</td>
-                    <td><span class="modal-badge" style="background:var(--amarillo-policia);color:var(--azul-oscuro);">${f.grado || '-'}</span></td>
-                    <td><strong>${f.nombres || '-'}</strong></td>
-                    <td><span class="modal-badge" style="background:#e3f2fd;color:#0D47A1;">${f.turno || '-'}</span></td>
-                    <td><span class="novedad-badge-popup">${novedadTexto || '-'}</span></td>
-                    <td>${obsHTML}</td>
-                </tr>`;
+                const obs = (f.observacion || '').trim();
+                const obsHTML = obs ? '<div class="observacion-cell">' + obs + '</div>' : '<div class="observacion-cell observacion-vacia">Sin observacion</div>';
+                const nov = (f.novedad || '').trim();
+                html += '<tr><td style="color:var(--gris-texto);font-size:0.75rem;">' + (idx + 1) + '</td><td><span class="modal-badge" style="background:var(--amarillo-policia);color:var(--azul-oscuro);">' + (f.grado || '-') + '</span></td><td><strong>' + (f.nombres || '-') + '</strong></td><td><span class="modal-badge" style="background:#e3f2fd;color:#0D47A1;">' + (f.turno || '-') + '</span></td><td><span class="novedad-badge-popup">' + (nov || '-') + '</span></td><td>' + obsHTML + '</td></tr>';
             });
-            html += `</tbody></table>`;
+            html += '</tbody></table>';
             return html;
         }
 
         function filtrarModalTabla() {
             const q = document.getElementById('modalSearchInput').value.toLowerCase().trim();
-            const filtrados = q
-                ? modalFuncionariosFull.filter(f =>
-                    (f.nombres || '').toLowerCase().includes(q) ||
-                    (f.grado   || '').toLowerCase().includes(q) ||
-                    (f.novedad || '').toLowerCase().includes(q) ||
-                    (f.observacion || '').toLowerCase().includes(q)
-                  )
-                : modalFuncionariosFull;
+            const filtrados = q ? modalFuncionariosFull.filter(f => (f.nombres || '').toLowerCase().includes(q) || (f.grado || '').toLowerCase().includes(q) || (f.novedad || '').toLowerCase().includes(q) || (f.observacion || '').toLowerCase().includes(q)) : modalFuncionariosFull;
             document.getElementById('modalTotal').textContent = filtrados.length;
             document.getElementById('modalBody').innerHTML = construirTablaModal(filtrados);
         }
 
-        function cerrarModalClick(event) {
-            if (event.target === document.getElementById('modalOverlay')) cerrarModal();
-        }
-        function cerrarModal() {
-            document.getElementById('modalOverlay').classList.remove('active');
-        }
-
+        function cerrarModalClick(e) { if (e.target === document.getElementById('modalOverlay')) cerrarModal(); }
+        function cerrarModal() { document.getElementById('modalOverlay').classList.remove('active'); }
         document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
 
-        /* =============================================
-           INICIO
-        ============================================= */
-        updateDate();
-        initSession();
-        cargarDatos();
-        setInterval(updateDate, 60000);
+        updateDate(); initSession(); cargarDatos(); setInterval(updateDate, 60000);
     </script>
 </body>
 </html>
