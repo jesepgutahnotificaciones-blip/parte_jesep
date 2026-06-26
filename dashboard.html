@@ -487,12 +487,15 @@
     </div>
 
     <script>
-        // ============================================================
-        // CONFIGURACIÓN API - V9 CORREGIDO (USA JSONP PARA TODO)
-        // ============================================================
         const API_URL = 'https://script.google.com/macros/s/AKfycbwT1yzHc_cLRvny4OftqbrVFj6P40Mw_a9GngrGOGRRuAIF-vvcLihctkj__JjGAdSP/exec';
 
         let currentDependency = 'ASJUR';
+        // ============================================================
+        // FIX: USUARIO_SESION se llena al hacer login exitoso.
+        // Todas las llamadas al API lo incluyen automáticamente,
+        // así el backend registra en AUDITORIA el nombre real del usuario.
+        // ============================================================
+        let USUARIO_SESION = '';
         let allTableData = [];
         let currentFilter = 'ALL';
         let tempUsuario = null;
@@ -510,9 +513,6 @@
             document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', options);
         }
 
-        // ============================================================
-        // API FETCH - JSONP (FUNCIONA PARA LECTURA Y ESCRITURA)
-        // ============================================================
         let jsonpCallbackId = 0;
         
         function apiFetchJSONP(action, params) {
@@ -524,6 +524,11 @@
                 urlParams.append('action', action);
                 urlParams.append('dependency', currentDependency);
                 urlParams.append('callback', callbackName);
+                // ============================================================
+                // FIX: incluir siempre el usuario de sesión para que
+                // handleSaveData lo pase a registrarAuditoria correctamente.
+                // ============================================================
+                urlParams.append('usuario', USUARIO_SESION || 'Sistema');
                 
                 for (const key in params) {
                     if (params[key] !== undefined && params[key] !== null) {
@@ -532,7 +537,6 @@
                 }
                 
                 const url = API_URL + '?' + urlParams.toString();
-                
                 console.log('JSONP URL:', url);
                 
                 const timeout = setTimeout(() => {
@@ -714,12 +718,17 @@
         }
 
         function showDashboard(usuario) {
+            // ============================================================
+            // FIX: guardar el nombre real del usuario en USUARIO_SESION.
+            // A partir de aquí, cada apiFetchJSONP lo envía en la URL
+            // y el backend lo usa en registrarAuditoria.
+            // ============================================================
+            USUARIO_SESION = usuario.username || '';
+
             document.getElementById('loginOverlay').classList.add('hidden');
-            
             document.getElementById('userInfo').style.display = 'flex';
             document.getElementById('userName').textContent = usuario.username;
             document.getElementById('userRole').textContent = usuario.rol;
-            
             document.getElementById('depTitle').textContent = currentDependency;
             updateDate();
             loadTotalFuncionarios();
@@ -730,6 +739,7 @@
             localStorage.removeItem('policiaSession');
             localStorage.removeItem('currentDependency');
             tempUsuario = null;
+            USUARIO_SESION = '';
             currentDependency = 'ASJUR';
             location.reload();
         }
@@ -797,18 +807,14 @@
 
                 if (turno && turno !== 'ALL') {
                     const summaryData = await apiFetchJSONP('getSummary', { turno: turno });
-                    console.log('Summary data:', summaryData);
                     if (summaryData.success) renderSummary(summaryData.summary);
                 }
 
                 const data = await apiFetchJSONP('getData');
-                console.log('Table data:', data);
                 
                 if (data.success) {
                     allTableData = data.data || [];
-                    if (!turno) {
-                        filterByTurno('ALL');
-                    }
+                    if (!turno) filterByTurno('ALL');
                 } else {
                     throw new Error(data.error || 'Error al cargar datos');
                 }
@@ -820,17 +826,18 @@
         }
 
         // ============================================================
-        // GUARDAR NOVEDAD - CORREGIDO CON JSONP
+        // GUARDAR NOVEDAD
+        // El usuario ya viaja en cada request via apiFetchJSONP.
+        // El backend lo registra en AUDITORIA con accion=GUARDAR_NOVEDAD.
+        // El dashboard lee AUDITORIA y marca ACTUALIZADO a ese usuario.
         // ============================================================
         async function saveNovedad(select, row) {
             const novedad = select.value;
             const status = document.getElementById('status-novedad-' + row);
-
-            // Buscar observación actual para NO borrarla
             const textarea = document.querySelector(`textarea[onblur*="saveObservation(this, ${row})"]`);
             const observacionActual = textarea ? textarea.value.trim() : '';
 
-            status.textContent = '⏳ Guardando en documento columna G...';
+            status.textContent = '⏳ Guardando...';
             status.className = 'status-msg show';
 
             try {
@@ -839,8 +846,6 @@
                     novedad: novedad || '',
                     observation: observacionActual
                 });
-                
-                console.log('Resultado saveNovedad:', result);
 
                 if (result && result.success) {
                     const badge = document.getElementById('badge-' + row);
@@ -848,41 +853,32 @@
                         badge.className = 'col-novedad ' + getNovedadClass(novedad);
                         badge.textContent = novedad || 'Seleccione Novedad';
                     }
-
-                    status.textContent = '✓ Guardado y vericado (G)';
+                    status.textContent = '✓ Guardado';
                     status.className = 'status-msg show success';
                 } else {
                     throw new Error((result && result.error) || 'Error del servidor');
                 }
 
-                setTimeout(() => {
-                    status.classList.remove('show');
-                }, 3000);
+                setTimeout(() => { status.classList.remove('show'); }, 3000);
 
             } catch (error) {
                 console.error('Error saveNovedad:', error);
                 status.textContent = '✗ Error: ' + (error.message || 'No se pudo guardar');
                 status.className = 'status-msg show error';
-                
-                setTimeout(() => {
-                    status.classList.remove('show');
-                }, 5000);
+                setTimeout(() => { status.classList.remove('show'); }, 5000);
             }
         }
 
         // ============================================================
-        // GUARDAR OBSERVACIÓN - CORREGIDO CON JSONP
+        // GUARDAR OBSERVACIÓN — botón 💾 Guardar
         // ============================================================
         async function saveObservation(textarea, row) {
             const observation = textarea.value.trim();
-
-            // Buscar novedad actual para NO borrarla
             const select = document.querySelector(`select[onchange*="saveNovedad(this, ${row})"]`);
             const novedadActual = select ? select.value : '';
-
             const status = document.getElementById('status-' + row);
 
-            status.textContent = '⏳ Guardando en columna H...';
+            status.textContent = '⏳ Guardando...';
             status.className = 'status-msg show';
 
             try {
@@ -891,28 +887,21 @@
                     novedad: novedadActual,
                     observation: observation
                 });
-                
-                console.log('Resultado saveObservation:', result);
 
                 if (result && result.success) {
-                    status.textContent = '✓ Guardado y verificado H';
+                    status.textContent = '✓ Guardado';
                     status.className = 'status-msg show success';
                 } else {
                     throw new Error((result && result.error) || 'Error del servidor');
                 }
 
-                setTimeout(() => {
-                    status.classList.remove('show');
-                }, 3000);
+                setTimeout(() => { status.classList.remove('show'); }, 3000);
 
             } catch (error) {
                 console.error('Error saveObservation:', error);
                 status.textContent = '✗ Error: ' + (error.message || 'No se pudo guardar');
                 status.className = 'status-msg show error';
-                
-                setTimeout(() => {
-                    status.classList.remove('show');
-                }, 5000);
+                setTimeout(() => { status.classList.remove('show'); }, 5000);
             }
         }
 
@@ -941,7 +930,6 @@
                 const selected = (currentValue === n) ? 'selected' : '';
                 options += '<option value="' + n + '" ' + selected + '>' + n + '</option>';
             });
-
             return '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><select class="novedad-select" onchange="saveNovedad(this, ' + row + ')">' + options + '</select><span class="col-novedad ' + getNovedadClass(currentValue) + '" id="badge-' + row + '">' + (currentValue || 'Seleccione Novedad') + '</span><span class="status-msg" id="status-novedad-' + row + '"></span></div>';
         }
 
@@ -996,7 +984,6 @@
         function renderSummary(data) {
             const container = document.getElementById('summaryContainer');
             container.innerHTML = '';
-            
             if (!data || data.length === 0) {
                 container.innerHTML = '<p style="text-align:center; padding:20px;">No hay datos de resumen</p>';
                 return;
@@ -1015,12 +1002,10 @@
                         novedadItems = [];
                         isInNovedadSection = false;
                     }
-                    
                     const sectionDiv = document.createElement('div');
                     sectionDiv.className = 'summary-grid-6';
                     container.appendChild(sectionDiv);
                     currentGrid = sectionDiv;
-                    
                     const titleDiv = document.createElement('div');
                     titleDiv.className = 'summary-item header-style';
                     titleDiv.innerHTML = '<div class="label">' + item.label + '</div><div class="value">-</div>';
@@ -1031,22 +1016,18 @@
                         appendNovedadAccordion(container, novedadItems, novedadAccordionId, novedadContentId);
                         novedadItems = [];
                     }
-                    
                     isInNovedadSection = true;
                     novedadAccordionId = 'novedad-acc-' + index;
                     novedadContentId = 'novedad-content-' + index;
-                    
                     const accordionHeader = document.createElement('div');
                     accordionHeader.className = 'novedad-accordion-header';
                     accordionHeader.setAttribute('onclick', 'toggleNovedadAccordion("' + novedadContentId + '", "' + novedadAccordionId + '-icon")');
                     accordionHeader.innerHTML = '<span class="novedad-accordion-title">📋 ' + item.label + '</span><span class="novedad-accordion-icon collapsed" id="' + novedadAccordionId + '-icon">▼</span>';
                     container.appendChild(accordionHeader);
-                    
                     const accordionContent = document.createElement('div');
                     accordionContent.className = 'novedad-accordion-content collapsed';
                     accordionContent.id = novedadContentId;
                     container.appendChild(accordionContent);
-                    
                     const novedadDiv = document.createElement('div');
                     novedadDiv.className = 'novedad-grid';
                     accordionContent.appendChild(novedadDiv);
@@ -1061,7 +1042,6 @@
                         novedadItems = [];
                         isInNovedadSection = false;
                     }
-                    
                     const div = document.createElement('div');
                     div.className = 'summary-item';
                     div.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
@@ -1076,7 +1056,6 @@
 
         async function filterByTurno(turno) {
             currentFilter = turno;
-            
             document.querySelectorAll('.filter-btn').forEach(function(btn) { btn.classList.remove('active'); });
             if (turno === 'A') document.getElementById('btn-turno-a').classList.add('active');
             else if (turno === 'B') document.getElementById('btn-turno-b').classList.add('active');
@@ -1084,14 +1063,11 @@
             else document.getElementById('btn-turno-all').classList.add('active');
             
             const summarySection = document.getElementById('summarySection');
-            
             if (turno !== 'ALL') {
                 summarySection.classList.remove('hidden');
                 document.getElementById('summaryContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando resumen Turno ' + turno + '...</p></div>';
-                
                 try {
                     const summaryData = await apiFetchJSONP('getSummary', { turno: turno });
-                    console.log('Summary response:', summaryData);
                     if (summaryData.success) renderSummary(summaryData.summary);
                 } catch (e) {
                     console.error('Error cargando resumen por turno:', e);
@@ -1103,35 +1079,41 @@
             let filteredData = allTableData;
             if (turno !== 'ALL') {
                 filteredData = allTableData.filter(function(person) {
-                    const turnoPersona = (person.turno || '').toString().trim().toUpperCase();
-                    return turnoPersona === turno;
+                    return (person.turno || '').toString().trim().toUpperCase() === turno;
                 });
             }
             
             const info = document.getElementById('filterInfo');
-            if (turno === 'ALL') {
-                info.textContent = 'Mostrando todos los registros (' + filteredData.length + ')';
-            } else {
-                info.textContent = 'Filtrado: Turno ' + turno + ' (' + filteredData.length + ' registros)';
-            }
+            info.textContent = turno === 'ALL'
+                ? 'Mostrando todos los registros (' + filteredData.length + ')'
+                : 'Filtrado: Turno ' + turno + ' (' + filteredData.length + ' registros)';
             
             renderTable(filteredData);
         }
 
         function renderTable(data) {
             const container = document.getElementById('tableContainer');
-
             if (!data || data.length === 0) {
                 container.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p style="font-size:1.2rem; margin-bottom:10px;">📭 No hay registros</p><p>La dependencia <strong>' + currentDependency + '</strong> no tiene datos</p></div>';
                 return;
             }
 
             let html = '<table><thead><tr><th>GRADO</th><th>APELLIDOS Y NOMBRES</th><th>TURNO</th><th>NOVEDAD</th><th>OBSERVACIONES</th></tr></thead><tbody>';
-
             data.forEach(function(person) {
-                html += '<tr><td><span class="col-grado">' + (person.grado || '-') + '</span></td><td>' + (person.nombres || '-') + '</td><td>' + (person.turno || '-') + '</td><td>' + createNovedadSelect(person.novedad, person.row) + '</td><td><div class="obs-container"><textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ' + person.row + ')">' + (person.observacion || '') + '</textarea><div class="obs-actions"><button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ' + person.row + ')">💾 Guardar</button><span class="status-msg" id="status-' + person.row + '"></span></div></div></td></tr>';
+                html += '<tr>'
+                    + '<td><span class="col-grado">' + (person.grado || '-') + '</span></td>'
+                    + '<td>' + (person.nombres || '-') + '</td>'
+                    + '<td>' + (person.turno || '-') + '</td>'
+                    + '<td>' + createNovedadSelect(person.novedad, person.row) + '</td>'
+                    + '<td><div class="obs-container">'
+                    +   '<textarea class="obs-input" placeholder="Ingrese observación..." onblur="saveObservation(this, ' + person.row + ')">' + (person.observacion || '') + '</textarea>'
+                    +   '<div class="obs-actions">'
+                    +     '<button class="btn-save" onclick="saveObservation(this.parentElement.previousElementSibling, ' + person.row + ')">💾 Guardar</button>'
+                    +     '<span class="status-msg" id="status-' + person.row + '"></span>'
+                    +   '</div>'
+                    + '</div></td>'
+                    + '</tr>';
             });
-
             html += '</tbody></table>';
             container.innerHTML = html;
         }
@@ -1139,7 +1121,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
-            
             if (usernameInput) {
                 usernameInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') passwordInput.focus();
