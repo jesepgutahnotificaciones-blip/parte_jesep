@@ -213,7 +213,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxiFfcPmecnowW-v-71BXFv2_aFWCo0djTyhXRtHaV8TfsVg0Y4_TXzno3C88nMqu0Q/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz2tCZ-Be_TeLESVIDpO9D_S67n4T4Wf4O-ebPmv08Z3Km47E_pooDdp8oHjK03rU06/exec';
         let DEPENDENCY = '', USUARIO_ACTUAL = null, ROL_ACTUAL = 'usuario';
         let allPersonnelData = [], allAuditoriaData = [], modalFuncionariosFull = [], jsonpCallbackId = 0;
 
@@ -433,86 +433,210 @@
         }
 
         function renderizarNovedadesTurno(tl, novedades) {
-            let itemsHTML = '', totalNovedades = 0;
-            novedades.forEach(nv => {
-                const total = parseInt(nv.total) || 0; totalNovedades += total;
-                const css = NOVEDADES_CSS[nv.nombre] || 'nov-otra';
-                const onclick = total > 0 ? `onclick="abrirModal('${nv.nombre.replace(/'/g, "\\'")}', '${tl}')"` : '';
-                itemsHTML += `<div class="novedad-item ${css}" ${onclick} ${total===0?'style="opacity:0.6;cursor:default;"':''}><div class="novedad-nombre"><span class="novedad-icon"></span>${nv.nombre}${total>0?'<span class="click-hint">👁 Ver</span>':''}</div><div class="novedad-total ${total===0?'zero':''}">${total}</div></div>`;
-            });
-            return `<div class="novedades-card"><div class="novedades-header"><h3>📋 NOVEDADES</h3><div class="novedades-badge">TURNO ${tl}</div></div><div class="novedades-body">${itemsHTML}<div class="novedades-total-card"><div class="novedades-total-label">Total Novedades</div><div class="novedades-total-value">${totalNovedades}</div></div></div></div>`;
-        }
+    let itemsHTML = '';
+    let totalNovedades = 0;
 
-        async function abrirModal(novedad, turno) {
-  try {
-    document.getElementById('modalTitle').textContent =
-      novedad + ' - Turno ' + turno;
+    novedades.forEach(nv => {
+        const total = parseInt(nv.total) || 0;
+        totalNovedades += total;
 
-    document.getElementById('modalOverlay').classList.add('active');
+        const css = NOVEDADES_CSS[nv.nombre] || 'nov-otra';
 
-    document.getElementById('modalBody').innerHTML =
-      '<div class="modal-loading">Cargando funcionarios...</div>';
+        const onclick = total > 0
+            ? `onclick="abrirModal('${nv.nombre.replace(/'/g, "\\\\'")}', '${tl}')"`
+            : '';
 
-    const res = await apiFetchJSONP('getFuncionariosPorNovedad', {
-      turno: turno,
-      novedad: novedad
+        itemsHTML += `
+            <div class="novedad-item ${css}"
+                 ${onclick}
+                 ${total === 0 ? 'style="opacity:0.6;cursor:default;"' : ''}>
+
+                <div class="novedad-nombre">
+                    <span class="novedad-icon"></span>
+                    ${nv.nombre}
+                    ${total > 0 ? '<span class="click-hint">👁 Ver</span>' : ''}
+                </div>
+
+                <div class="novedad-total ${total === 0 ? 'zero' : ''}">
+                    ${total}
+                </div>
+            </div>
+        `;
     });
 
-    if (!res.success) {
-      document.getElementById('modalBody').innerHTML =
-        '<div class="modal-empty">Error: ' + res.error + '</div>';
-      return;
-    }
+    return `
+        <div class="novedades-card">
+            <div class="novedades-header">
+                <h3>📋 NOVEDADES</h3>
+                <div class="novedades-badge">TURNO ${tl}</div>
+            </div>
 
-    if (!res.data || res.data.length === 0) {
-      document.getElementById('modalBody').innerHTML =
-        '<div class="modal-empty">No hay funcionarios con esta novedad</div>';
-      return;
+            <div class="novedades-body">
+                ${itemsHTML}
+
+                <div class="novedades-total-card">
+                    <div class="novedades-total-label">
+                        Total Novedades
+                    </div>
+                    <div class="novedades-total-value">
+                        ${totalNovedades}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// MODAL DE FUNCIONARIOS POR NOVEDAD - V15
+// ============================================================
+
+let modalFuncionariosFull = [];
+
+async function abrirModal(novedad, turno) {
+    try {
+        document.getElementById('modalTitle').textContent =
+            '👥 ' + novedad;
+
+        document.getElementById('modalSubtitle').textContent =
+            'Turno ' + turno + ' - ' + DEPENDENCY;
+
+        document.getElementById('modalOverlay').classList.add('active');
+
+        document.getElementById('modalStatsBar').style.display = 'none';
+        document.getElementById('modalSearchBar').style.display = 'none';
+
+        document.getElementById('modalBody').innerHTML = `
+            <div class="modal-loading">
+                <div class="spinner"></div>
+                <p>Cargando funcionarios...</p>
+            </div>
+        `;
+
+        const res = await apiFetchJSONP('getFuncionariosPorNovedad', {
+            turno: turno,
+            novedad: novedad
+        });
+
+        if (!res.success) {
+            document.getElementById('modalBody').innerHTML = `
+                <div class="modal-empty">
+                    ❌ Error: ${res.error}
+                </div>
+            `;
+            return;
+        }
+
+        modalFuncionariosFull = res.data || [];
+
+        document.getElementById('modalTotal').textContent =
+            modalFuncionariosFull.length;
+
+        document.getElementById('modalStatsBar').style.display = 'flex';
+        document.getElementById('modalSearchBar').style.display = 'block';
+
+        renderizarTablaModal(modalFuncionariosFull);
+
+    } catch (e) {
+        document.getElementById('modalBody').innerHTML = `
+            <div class="modal-empty">
+                ❌ ${e.message}
+            </div>
+        `;
+    }
+}
+
+function renderizarTablaModal(datos) {
+
+    if (!datos || datos.length === 0) {
+        document.getElementById('modalBody').innerHTML = `
+            <div class="modal-empty">
+                No hay funcionarios registrados con esta novedad.
+            </div>
+        `;
+        return;
     }
 
     let html = `
-      <table class="modal-table">
-        <thead>
-          <tr>
-            <th>Grado</th>
-            <th>Apellidos y nombres</th>
-            <th>Observación</th>
-          </tr>
-        </thead>
-        <tbody>
+        <table class="modal-table">
+            <thead>
+                <tr>
+                    <th>Grado</th>
+                    <th>Apellidos y nombres</th>
+                    <th>Observación</th>
+                </tr>
+            </thead>
+            <tbody>
     `;
 
-    res.data.forEach(f => {
-      html += `
-        <tr>
-          <td>${f.grado}</td>
-          <td>${f.nombres}</td>
-          <td>${f.observacion || '-'}</td>
-        </tr>
-      `;
+    datos.forEach(f => {
+        html += `
+            <tr>
+                <td>
+                    <span class="modal-badge">
+                        ${f.grado || '-'}
+                    </span>
+                </td>
+
+                <td>
+                    <strong>${f.nombres || '-'}</strong>
+                </td>
+
+                <td class="observacion-cell">
+                    ${f.observacion
+                        ? f.observacion
+                        : '<span class="observacion-vacia">Sin observación</span>'}
+                </td>
+            </tr>
+        `;
     });
 
-    html += '</tbody></table>';
+    html += `
+            </tbody>
+        </table>
+    `;
 
     document.getElementById('modalBody').innerHTML = html;
+}
 
-  } catch (e) {
-    document.getElementById('modalBody').innerHTML =
-      '<div class="modal-empty">' + e.message + '</div>';
-  }
+function filtrarModalTabla() {
+
+    const txt = document.getElementById('modalSearchInput')
+        .value
+        .toLowerCase()
+        .trim();
+
+    if (!txt) {
+        renderizarTablaModal(modalFuncionariosFull);
+        return;
+    }
+
+    const filtrados = modalFuncionariosFull.filter(f =>
+        (f.grado || '').toLowerCase().includes(txt) ||
+        (f.nombres || '').toLowerCase().includes(txt) ||
+        (f.observacion || '').toLowerCase().includes(txt)
+    );
+
+    renderizarTablaModal(filtrados);
 }
 
 function cerrarModal() {
-  document.getElementById('modalOverlay').classList.remove('active');
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.getElementById('modalSearchInput').value = '';
 }
 
 function cerrarModalClick(e) {
-  if (e.target.id === 'modalOverlay') cerrarModal();
-}    
+    if (e.target.id === 'modalOverlay') {
+        cerrarModal();
+    }
+}
 
-
-
-
+// Cerrar con tecla ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
         // ============================================================
         // Renderizar Usuarios V14
         // ACTUALIZADO  = el usuario presionó Guardar (accion=GUARDAR_NOVEDAD en AUDITORIA)
