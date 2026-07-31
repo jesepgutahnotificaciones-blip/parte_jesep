@@ -88,9 +88,7 @@
         .usuarios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 30px; }
         .usuario-card { background: var(--blanco); border-radius: 10px; padding: 14px 16px; box-shadow: var(--sombra-card); border: 1px solid var(--borde); display: flex; align-items: center; gap: 14px; }
         .usuario-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; }
-        /* ACTUALIZADO = verde (igual que antes, tuvo actividad reciente) */
         .avatar-actualizado { background: #e8f5e9; color: #1E8E3E; border: 2px solid #1E8E3E; }
-        /* SIN ACTUALIZAR = gris neutro (sin actividad reciente) */
         .avatar-sin-actualizar { background: #f1f3f4; color: #80868B; border: 2px solid #B0BEC5; }
         .usuario-info { flex: 1; min-width: 0; }
         .usuario-nombre { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -98,9 +96,7 @@
         .usuario-dep { font-size: 0.7rem; color: var(--azul-oscuro); font-weight: 600; }
         .ultimo-acceso { font-size: 0.68rem; color: var(--gris-texto); margin-top: 2px; }
         .estado-badge { padding: 3px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; white-space: nowrap; }
-        /* ACTUALIZADO: fondo verde */
         .estado-actualizado { background: #e8f5e9; color: #1B5E20; border: 1px solid #a5d6a7; }
-        /* SIN ACTUALIZAR: fondo gris neutro */
         .estado-sin-actualizar { background: #f1f3f4; color: #5F6368; border: 1px solid #DADCE0; }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
@@ -128,6 +124,7 @@
         .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.96); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; }
         .loading-overlay.hidden { opacity: 0; pointer-events: none; }
         .spinner { width: 50px; height: 50px; border: 4px solid var(--gris-suave); border-top-color: var(--amarillo-policia); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        .spinner-sm { width: 28px; height: 28px; border: 3px solid var(--gris-suave); border-top-color: var(--amarillo-policia); border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .footer-institutional { text-align: center; padding: 20px; margin-top: 40px; background: linear-gradient(135deg, #01592F 0%, #173E56 100%); }
         .footer-institutional p { color: var(--blanco); font-size: 0.8rem; opacity: 0.8; }
@@ -204,7 +201,7 @@
                 <div class="modal-cat-breakdown" id="modalCatBreakdown"></div>
             </div>
             <div class="modal-search" id="modalSearchBar" style="display:none;">
-                <input type="text" id="modalSearchInput" placeholder="Buscar por nombre, grado, novedad u observacion..." oninput="filtrarModalTabla()">
+                <input type="text" id="modalSearchInput" placeholder="Buscar por nombre, grado u observacion..." oninput="filtrarModalTabla()">
             </div>
             <div class="modal-body" id="modalBody">
                 <div class="modal-loading"><div class="spinner-sm"></div><p>Buscando funcionarios...</p></div>
@@ -213,9 +210,40 @@
     </div>
 
     <script>
+
+            // ============================================================
+        // CONFIGURACION Y UTILIDADES
+        // ============================================================
         const API_URL = 'https://script.google.com/macros/s/AKfycbz2tCZ-Be_TeLESVIDpO9D_S67n4T4Wf4O-ebPmv08Z3Km47E_pooDdp8oHjK03rU06/exec';
         let DEPENDENCY = '', USUARIO_ACTUAL = null, ROL_ACTUAL = 'usuario';
-        let allPersonnelData = [], allAuditoriaData = [], modalFuncionariosFull = [], jsonpCallbackId = 0;
+        let allPersonnelData = [], modalFuncionariosFull = [], jsonpCallbackId = 0;
+
+        const NOVEDADES_ORDEN = [
+            'OFICINA','VACACIONES','SERVICIO','ESTADO DE GRAVIDEZ','EXCUSA TOTAL',
+            'PERMISO','CITA MEDICA','LICENCIA DE MATERNIDAD','EXCUSADO DEL SERVICIO',
+            'OTRA NOVEDAD','RETARDAD@','EXCUSA PARCIAL','CURSO DE ASCENSO','COMISION'
+        ];
+
+        const NOVEDADES_CSS = {
+            'OFICINA': 'nov-oficina', 'VACACIONES': 'nov-vacaciones', 'SERVICIO': 'nov-servicio',
+            'ESTADO DE GRAVIDEZ': 'nov-gravidez', 'EXCUSA TOTAL': 'nov-excusa', 'PERMISO': 'nov-permiso',
+            'CITA MEDICA': 'nov-cita', 'LICENCIA DE MATERNIDAD': 'nov-maternidad',
+            'EXCUSADO DEL SERVICIO': 'nov-excusa-servicio', 'OTRA NOVEDAD': 'nov-otra',
+            'RETARDAD@': 'nov-retardado', 'EXCUSA PARCIAL': 'nov-excusa-parcial',
+            'CURSO DE ASCENSO': 'nov-curso', 'COMISION': 'nov-comision'
+        };
+
+        const CELDAS_FORMACION = {
+            A: ['I2','J2','K2','L2','M2','N2','O2'],
+            B: ['P2','Q2','R2','S2','T2','U2','V2'],
+            C: ['W2','X2','Y2','Z2','AA2','AB2','AC2']
+        };
+
+        const CELDAS_NOVEDADES = {
+            A: ['J8','J9','J10','J11','J12','J13','J14','J15','J16','J17','J18','J19','J20','J21'],
+            B: ['Q8','Q9','Q10','Q11','Q12','Q13','Q14','Q15','Q16','Q17','Q18','Q19','Q20','Q21'],
+            C: ['X8','X9','X10','X11','X12','X13','X14','X15','X16','X17','X18','X19','X20','X21']
+        };
 
         function logDebug(msg) {
             const panel = document.getElementById('debugPanel');
@@ -224,17 +252,14 @@
             panel.appendChild(line);
             console.log(msg);
         }
-        function toggleDebug() { document.getElementById('debugPanel').classList.toggle('visible'); }
 
-        const NOVEDADES_ORDEN = ['OFICINA','VACACIONES','SERVICIO','ESTADO DE GRAVIDEZ','EXCUSA TOTAL','PERMISO','CITA MEDICA','LICENCIA DE MATERNIDAD','EXCUSADO DEL SERVICIO','OTRA NOVEDAD','RETARDAD@','EXCUSA PARCIAL','CURSO DE ASCENSO','COMISION'];
+        function toggleDebug() {
+            document.getElementById('debugPanel').classList.toggle('visible');
+        }
 
-        const NOVEDADES_CSS = {
-            'OFICINA': 'nov-oficina', 'VACACIONES': 'nov-vacaciones', 'SERVICIO': 'nov-servicio', 'ESTADO DE GRAVIDEZ': 'nov-gravidez',
-            'EXCUSA TOTAL': 'nov-excusa', 'PERMISO': 'nov-permiso', 'CITA MEDICA': 'nov-cita', 'LICENCIA DE MATERNIDAD': 'nov-maternidad',
-            'EXCUSADO DEL SERVICIO': 'nov-excusa-servicio', 'OTRA NOVEDAD': 'nov-otra', 'RETARDAD@': 'nov-retardado',
-            'EXCUSA PARCIAL': 'nov-excusa-parcial', 'CURSO DE ASCENSO': 'nov-curso', 'COMISION': 'nov-comision'
-        };
-
+        // ============================================================
+        // COMUNICACION CON BACKEND (JSONP)
+        // ============================================================
         function apiFetchJSONP(action, params, overrides) {
             params = params || {};
             overrides = overrides || {};
@@ -247,46 +272,70 @@
                 urlP.append('callback', cbName);
                 urlP.append('usuario', USUARIO_ACTUAL || 'Sistema');
                 urlP.append('rol', ROL_ACTUAL || 'usuario');
-                for (const [k, v] of Object.entries(params)) { if (v !== undefined && v !== null) urlP.append(k, v); }
+                for (const [k, v] of Object.entries(params)) {
+                    if (v !== undefined && v !== null) urlP.append(k, v);
+                }
                 const url = API_URL + '?' + urlP.toString();
-                logDebug('JSONP URL: ' + url.substring(0, 200));
-                const to = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 18000);
+                logDebug('JSONP → ' + action + ' | ' + url.substring(0, 180));
+                const to = setTimeout(() => { cleanup(); reject(new Error('Timeout JSONP')); }, 18000);
                 window[cbName] = function(data) { clearTimeout(to); cleanup(); resolve(data); };
                 function cleanup() { delete window[cbName]; if (script.parentNode) script.parentNode.removeChild(script); }
-                script.onerror = function() { clearTimeout(to); cleanup(); reject(new Error('Error JSONP')); };
+                script.onerror = function() { clearTimeout(to); cleanup(); reject(new Error('Error de red JSONP')); };
                 script.src = url;
                 document.head.appendChild(script);
             });
         }
 
+        // ============================================================
+        // SESION Y UTILIDADES DE FECHA
+        // ============================================================
         function updateDate() {
-            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-CO', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
         }
 
         function checkSession() {
             const s = localStorage.getItem('policiaSession');
             if (!s) return null;
-            try { const session = JSON.parse(s); if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) { localStorage.removeItem('policiaSession'); return null; } return session.usuario; }
-            catch(e) { return null; }
+            try {
+                const session = JSON.parse(s);
+                if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) {
+                    localStorage.removeItem('policiaSession');
+                    return null;
+                }
+                return session.usuario;
+            } catch(e) { return null; }
         }
 
         function initSession() {
             const u = checkSession();
             if (u) {
-                USUARIO_ACTUAL = u.username; ROL_ACTUAL = u.rol || 'usuario';
+                USUARIO_ACTUAL = u.username;
+                ROL_ACTUAL = u.rol || 'usuario';
                 DEPENDENCY = u.dependencia ? u.dependencia.trim() : (localStorage.getItem('currentDependency') || '').trim();
                 if (DEPENDENCY) localStorage.setItem('currentDependency', DEPENDENCY);
                 document.getElementById('userInfo').style.display = 'flex';
                 document.getElementById('userNameDisplay').textContent = USUARIO_ACTUAL;
                 document.getElementById('userRoleDisplay').textContent = ROL_ACTUAL;
-            } else { DEPENDENCY = (localStorage.getItem('currentDependency') || '').trim(); }
+            } else {
+                DEPENDENCY = (localStorage.getItem('currentDependency') || '').trim();
+            }
             const dt = DEPENDENCY || 'SIN DEPENDENCIA';
             document.getElementById('depSubtitle').textContent = 'Dashboard de Novedades — ' + dt;
             document.getElementById('depBadge').textContent = '📍 ' + dt;
         }
 
-        function logout() { localStorage.removeItem('policiaSession'); localStorage.removeItem('currentDependency'); location.reload(); }
+        function logout() {
+            localStorage.removeItem('policiaSession');
+            localStorage.removeItem('currentDependency');
+            location.reload();
+        }
+        // === FIN CONFIGURACION ===
 
+                // ============================================================
+        // CARGA DE DATOS PRINCIPAL
+        // ============================================================
         async function cargarDatos() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
             document.getElementById('loadingText').textContent = 'Cargando datos' + (DEPENDENCY ? ' de ' + DEPENDENCY : '') + '...';
@@ -299,92 +348,66 @@
             }
 
             try {
-                logDebug('=== Leyendo Formacion de Registro_Cambios ===');
-                const [formacionA, formacionB, formacionC] = await Promise.all([
-                    apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'I2,J2,K2,L2,M2,N2,O2' }),
-                    apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'P2,Q2,R2,S2,T2,U2,V2' }),
-                    apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'W2,X2,Y2,Z2,AA2,AB2,AC2' })
+                logDebug('=== INICIO CARGA ===');
+
+                // 1. Formacion y novedades desde Registro_Cambios (paralelo)
+                const reqsFormacion = ['A','B','C'].map(t => apiFetchJSONP('getCells', {
+                    sheet: 'Registro_Cambios',
+                    cells: CELDAS_FORMACION[t].join(',')
+                }));
+                const reqsNovedades = ['A','B','C'].map(t => apiFetchJSONP('getCells', {
+                    sheet: 'Registro_Cambios',
+                    cells: CELDAS_NOVEDADES[t].join(',')
+                }));
+                const reqsPersonas = ['A','B','C'].map(t => apiFetchJSONP('getData', {
+                    sheet: DEPENDENCY + '_TURNO_' + t
+                }));
+
+                const [formA, formB, formC, novA, novB, novC, dataA, dataB, dataC] = await Promise.all([
+                    ...reqsFormacion, ...reqsNovedades, ...reqsPersonas
                 ]);
 
-                logDebug('Formacion A: ' + JSON.stringify(formacionA));
-                logDebug('Formacion B: ' + JSON.stringify(formacionB));
-                logDebug('Formacion C: ' + JSON.stringify(formacionC));
+                // 2. Usuarios (para la seccion inferior)
+                const usuariosResponse = await apiFetchJSONP('getUsuarios');
 
-                // V13: Leer novedades directo de Registro_Cambios (42 celdas, instantáneo)
-                logDebug('=== Leyendo Novedades de Registro_Cambios (directo) ===');
-                const [novCeldasA, novCeldasB, novCeldasC] = await Promise.all([
-                    apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'J8,J9,J10,J11,J12,J13,J14,J15,J16,J17,J18,J19,J20,J21' }),
-                    apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'Q8,Q9,Q10,Q11,Q12,Q13,Q14,Q15,Q16,Q17,Q18,Q19,Q20,Q21' }),
-                    apiFetchJSONP('getCells', { sheet: 'Registro_Cambios', cells: 'X8,X9,X10,X11,X12,X13,X14,X15,X16,X17,X18,X19,X20,X21' })
-                ]);
-                logDebug('NovA: ' + JSON.stringify(novCeldasA).substring(0, 150));
-                logDebug('NovB: ' + JSON.stringify(novCeldasB).substring(0, 150));
-                logDebug('NovC: ' + JSON.stringify(novCeldasC).substring(0, 150));
+                logDebug('Datos cargados. Formacion OK. Novedades OK. Personas: A=' + (dataA.data?dataA.data.length:0) + ' B=' + (dataB.data?dataB.data.length:0) + ' C=' + (dataC.data?dataC.data.length:0));
 
-                const [dataA, dataB, dataC, usuariosResponse] = await Promise.all([
-                    apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_A' }),
-                    apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_B' }),
-                    apiFetchJSONP('getData', { sheet: DEPENDENCY + '_TURNO_C' }),
-                    apiFetchJSONP('getUsuarios')
-                ]);
-
-                logDebug('Turno A: success=' + dataA.success + ' count=' + (dataA.data ? dataA.data.length : 0));
-                logDebug('Turno B: success=' + dataB.success + ' count=' + (dataB.data ? dataB.data.length : 0));
-                logDebug('Turno C: success=' + dataC.success + ' count=' + (dataC.data ? dataC.data.length : 0));
-
+                // 3. Consolidar allPersonnelData (por si se necesita en otra funcion)
                 allPersonnelData = [];
-                ['A', 'B', 'C'].forEach((turno, idx) => {
-                    const resp = [dataA, dataB, dataC][idx];
+                [dataA, dataB, dataC].forEach((resp, idx) => {
+                    const turno = ['A','B','C'][idx];
                     if (resp.success && resp.data) {
-                        resp.data.forEach(row => {
-                            row.turno = turno;
-                            allPersonnelData.push(row);
-                        });
+                        resp.data.forEach(row => { row.turno = turno; allPersonnelData.push(row); });
                     }
                 });
 
-                logDebug('Total allPersonnelData: ' + allPersonnelData.length);
-
+                // 4. Extraer formacion
                 const formacionData = {
-                    A: extraerFormacion(formacionA, ['I2','J2','K2','L2','M2','N2','O2']),
-                    B: extraerFormacion(formacionB, ['P2','Q2','R2','S2','T2','U2','V2']),
-                    C: extraerFormacion(formacionC, ['W2','X2','Y2','Z2','AA2','AB2','AC2'])
+                    A: extraerFormacion(formA, CELDAS_FORMACION.A),
+                    B: extraerFormacion(formB, CELDAS_FORMACION.B),
+                    C: extraerFormacion(formC, CELDAS_FORMACION.C)
                 };
 
-                // V13: Mapear celdas de Registro_Cambios a NOVEDADES_ORDEN
-                // Filas 8-21 = índices 0-13 de NOVEDADES_ORDEN
-                const colsMap = { A: novCeldasA, B: novCeldasB, C: novCeldasC };
-                const celdasBase = {
-                    A: ['J8','J9','J10','J11','J12','J13','J14','J15','J16','J17','J18','J19','J20','J21'],
-                    B: ['Q8','Q9','Q10','Q11','Q12','Q13','Q14','Q15','Q16','Q17','Q18','Q19','Q20','Q21'],
-                    C: ['X8','X9','X10','X11','X12','X13','X14','X15','X16','X17','X18','X19','X20','X21']
+                // 5. Extraer novedades
+                const novedadesData = {
+                    A: extraerNovedades(novA, CELDAS_NOVEDADES.A),
+                    B: extraerNovedades(novB, CELDAS_NOVEDADES.B),
+                    C: extraerNovedades(novC, CELDAS_NOVEDADES.C)
                 };
-                const novedadesData = { A: [], B: [], C: [] };
-                ['A', 'B', 'C'].forEach(t => {
-                    const resp = colsMap[t];
-                    const celdas = celdasBase[t];
-                    novedadesData[t] = NOVEDADES_ORDEN.map((nombre, idx) => ({
-                        nombre: nombre,
-                        total: (resp.success && resp.values && resp.values[celdas[idx]] !== undefined)
-                            ? (parseInt(resp.values[celdas[idx]]) || 0)
-                            : 0
-                    }));
-                });
 
+                // 6. Renderizar
                 let formacionHTML = '';
-                ['A', 'B', 'C'].forEach(t => {
-                    formacionHTML += renderizarParteTurno(t, formacionData[t]);
-                });
+                ['A','B','C'].forEach(t => { formacionHTML += renderizarParteTurno(t, formacionData[t]); });
                 document.getElementById('turnosContainer').innerHTML = formacionHTML;
 
                 let novedadesHTML = '';
-                ['A', 'B', 'C'].forEach(t => {
-                    novedadesHTML += renderizarNovedadesTurno(t, novedadesData[t]);
-                });
+                ['A','B','C'].forEach(t => { novedadesHTML += renderizarNovedadesTurno(t, novedadesData[t]); });
                 document.getElementById('novedadesContainer').innerHTML = novedadesHTML;
 
-                // Leer AUDITORIA completa (sin filtro de dep) para detectar
-                // quién ha guardado con el botón Guardar en las últimas 8h
+                // 7. Delegar clicks en novedades (evita problemas de escape con comillas)
+                delegarClicksNovedades();
+
+                // 8. Usuarios y actividad
                 if (usuariosResponse.success && usuariosResponse.data) {
                     const auditoriaTotal = await apiFetchJSONP('getAuditoria', {}, { dependency: '' });
                     const ahora = Date.now();
@@ -395,14 +418,13 @@
                             const u = (r.usuario || '').trim();
                             if (!u) return;
                             const ts = r.fechaHora ? new Date(r.fechaHora).getTime() : 0;
-                            if (!ultimaActividad[u] || ts > ultimaActividad[u]) {
-                                ultimaActividad[u] = ts;
-                            }
+                            if (!ultimaActividad[u] || ts > ultimaActividad[u]) ultimaActividad[u] = ts;
                         });
                     }
-                    logDebug('Actividad por usuario: ' + JSON.stringify(ultimaActividad));
                     renderizarUsuarios(usuariosResponse.data, ultimaActividad, ahora);
                 }
+
+                logDebug('=== CARGA COMPLETADA ===');
 
             } catch (e) {
                 console.error(e);
@@ -413,235 +435,110 @@
             }
         }
 
+        // ============================================================
+        // EXTRACTORES
+        // ============================================================
         function extraerFormacion(response, celdas) {
-            const resultado = { total: 0, oficiales: 0, ne: 0, patrulleros: 0, pp: 0, axp: 0, nouni: 0 };
-            if (!response.success || !response.values) return resultado;
+            const r = { total: 0, oficiales: 0, ne: 0, patrulleros: 0, pp: 0, axp: 0, nouni: 0 };
+            if (!response.success || !response.values) return r;
             const v = response.values;
-            resultado.total = parseInt(v[celdas[0]]) || 0;
-            resultado.oficiales = parseInt(v[celdas[1]]) || 0;
-            resultado.ne = parseInt(v[celdas[2]]) || 0;
-            resultado.patrulleros = parseInt(v[celdas[3]]) || 0;
-            resultado.pp = parseInt(v[celdas[4]]) || 0;
-            resultado.axp = parseInt(v[celdas[5]]) || 0;
-            resultado.nouni = parseInt(v[celdas[6]]) || 0;
-            return resultado;
+            r.total       = parseInt(v[celdas[0]]) || 0;
+            r.oficiales   = parseInt(v[celdas[1]]) || 0;
+            r.ne          = parseInt(v[celdas[2]]) || 0;
+            r.patrulleros = parseInt(v[celdas[3]]) || 0;
+            r.pp          = parseInt(v[celdas[4]]) || 0;
+            r.axp         = parseInt(v[celdas[5]]) || 0;
+            r.nouni       = parseInt(v[celdas[6]]) || 0;
+            return r;
         }
 
+        function extraerNovedades(response, celdas) {
+            return NOVEDADES_ORDEN.map((nombre, idx) => ({
+                nombre: nombre,
+                total: (response.success && response.values && response.values[celdas[idx]] !== undefined)
+                    ? (parseInt(response.values[celdas[idx]]) || 0) : 0
+            }));
+        }
+
+        // ============================================================
+        // RENDERIZADO: FORMACION
+        // ============================================================
         function renderizarParteTurno(tl, d) {
             const emojis = { A: '🅰️', B: '🅱️', C: '🅾️' };
-            return `<div class="turno-card"><div class="turno-header"><h2>${emojis[tl]||'🔵'} EN FORMACION</h2><div class="turno-badge">TURNO ${tl}</div></div><div class="forman-subtitle">FORMAN</div><div class="turno-body"><div class="categorias-grid"><div class="categoria-item"><div class="label">OF</div><div class="value ${d.oficiales===0?'zero':''}">${d.oficiales}</div></div><div class="categoria-item"><div class="label">NE</div><div class="value ${d.ne===0?'zero':''}">${d.ne}</div></div><div class="categoria-item"><div class="label">PT</div><div class="value ${d.patrulleros===0?'zero':''}">${d.patrulleros}</div></div><div class="categoria-item"><div class="label">PP</div><div class="value ${d.pp===0?'zero':''}">${d.pp}</div></div><div class="categoria-item"><div class="label">AXP</div><div class="value ${d.axp===0?'zero':''}">${d.axp}</div></div><div class="categoria-item"><div class="label">NO UNI</div><div class="value ${d.nouni===0?'zero':''}">${d.nouni}</div></div></div><div class="total-card"><div class="total-label">Total En Formacion Turno ${tl}</div><div class="total-value">${d.total}</div></div></div></div>`;
-        }
-
-        function renderizarNovedadesTurno(tl, novedades) {
-    let itemsHTML = '';
-    let totalNovedades = 0;
-
-    novedades.forEach(nv => {
-        const total = parseInt(nv.total) || 0;
-        totalNovedades += total;
-
-        const css = NOVEDADES_CSS[nv.nombre] || 'nov-otra';
-
-        const onclick = total > 0
-            ? `onclick="abrirModal('${nv.nombre.replace(/'/g, "\\\\'")}', '${tl}')"`
-            : '';
-
-        itemsHTML += `
-            <div class="novedad-item ${css}"
-                 ${onclick}
-                 ${total === 0 ? 'style="opacity:0.6;cursor:default;"' : ''}>
-
-                <div class="novedad-nombre">
-                    <span class="novedad-icon"></span>
-                    ${nv.nombre}
-                    ${total > 0 ? '<span class="click-hint">👁 Ver</span>' : ''}
+            return `
+            <div class="turno-card">
+                <div class="turno-header">
+                    <h2>${emojis[tl]||'🔵'} EN FORMACION</h2>
+                    <div class="turno-badge">TURNO ${tl}</div>
                 </div>
-
-                <div class="novedad-total ${total === 0 ? 'zero' : ''}">
-                    ${total}
-                </div>
-            </div>
-        `;
-    });
-
-    return `
-        <div class="novedades-card">
-            <div class="novedades-header">
-                <h3>📋 NOVEDADES</h3>
-                <div class="novedades-badge">TURNO ${tl}</div>
-            </div>
-
-            <div class="novedades-body">
-                ${itemsHTML}
-
-                <div class="novedades-total-card">
-                    <div class="novedades-total-label">
-                        Total Novedades
+                <div class="forman-subtitle">FORMAN</div>
+                <div class="turno-body">
+                    <div class="categorias-grid">
+                        <div class="categoria-item"><div class="label">OF</div><div class="value ${d.oficiales===0?'zero':''}">${d.oficiales}</div></div>
+                        <div class="categoria-item"><div class="label">NE</div><div class="value ${d.ne===0?'zero':''}">${d.ne}</div></div>
+                        <div class="categoria-item"><div class="label">PT</div><div class="value ${d.patrulleros===0?'zero':''}">${d.patrulleros}</div></div>
+                        <div class="categoria-item"><div class="label">PP</div><div class="value ${d.pp===0?'zero':''}">${d.pp}</div></div>
+                        <div class="categoria-item"><div class="label">AXP</div><div class="value ${d.axp===0?'zero':''}">${d.axp}</div></div>
+                        <div class="categoria-item"><div class="label">NO UNI</div><div class="value ${d.nouni===0?'zero':''}">${d.nouni}</div></div>
                     </div>
-                    <div class="novedades-total-value">
-                        ${totalNovedades}
+                    <div class="total-card">
+                        <div class="total-label">Total En Formacion Turno ${tl}</div>
+                        <div class="total-value">${d.total}</div>
                     </div>
                 </div>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================================
-// MODAL DE FUNCIONARIOS POR NOVEDAD - V15
-// ============================================================
-
-let modalFuncionariosFull = [];
-
-async function abrirModal(novedad, turno) {
-    try {
-        document.getElementById('modalTitle').textContent =
-            '👥 ' + novedad;
-
-        document.getElementById('modalSubtitle').textContent =
-            'Turno ' + turno + ' - ' + DEPENDENCY;
-
-        document.getElementById('modalOverlay').classList.add('active');
-
-        document.getElementById('modalStatsBar').style.display = 'none';
-        document.getElementById('modalSearchBar').style.display = 'none';
-
-        document.getElementById('modalBody').innerHTML = `
-            <div class="modal-loading">
-                <div class="spinner"></div>
-                <p>Cargando funcionarios...</p>
-            </div>
-        `;
-
-        const res = await apiFetchJSONP('getFuncionariosPorNovedad', {
-            turno: turno,
-            novedad: novedad
-        });
-
-        if (!res.success) {
-            document.getElementById('modalBody').innerHTML = `
-                <div class="modal-empty">
-                    ❌ Error: ${res.error}
-                </div>
-            `;
-            return;
+            </div>`;
         }
 
-        modalFuncionariosFull = res.data || [];
-
-        document.getElementById('modalTotal').textContent =
-            modalFuncionariosFull.length;
-
-        document.getElementById('modalStatsBar').style.display = 'flex';
-        document.getElementById('modalSearchBar').style.display = 'block';
-
-        renderizarTablaModal(modalFuncionariosFull);
-
-    } catch (e) {
-        document.getElementById('modalBody').innerHTML = `
-            <div class="modal-empty">
-                ❌ ${e.message}
-            </div>
-        `;
-    }
-}
-
-function renderizarTablaModal(datos) {
-
-    if (!datos || datos.length === 0) {
-        document.getElementById('modalBody').innerHTML = `
-            <div class="modal-empty">
-                No hay funcionarios registrados con esta novedad.
-            </div>
-        `;
-        return;
-    }
-
-    let html = `
-        <table class="modal-table">
-            <thead>
-                <tr>
-                    <th>Grado</th>
-                    <th>Apellidos y nombres</th>
-                    <th>Observación</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-
-    datos.forEach(f => {
-        html += `
-            <tr>
-                <td>
-                    <span class="modal-badge">
-                        ${f.grado || '-'}
-                    </span>
-                </td>
-
-                <td>
-                    <strong>${f.nombres || '-'}</strong>
-                </td>
-
-                <td class="observacion-cell">
-                    ${f.observacion
-                        ? f.observacion
-                        : '<span class="observacion-vacia">Sin observación</span>'}
-                </td>
-            </tr>
-        `;
-    });
-
-    html += `
-            </tbody>
-        </table>
-    `;
-
-    document.getElementById('modalBody').innerHTML = html;
-}
-
-function filtrarModalTabla() {
-
-    const txt = document.getElementById('modalSearchInput')
-        .value
-        .toLowerCase()
-        .trim();
-
-    if (!txt) {
-        renderizarTablaModal(modalFuncionariosFull);
-        return;
-    }
-
-    const filtrados = modalFuncionariosFull.filter(f =>
-        (f.grado || '').toLowerCase().includes(txt) ||
-        (f.nombres || '').toLowerCase().includes(txt) ||
-        (f.observacion || '').toLowerCase().includes(txt)
-    );
-
-    renderizarTablaModal(filtrados);
-}
-
-function cerrarModal() {
-    document.getElementById('modalOverlay').classList.remove('active');
-    document.getElementById('modalSearchInput').value = '';
-}
-
-function cerrarModalClick(e) {
-    if (e.target.id === 'modalOverlay') {
-        cerrarModal();
-    }
-}
-
-// Cerrar con tecla ESC
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        cerrarModal();
-    }
-});
         // ============================================================
-        // Renderizar Usuarios V14
-        // ACTUALIZADO  = el usuario presionó Guardar (accion=GUARDAR_NOVEDAD en AUDITORIA)
-        // SIN ACTUALIZAR = sin registros de guardado
-        // ultimaActividad: { 'nombreUsuario': timestamp }
+        // RENDERIZADO: NOVEDADES
+        // ============================================================
+        function renderizarNovedadesTurno(tl, novedades) {
+            let itemsHTML = '';
+            let totalNovedades = 0;
+            novedades.forEach(nv => {
+                const total = parseInt(nv.total) || 0;
+                totalNovedades += total;
+                const css = NOVEDADES_CSS[nv.nombre] || 'nov-otra';
+                itemsHTML += `
+                    <div class="novedad-item ${css}" data-novedad="${encodeURIComponent(nv.nombre)}" data-turno="${tl}" ${total===0?'style="opacity:0.6;cursor:default;"':''}>
+                        <div class="novedad-nombre">
+                            <span class="novedad-icon"></span>
+                            ${nv.nombre}
+                            ${total > 0 ? '<span class="click-hint">👁 Ver</span>' : ''}
+                        </div>
+                        <div class="novedad-total ${total === 0 ? 'zero' : ''}">${total}</div>
+                    </div>`;
+            });
+            return `
+            <div class="novedades-card">
+                <div class="novedades-header">
+                    <h3>📋 NOVEDADES</h3>
+                    <div class="novedades-badge">TURNO ${tl}</div>
+                </div>
+                <div class="novedades-body">
+                    ${itemsHTML}
+                    <div class="novedades-total-card">
+                        <div class="novedades-total-label">Total Novedades</div>
+                        <div class="novedades-total-value">${totalNovedades}</div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function delegarClicksNovedades() {
+            document.querySelectorAll('.novedad-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const total = parseInt(this.querySelector('.novedad-total').textContent) || 0;
+                    if (total === 0) return;
+                    const novedad = decodeURIComponent(this.getAttribute('data-novedad'));
+                    const turno = this.getAttribute('data-turno');
+                    abrirModal(novedad, turno);
+                });
+            });
+        }
+
+        // ============================================================
+        // RENDERIZADO: USUARIOS
         // ============================================================
         function renderizarUsuarios(usuarios, ultimaActividad, ahora) {
             ultimaActividad = ultimaActividad || {};
@@ -650,9 +547,7 @@ document.addEventListener('keydown', function(e) {
                 document.getElementById('usuariosContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">No hay usuarios registrados</div>';
                 return;
             }
-
             let html = '';
-
             usuarios.forEach(u => {
                 const nombre = u.usuario || '?';
                 const rol = u.rol || 'usuario';
@@ -660,16 +555,14 @@ document.addEventListener('keydown', function(e) {
                 const ini = nombre.substring(0, 2).toUpperCase();
                 const lastTs = ultimaActividad[nombre] || 0;
                 const actualizado = lastTs > 0;
-
                 let txt = 'Sin actividad registrada';
                 if (actualizado) {
                     const d = ahora - lastTs;
-                    if (d < 60000)       txt = 'Actualizado hace < 1 min';
-                    else if (d < 3600000) txt = 'Actualizado hace ' + Math.floor(d / 60000) + ' min';
-                    else if (d < 86400000) txt = 'Actualizado hace ' + Math.floor(d / 3600000) + 'h';
-                    else                  txt = 'Actualizado hace ' + Math.floor(d / 86400000) + ' dia(s)';
+                    if (d < 60000) txt = 'Actualizado hace < 1 min';
+                    else if (d < 3600000) txt = 'Actualizado hace ' + Math.floor(d/60000) + ' min';
+                    else if (d < 86400000) txt = 'Actualizado hace ' + Math.floor(d/3600000) + 'h';
+                    else txt = 'Actualizado hace ' + Math.floor(d/86400000) + ' dia(s)';
                 }
-
                 html += `<div class="usuario-card">
                     <div class="usuario-avatar ${actualizado ? 'avatar-actualizado' : 'avatar-sin-actualizar'}">${ini}</div>
                     <div class="usuario-info">
@@ -685,75 +578,107 @@ document.addEventListener('keydown', function(e) {
                     </div>
                 </div>`;
             });
-
             document.getElementById('usuariosContainer').innerHTML = html;
         }
+        // === FIN CARGA Y RENDERIZADO ===
 
-        function abrirModal(novedadNombre, turnoLetra) {
-            logDebug('=== MODAL === novedad="' + novedadNombre + '" turno="' + turnoLetra + '"');
-            logDebug('allPersonnelData.length=' + allPersonnelData.length);
-            const overlay = document.getElementById('modalOverlay');
-            document.getElementById('modalTitle').textContent = '👥 ' + novedadNombre;
-            document.getElementById('modalSubtitle').textContent = 'Turno ' + turnoLetra + ' — ' + (DEPENDENCY || 'Sin dependencia');
-            document.getElementById('modalBody').innerHTML = '<div class="modal-loading"><div class="spinner-sm"></div><p>Buscando funcionarios...</p></div>';
-            document.getElementById('modalStatsBar').style.display = 'none';
-            document.getElementById('modalSearchBar').style.display = 'none';
-            document.getElementById('modalSearchInput').value = '';
-            overlay.classList.add('active');
-
-            setTimeout(() => {
-                const filtrados = allPersonnelData.filter(p => {
-                    const turnoP = (p.turno || '').toString().trim().toUpperCase();
-                    const novP = (p.novedad || '').toString().trim();
-                    return turnoP === turnoLetra && novP === novedadNombre;
-                });
-                logDebug('Filtrados: ' + filtrados.length);
-                modalFuncionariosFull = filtrados;
-                renderizarModal(filtrados, novedadNombre, turnoLetra);
-            }, 280);
-        }
-
-        function renderizarModal(funcionarios, novedadNombre, turnoLetra) {
-            const body = document.getElementById('modalBody');
-            if (funcionarios.length === 0) {
+                // ============================================================
+        // MODAL DE FUNCIONARIOS POR NOVEDAD (BACKEND V13)
+        // ============================================================
+        async function abrirModal(novedad, turno) {
+            try {
+                document.getElementById('modalTitle').textContent = '👥 ' + novedad;
+                document.getElementById('modalSubtitle').textContent = 'Turno ' + turno + ' - ' + DEPENDENCY;
+                document.getElementById('modalOverlay').classList.add('active');
                 document.getElementById('modalStatsBar').style.display = 'none';
                 document.getElementById('modalSearchBar').style.display = 'none';
-                body.innerHTML = '<div class="modal-empty"><div class="empty-icon">📭</div><p style="font-weight:600;margin-bottom:8px;">Sin funcionarios registrados</p><p style="font-size:0.8rem;">No hay funcionarios con <strong>' + novedadNombre + '</strong> en Turno ' + turnoLetra + '.</p></div>';
-                return;
+                document.getElementById('modalBody').innerHTML = '<div class="modal-loading"><div class="spinner-sm"></div><p>Cargando funcionarios...</p></div>';
+
+                const res = await apiFetchJSONP('getFuncionariosPorNovedad', {
+                    turno: turno,
+                    novedad: novedad
+                });
+
+                if (!res.success) {
+                    document.getElementById('modalBody').innerHTML = '<div class="modal-empty">❌ Error: ' + (res.error || 'Desconocido') + '</div>';
+                    return;
+                }
+
+                modalFuncionariosFull = res.data || [];
+                document.getElementById('modalTotal').textContent = modalFuncionariosFull.length;
+                document.getElementById('modalStatsBar').style.display = 'flex';
+                document.getElementById('modalSearchBar').style.display = 'block';
+
+                // Breakdown por grado
+                const gradoCount = {};
+                modalFuncionariosFull.forEach(f => {
+                    const g = f.grado || 'N/D';
+                    gradoCount[g] = (gradoCount[g] || 0) + 1;
+                });
+                document.getElementById('modalCatBreakdown').innerHTML = Object.entries(gradoCount)
+                    .map(([g,c]) => '<span class="cat-chip">' + g + ': ' + c + '</span>')
+                    .join('');
+
+                renderizarTablaModal(modalFuncionariosFull);
+
+            } catch (e) {
+                document.getElementById('modalBody').innerHTML = '<div class="modal-empty">❌ ' + e.message + '</div>';
             }
-            document.getElementById('modalStatsBar').style.display = 'flex';
-            document.getElementById('modalTotal').textContent = funcionarios.length;
-            const gradoCount = {};
-            funcionarios.forEach(f => { const g = f.grado || 'N/D'; gradoCount[g] = (gradoCount[g] || 0) + 1; });
-            document.getElementById('modalCatBreakdown').innerHTML = Object.entries(gradoCount).map(([g,c]) => '<span class="cat-chip">' + g + ': ' + c + '</span>').join('');
-            document.getElementById('modalSearchBar').style.display = 'block';
-            body.innerHTML = construirTablaModal(funcionarios);
         }
 
-        function construirTablaModal(funcionarios) {
-            let html = '<table class="modal-table"><thead><tr><th style="width:36px;">#</th><th style="width:90px;">Grado</th><th>Apellidos y Nombres</th><th style="width:60px;">Turno</th><th style="width:150px;">Novedad</th><th>Observacion</th></tr></thead><tbody>';
-            funcionarios.forEach((f, idx) => {
-                const obs = (f.observacion || '').trim();
-                const obsHTML = obs ? '<div class="observacion-cell">' + obs + '</div>' : '<div class="observacion-cell observacion-vacia">Sin observacion</div>';
-                const nov = (f.novedad || '').trim();
-                html += '<tr><td style="color:var(--gris-texto);font-size:0.75rem;">' + (idx + 1) + '</td><td><span class="modal-badge" style="background:var(--amarillo-policia);color:var(--azul-oscuro);">' + (f.grado || '-') + '</span></td><td><strong>' + (f.nombres || '-') + '</strong></td><td><span class="modal-badge" style="background:#e3f2fd;color:#0D47A1;">' + (f.turno || '-') + '</span></td><td><span class="novedad-badge-popup">' + (nov || '-') + '</span></td><td>' + obsHTML + '</td></tr>';
+        function renderizarTablaModal(datos) {
+            if (!datos || datos.length === 0) {
+                document.getElementById('modalBody').innerHTML = '<div class="modal-empty">No hay funcionarios registrados con esta novedad.</div>';
+                return;
+            }
+            let html = '<table class="modal-table"><thead><tr><th>#</th><th>Grado</th><th>Apellidos y nombres</th><th>Observacion</th></tr></thead><tbody>';
+            datos.forEach((f, idx) => {
+                html += '<tr>' +
+                    '<td style="color:var(--gris-texto);font-size:0.75rem;">' + (idx+1) + '</td>' +
+                    '<td><span class="modal-badge" style="background:var(--amarillo-policia);color:var(--azul-oscuro);">' + (f.grado || '-') + '</span></td>' +
+                    '<td><strong>' + (f.nombres || '-') + '</strong></td>' +
+                    '<td class="observacion-cell">' + (f.observacion ? f.observacion : '<span class="observacion-vacia">Sin observacion</span>') + '</td>' +
+                    '</tr>';
             });
             html += '</tbody></table>';
-            return html;
+            document.getElementById('modalBody').innerHTML = html;
         }
 
         function filtrarModalTabla() {
-            const q = document.getElementById('modalSearchInput').value.toLowerCase().trim();
-            const filtrados = q ? modalFuncionariosFull.filter(f => (f.nombres || '').toLowerCase().includes(q) || (f.grado || '').toLowerCase().includes(q) || (f.novedad || '').toLowerCase().includes(q) || (f.observacion || '').toLowerCase().includes(q)) : modalFuncionariosFull;
+            const txt = document.getElementById('modalSearchInput').value.toLowerCase().trim();
+            if (!txt) {
+                renderizarTablaModal(modalFuncionariosFull);
+                return;
+            }
+            const filtrados = modalFuncionariosFull.filter(f =>
+                (f.grado || '').toLowerCase().includes(txt) ||
+                (f.nombres || '').toLowerCase().includes(txt) ||
+                (f.observacion || '').toLowerCase().includes(txt)
+            );
             document.getElementById('modalTotal').textContent = filtrados.length;
-            document.getElementById('modalBody').innerHTML = construirTablaModal(filtrados);
+            renderizarTablaModal(filtrados);
         }
 
-        function cerrarModalClick(e) { if (e.target === document.getElementById('modalOverlay')) cerrarModal(); }
-        function cerrarModal() { document.getElementById('modalOverlay').classList.remove('active'); }
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+        function cerrarModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('modalSearchInput').value = '';
+        }
 
-        updateDate(); initSession(); cargarDatos(); setInterval(updateDate, 60000);
+        function cerrarModalClick(e) {
+            if (e.target.id === 'modalOverlay') cerrarModal();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') cerrarModal();
+        });
+
+        // ============================================================
+        // INICIALIZACION
+        // ============================================================
+        updateDate();
+        initSession();
+        cargarDatos();
+        setInterval(updateDate, 60000);
     </script>
 </body>
 </html>
