@@ -443,6 +443,76 @@
             return `<div class="novedades-card"><div class="novedades-header"><h3>📋 NOVEDADES</h3><div class="novedades-badge">TURNO ${tl}</div></div><div class="novedades-body">${itemsHTML}<div class="novedades-total-card"><div class="novedades-total-label">Total Novedades</div><div class="novedades-total-value">${totalNovedades}</div></div></div></div>`;
         }
 
+        async function abrirModal(novedad, turno) {
+  try {
+    document.getElementById('modalTitle').textContent =
+      novedad + ' - Turno ' + turno;
+
+    document.getElementById('modalOverlay').classList.add('active');
+
+    document.getElementById('modalBody').innerHTML =
+      '<div class="modal-loading">Cargando funcionarios...</div>';
+
+    const res = await apiFetchJSONP('getFuncionariosPorNovedad', {
+      turno: turno,
+      novedad: novedad
+    });
+
+    if (!res.success) {
+      document.getElementById('modalBody').innerHTML =
+        '<div class="modal-empty">Error: ' + res.error + '</div>';
+      return;
+    }
+
+    if (!res.data || res.data.length === 0) {
+      document.getElementById('modalBody').innerHTML =
+        '<div class="modal-empty">No hay funcionarios con esta novedad</div>';
+      return;
+    }
+
+    let html = `
+      <table class="modal-table">
+        <thead>
+          <tr>
+            <th>Grado</th>
+            <th>Apellidos y nombres</th>
+            <th>Observación</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    res.data.forEach(f => {
+      html += `
+        <tr>
+          <td>${f.grado}</td>
+          <td>${f.nombres}</td>
+          <td>${f.observacion || '-'}</td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+
+    document.getElementById('modalBody').innerHTML = html;
+
+  } catch (e) {
+    document.getElementById('modalBody').innerHTML =
+      '<div class="modal-empty">' + e.message + '</div>';
+  }
+}
+
+function cerrarModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+}
+
+function cerrarModalClick(e) {
+  if (e.target.id === 'modalOverlay') cerrarModal();
+}    
+
+
+
+
         // ============================================================
         // Renderizar Usuarios V14
         // ACTUALIZADO  = el usuario presionó Guardar (accion=GUARDAR_NOVEDAD en AUDITORIA)
